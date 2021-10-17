@@ -1,2 +1,1 @@
-# xenahProj1
-Alumni connector
+Leva development repository
