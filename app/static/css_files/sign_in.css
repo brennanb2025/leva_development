@@ -1,0 +1,81 @@
+.btn {
+    background-color: #dfdfdf;
+    border: none;
+    color: black;
+    padding: 6px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 17px;
+    cursor:pointer;
+    font-family: verdana;
+}
+.google_btn {
+    background-color: #dfdfdf;
+    border: 2px solid black;
+    color: black;
+    border-radius:13px;
+    padding: 6px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 17px;
+    cursor:pointer;
+    font-family: verdana;
+}
+.make_account {
+    width: 170px;
+    height: 60px;
+    line-height: 60px;
+    font-size: 15px;
+    font-family: Helvetica, sans-serif;
+    color:black;
+}
+.log_in_btn {
+    width: 120px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 15px;
+    font-family: Helvetica, sans-serif;
+    color:navy;
+}
+
+.purple_container_sign_in {
+    background-color: #e8ccfc;
+    padding-top: 15px;
+    padding-bottom: 5px;
+    width: 32%;
+    margin: auto;
+}
+.white_container {
+    background-color: white;
+    padding: 0px;
+    font-size: 16px;
+    width:100%;
+    text-decoration: none;
+    color: black;
+}
+.horizontal_spacing {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+.form_style {
+    border: none;
+    width:100%;
+    height:25px;
+}
+.input_title {
+    font-size: 20px;
+    font-family: Helvetica, sans-serif;
+    color:navy;
+    padding-bottom: 3px;
+}
+.navy {
+    color:navy;
+}
+
+.flashesLogin {
+    text-align: center;
+    margin:auto;
+    font-size: 20px;
+}

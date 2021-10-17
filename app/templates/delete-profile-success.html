@@ -1,0 +1,44 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css_files/navigation_bar.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/general_page.css')}}">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/navigation_bar.css')}}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+    <title>Delete Profile | Leva</title>
+</head>
+
+<body>
+    <!--NAVBAR maybe change these links to brace brace url underscore for('link') brace brace? -->
+    <!-- navbar -->
+    <div class="navbar">
+        <table class="span_width">
+            <tr>
+                <td>
+                    <img class="navbar_image" src="{{ url_for('static', filename='Leva_icon.webp')}}">
+                </td>
+                <td>
+                    <a class="bar_a navbar_log_in_out" href="{{ url_for('sign_in') }}">Log In</a><br/>
+                </td>
+            </tr>
+        </table>
+
+        <table class="a_bar_table">
+            <tr>
+                <td class="a_bar_td"><a class="bar_a" href="/">Home</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('feed') }}">My Feed</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('view', id=userID) }}">My Profile</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('my_connections') }}">My Connections</a></td>
+            </tr>
+        </table>
+    </div>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    
+    <strong>You have successfully deleted your account.</strong>
+</body>
+</html>

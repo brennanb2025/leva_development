@@ -1,0 +1,40 @@
+.intro_video {
+    width:662px;
+    height:372px;
+}
+.allText {
+    margin-left:28%;
+    margin-right:28%;
+    line-height: 1.6;
+}
+.registerBtn {
+    width:170px;
+    height:60px;
+    line-height:60px;
+    font-size:17px;  
+}
+.profileImgTable {
+    width:65%;
+}
+.profileImg {
+    width:348px;
+    height:348px;
+}
+.profileImgTd {
+    padding:0px;
+    border-collapse: collapse;
+}
+.purple_container {
+    background-color: #e8ccfc;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    width: 53%;
+    margin: auto;
+}
+.white_container {
+    background-color: white;
+    padding: 5px;
+    font-size: 16px;
+    text-decoration: none;
+    color: black;
+}

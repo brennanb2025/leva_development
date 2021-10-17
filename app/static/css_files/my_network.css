@@ -1,0 +1,44 @@
+.chtext {
+    font-family: Helvetica, sans-serif;;
+    line-height: 1.5;
+}
+.leftAlign {
+    margin-left: 5%;
+}
+.userTitle {
+    font-size: 19px;
+    text-decoration: none;
+    color: black;
+}
+.userTable {
+    padding-bottom: 10px;
+}
+.userTableSurround {
+    border-spacing: 0 15px;
+}
+
+.space_up {
+    padding-top: 7px;
+}
+.space_left {
+    padding-left: 10px;
+}
+.purple_container_my_network {
+    background-color: #e8ccfc;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    width: 55%;
+    margin: auto;
+}
+.white_container {
+    background-color: white;
+    padding-left: 8px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right:0px;
+    font-size: 16px;
+    width:100%;
+    /*height: 20px;*/
+    text-decoration: none;
+    color: black;
+}

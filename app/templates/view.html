@@ -1,0 +1,230 @@
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/general_page.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/navigation_bar.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/view.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/media_gallery.css')}}">
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+    <title>View Profile | Leva</title>
+</head>
+
+<body>
+    <!-- navbar -->
+    <div class="navbar">
+        <table class="span_width">
+            <tr>
+                <td>
+                    <img class="navbar_image" src="{{ url_for('static', filename='Leva_icon.webp')}}">
+                </td>
+                <td>
+                    {% if userID != None %}
+                        <a class="bar_a navbar_log_in_out" href="{{ url_for('logout') }}">Log Out</a><br/>
+                    {% else %}
+                        <a class="bar_a navbar_log_in_out" href="{{ url_for('sign_in') }}">Log In</a><br/>
+                    {% endif %}
+                    
+                </td>
+            </tr>
+        </table>
+
+        <table class="a_bar_table">
+            <tr>
+                <td class="a_bar_td"><a class="bar_a" href="/">Home</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('feed') }}">My Feed</a></td>
+                {% if logged_in is defined %}
+                {% if logged_in == false %}
+                    <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('view', id=userID) }}">My Profile</a></td>
+                {% else %}
+                    <td class="a_bar_td"><a class="bar_a left_border background_purple" href="{{ url_for('view', id=userID) }}">My Profile</a></td>
+                    <!-- This background should not be purple since they are not on the "my account" tab - they are on somebody else's account. -->
+                {% endif %}
+                {% endif %}
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('my_connections') }}">My Connections</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <br/><br/><br/><br/><br/>
+
+
+    <div class="regText">
+    
+    <div class="purpleContainer">
+        <br/>
+        <div class="centerAlign">
+            <br/><br/>
+            <!-- Container for the gallery -->
+            <div class="videoPictureContainer centerDiv grayBackground">
+            <div class="container">
+                <div class="mySlides">
+                    {% if profile_picture is none %}
+                        <img class="profile_picture" src="{{url_for('static', filename='blank-profile-picture.png')}}" alt="profile_picture"><br/>
+                    {% else %}
+                        <img class="profile_picture" src="{{profile_picture}}" alt="profile_picture"><br/>
+                    {% endif %}
+                </div>
+                <div class="mySlides">
+                    {% if intro_video is none %}
+                        <div class="noVid">
+                            No intro video<br/>
+                        </div>
+                    {% else %}
+                    <video class="videoPictureContainer" controls>
+                        <source src="{{intro_video}}" class="videoPictureContainer" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    {% endif %}
+                </div>
+        
+                <!-- Next and previous buttons -->
+                <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                <a class="next" onclick="plusSlides(1)">&#10095;</a>
+            </div>
+            </div>
+            <br/>
+
+            <div class="userTitle">
+                {{ user.first_name }} {{ user.last_name }}<br/>
+            </div>
+            <br/><br/>
+            <div class="headerText">
+                {% if isStudent == True %}
+                    Student
+                {% else %}
+                    Mentor
+                {% endif %}
+            </div>
+            <br/>
+            <br/>
+
+            {% if isStudent == False %}
+                <div class="headerText">
+                    Current occupation 
+                    <div class="space_up">
+                        <div class="white_container">
+                            {{ user.current_occupation }}<br/>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            
+            {% if in_network or logged_in %}
+                {% if user.email_contact %}
+                    <div class="headerText">
+                        Contact
+                        <div class="space_up">
+                            <div class="white_container">
+                                {{ user.email }}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="headerText">
+                        Contact
+                        <div class="space_up">
+                            <div class="white_container">
+                                {{ user.phone_number }}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <br/>
+            {% endif %}
+
+            <div class="headerText">
+                Current location 
+                <div class="space_up">
+                    <div class="white_container">
+                        {{ user.city_name }}<br/>
+                    </div>
+                </div>
+            </div>
+            <br/>
+
+            <div class="headerText">
+                About Me
+                <div class="space_up">
+                    <textarea id="bio" rows="14" cols="70" readonly>{{bio}}</textarea>
+                </div>
+            </div>
+            <br/>
+            
+            <div class="headerText">
+                Education
+                <div class="space_up">
+                    {% if educationList|length == 0 %} <!-- just checking - but this should never be true -->
+                        None
+                    {% else %}
+                        <div class="white_container">
+                        <div class="regText">
+                            {% for school in educationList %}
+                                {{ school }}<br/>
+                            {% endfor %}
+                        </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="headerText">
+                {% if isStudent %}
+                    Career interests
+                {% else %}
+                    Career experience
+                {% endif %}
+                <div class="space_up">
+                    {% if careerInterestList|length == 0 %}
+                        None
+                    {% else %}
+                        <div class="white_container">
+                        <div class="regText">
+                            {% for carInt in careerInterestList %}
+                                {{ carInt }}<br/>
+                            {% endfor %}
+                        </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="headerText">
+                Hobbies
+                <div class="space_up">
+                    {% if interestList|length == 0 %}
+                        None
+                    {% else %}
+                        <div class="white_container">
+                        <div class="regText">
+                            {% for interest in interestList %}
+                                {{ interest }} <br/>
+                            {% endfor %}
+                        </div>
+                        </div>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <br/><br/>
+
+            {% if logged_in is defined %}
+            {% if logged_in == true %}
+                <br/><br/>
+                <a class="add_something_btn editProfile centerDiv" href="{{ url_for('editProfile') }}">Edit Profile</a>
+            {% endif %}
+            {% endif %}
+            <br/><br/>
+        </div>
+    </div>
+    </div>
+
+    <div class="bottom_bar_spacing">
+    <div class="bottom_bar"></div>
+    </div>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js_files/view.js')}}"></script>
+</body>
+</html>

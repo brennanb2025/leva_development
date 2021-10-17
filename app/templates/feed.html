@@ -1,0 +1,97 @@
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/navigation_bar.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/general_page.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/feed.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/media_gallery.css')}}">
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+    <title>Feed | Leva</title>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
+    {{ JSGlue.include() }}
+</head>
+
+<body>
+    <!-- navbar -->
+    <div class="navbar">
+        <table class="span_width">
+            <tr>
+                <td>
+                    <img class="navbar_image" src="{{ url_for('static', filename='Leva_icon.webp')}}">
+                </td>
+                <td>
+                    {% if userID != None %}
+                        <a class="bar_a navbar_log_in_out" href="{{ url_for('logout') }}">Log Out</a><br/>
+                    {% else %}
+                        <a class="bar_a navbar_log_in_out" href="{{ url_for('sign_in') }}">Log In</a><br/>
+                    {% endif %}
+                    
+                </td>
+            </tr>
+        </table>
+
+        <table class="a_bar_table">
+            <tr>
+                <td class="a_bar_td"><a class="bar_a" href="/">Home</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border background_purple" href="{{ url_for('feed') }}">My Feed</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('view', id=userID) }}">My Profile</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('my_connections') }}">My Connections</a></td>
+            </tr>
+        </table>
+    </div>
+    <br/>
+    <br/>
+    <br/>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <div class="titleText centerDiv">
+        My Feed
+        {% if isStudent %}
+            - Matching Mentors
+        {% else %}
+            - Matching Students
+        {% endif %}
+    </div>
+    <br/>
+
+    <br/>
+    <div id="loadingText" class="centerDiv">
+        <br/><br/><br/><br/>
+        Loading...
+    </div>
+
+    <div id="noMatchDiv" class="regText centerDiv"></div>
+    <br/>
+    
+    <div class="userTableSurround fadeElem" id="matchTable">
+    
+    </div>
+
+
+    <div class="bottom_bar_spacing">
+    <div class="bottom_bar"></div>
+    </div>
+    
+    <script type="text/javascript" src="{{ url_for('static', filename='js_files/feed.js')}}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            init("{{isStudent}}");
+            get_new_users(function() { //callback: pass this function as an argument to the get_new_users function.
+
+                async function waitThenShowSlides() { //show the slides
+                    return result = await ready_document();
+                }; 
+                waitThenShowSlides().then(function() {
+                    showSlides(slideIndex);
+                });
+                
+                remove_loading();
+            });
+        });
+
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,62 @@
+from flask_wtf import FlaskForm
+from wtforms import (
+    StringField,
+    TextAreaField,
+    SubmitField,
+    PasswordField,
+    DateField,
+    IntegerField,
+    SelectField
+)
+from wtforms.validators import (
+    DataRequired,
+    Email,
+    EqualTo,
+    Length,
+    URL
+)
+
+class LoginForm(FlaskForm): #these have csrf validators but I turned them off because I'm doing it manually
+    email = StringField('Email')
+    password = PasswordField('Password')
+    submit = SubmitField('Sign In')
+        
+class RegistrationForm(FlaskForm):
+    first_name = StringField('First')
+    last_name = StringField('Last')
+    email = StringField('Email')
+    password = PasswordField('Password')
+    password2 = PasswordField('Repeat Password')
+    city_name = StringField('City')
+    current_occupation = StringField('Current Occupation')
+    submit = SubmitField('Register')
+
+class EditPasswordForm(FlaskForm):
+    password = PasswordField('Password')
+    password2 = PasswordField('Repeat Password')
+    submit = SubmitField('Change Password')
+
+class EditFirstNameForm(FlaskForm):
+    first_name = StringField('Change first name')
+    submit = SubmitField('Change first name')
+
+class EditCityForm(FlaskForm):
+    city_name = StringField('Change city')
+    submit = SubmitField('Change city')
+
+class EditCurrentOccupationForm(FlaskForm):
+    current_occupation = StringField('Change current occupation')
+    submit = SubmitField('Change current occupation')
+
+class EditLastNameForm(FlaskForm):
+    last_name = StringField('Change last name')
+    submit = SubmitField('Change last name')
+
+class ProjectCreationForm(FlaskForm):
+    name = StringField('Project name')
+    description = StringField('Description')
+    #idk how to store all of the goals here
+    submit = SubmitField('Submit project')
+
+class EmptyForm(FlaskForm):
+    submit = SubmitField('Submit')

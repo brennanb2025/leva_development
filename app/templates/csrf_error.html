@@ -1,0 +1,13 @@
+<html>
+<head>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+    <title>CSRF | Leva</title>
+</head>
+<body>
+    CSRF Error.<br/>
+    {{ reason }}<br/>
+    Try going back to the previous page and then coming back to this one.
+    <br/>
+    <br/>
+    <a href="{{ url_for('index') }}">Home Page</a>
+</body>

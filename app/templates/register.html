@@ -1,0 +1,523 @@
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/general_page.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/navigation_bar.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/create_user_table.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/register.css')}}">
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+    <title>Register | Leva</title>
+
+    <!--<link rel="stylesheet" href="{{ url_for('static', filename='node_modules/cropperjs/dist/cropper.min.css')}}"/>
+    <script src="{{ url_for('static', filename='node_modules/cropperjs/dist/cropper.min.js')}}">
+    </script>
+    -->
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+</head>
+
+<body>
+    <!-- navbar -->
+    <div class="navbar">
+        <table class="span_width">
+            <tr>
+                <td>
+                    <img class="navbar_image" src="{{ url_for('static', filename='Leva_icon.webp')}}">
+                </td>
+                <td>
+                    <a class="bar_a navbar_log_in_out" href="{{ url_for('sign_in') }}">Log In</a><br/>
+                </td>
+            </tr>
+        </table>
+
+        <table class="a_bar_table">
+            <tr>
+                <td class="a_bar_td"><a class="bar_a" href="/">Home</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('feed') }}">My Feed</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('view', id=userID) }}">My Profile</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('my_connections') }}">My Connections</a></td>
+            </tr>
+        </table>
+    </div>
+   
+    <br/><br/><br/><br/>
+    
+    <div class="titleText centerDiv">
+        Register
+    </div>
+    <br/><br/>
+    <div class="purple_container_register">
+    <div class="regText">
+    <form action="/register" method="POST" enctype="multipart/form-data" id="submitForm">
+        {{ form.csrf_token }}
+        <div class="horizontal_spacing">
+        <table class="first_last_table">
+            <tr>
+                <td class="first_last_td">
+                    <p>
+                        <div class="input_title">
+                            {{ form.first_name.label }}
+                        </div>
+
+                        <div class="pad_td">
+                        <div class="white_container">
+                            {{ form.first_name(class_="form_style", value=first_name) }}<br/>
+                        </div>
+                        </div>
+
+                    </p>
+                </td>
+                <td class="first_last_td">
+                    <p>
+                        <div class="input_title">
+                            {{ form.last_name.label }}
+                        </div>
+
+                        <div class="white_container">
+                            {{ form.last_name(class_="form_style", value=last_name) }}<br/>
+                        </div>
+                        
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <!-- to get correct spacing -->
+                {% if first_last_error %}
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class=flashes>
+                            {% for category, message in messages %}
+                                {% if category == 'last_nameError' or category == 'first_nameError' %}
+                                    <td class="errorTd">
+                                        {% if category == 'first_nameError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="errorTd">
+                                        {% if category == 'last_nameError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% else %}
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class=flashes>
+                            {% for category, message in messages %}
+                                {% if category == 'first_nameError' %}
+                                    <td class="errorTd">
+                                    {% if category == 'first_nameError' %}
+                                        <span style="color: red;">[{{ message }}]</span>
+                                    {% endif %}
+                                    </td>
+                                {% endif %}
+                            {% endfor %}
+                            {% for category, message in messages %}
+                                {% if category == 'last_nameError' %}
+                                <td class="errorTd">
+                                    {% if category == 'last_nameError' %}
+                                        <span style="color: red;">[{{ message }}]</span>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+            </tr>
+        </table>
+        <p>
+            <div class="input_title">
+                {{ form.email.label }}
+            </div>
+            <div class="white_container">
+                {{ form.email(class_="form_style", value=email) }}<br/>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'emailError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+        <p>
+            <div class="input_title">
+                How would you like to be contacted?<br/>
+            </div>
+            <div class="regText navy">
+                {% if email_or_phone == none or email_or_phone == "email" %}
+                    <input type="radio" id="emailBtn" name="radio_contact" value="Email" onclick="radio_email()" checked>
+                    <label for="emailBtn">Email</label><br/>
+                    <input type="radio" id="phonenumBtn" name="radio_contact" value="Phone number" onclick="radio_phone()">
+                    <label for="phonenumBtn">Phone number</label>
+                {% else %}
+                    <input type="radio" id="emailBtn" name="radio_contact" value="Email" onclick="radio_email()">
+                    <label for="emailBtn">Email</label><br/>
+                    <input type="radio" id="phonenumBtn" name="radio_contact" value="Phone number" onclick="radio_phone()" checked>
+                    <label for="phonenumBtn">Phone number</label>
+                {% endif %}
+            </div>
+            <div id="whiteContainerPhone" class="white_container">
+                <input type="tel" id="phoneNumber" name="phoneNumber" class="form_style" placeholder="123-456-7890" value="{{phone_num}}">
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'phoneError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+        <p>
+            <div class="input_title">
+                {{ form.password.label }}<br>
+            </div>
+
+            <div class="white_container">
+                {{ form.password(class_="form_style") }}<br>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'passwordError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+        <p>
+            <div class="input_title">
+                {{ form.password2.label }}<br>
+            </div>
+
+            <div class="white_container">
+                {{ form.password2(class_="form_style") }}<br>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'password2Error' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+        <p>
+            <br/>
+            <div class="input_title">
+                I am looking for connections with...<br/>
+            </div>
+            <div class="regText navy">
+                {% if register_type == none or register_type == "student" %}
+                    <input type="radio" id="studentBtn" name="radio_position" value="student" onclick="radio_student()" checked>
+                    <label for="studentBtn">Employers (mentors)</label><br/> <!-- they are a student looking for mentors -->
+                    <input type="radio" id="mentorBtn" name="radio_position" value="mentor" onclick="radio_mentor()">
+                    <label for="mentorBtn">Employees (students)</label> <!-- they are a mentor looking for students -->
+                {% else %}
+                    <input type="radio" id="studentBtn" name="radio_position" value="student" onclick="radio_student()">
+                    <label for="studentBtn">Employers (mentors)</label><br/> <!-- they are a student looking for mentors -->
+                    <input type="radio" id="mentorBtn" name="radio_position" value="mentor" onclick="radio_mentor()" checked>
+                    <label for="mentorBtn">Employees (students)</label> <!-- they are a mentor looking for students -->
+                {% endif %}
+            </div>
+        </p>
+        <p>
+            <div id="occupationInput">
+            <div class="input_title">
+                {{ form.current_occupation.label }}<br>
+            </div>
+
+            <div class="white_container">
+                {{ form.current_occupation(class_="form_style", value=current_occupation) }}<br>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'currentOccupationError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            </div>
+        </p>
+        <p>
+            <div class="input_title">
+                {{ form.city_name.label }}<br>
+            </div>
+
+            <div class="white_container">
+                {{ form.city_name(class_="form_style", value=city_name) }}<br>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'cityNameError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+        <p>
+            <div class="input_title">
+                Profile Picture<br/>
+            </div>
+            <label for="inputFile" class="choose_file_container add_something_btn">
+                Choose file
+            </label>
+            <div class="regText navy">(Max size = 5MB)</div>
+            <input type="file" class="hide_this_input" name="file" value="file" id="inputFile" accept="image/x-png,image/png,image/jpeg">
+
+            <div class="image_container centerDiv pad_top" id="image_container_div">
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'imageError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            <!--
+            <div class="regText navy" id="imgStuff">
+                <p id="scrollAdvice">Scroll to resize image. Click the crop button to set the crop. (This is required.)</p>
+                <div class="centerDiv">
+                    <button id="crop-btn" type="button" class="crop_btn add_something_btn">Crop</button>
+                </div>
+                <br/><br/>
+                <input type="file" name="croppedImgFile" value="croppedImgFile" id="croppedImgFile" accept="image/x-png,image/png,image/jpeg">
+                <div id="cropPreview">Cropped image preview:</div>
+                <div class="image_container centerDiv" id="cropped_image">
+                </div>
+            </div>
+            -->
+        </p>
+        <p>
+            <input type="hidden" name="videoDuration" id="videoDuration" value="">
+            <div class="input_title">
+                Introduction Video<br/>
+            </div>
+            <label for="videoFile" class="choose_file_container add_something_btn">
+                Choose file
+            </label>
+            <div class="regText navy">
+                (Max size = 40MB, max duration = 30 seconds)<br/>
+            </div>
+            <input type="file" class="hide_this_input" name="videoFile" value="videoFile" id="videoFile" accept="video/mp4">
+            
+            <video id="newVideo" class="video_container" controls>
+                
+                Your browser does not support the video tag.
+            </video>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'videoError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            <br/><br/>
+        </p>
+        <p>
+            <div class="input_title">
+                Bio<br/>
+            </div>
+            <textarea id="bio" name="bio" maxlength="500">{{bio}}</textarea>
+            <div id="char_count" class="regText navy" value="">Characters left: {{500}}</div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'bioError' %}
+                            <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+        <p>
+            <br/>
+            <div class="input_title">
+                Education<br/>
+            </div>
+            <table>
+                <tr>
+                    <td class="add_attribute_td">
+                        <input list="schools" name="educationField" class="add_attribute_form_style" id="educationField">
+                        <datalist id="schools" name="schoolsDatalist" style="overflow-y: auto">
+                            {% for school in schools %}
+                                <option value="{{school.title}}">
+                            {% endfor %}
+                        </datalist>
+                    </td>
+                    <td class="add_attribute_td">
+                        <input type="button" class="add_attribute add_something_btn" name="addEducation" id="addEducation" value="Add school" onclick="add_education()">
+                    </td>
+                </tr>
+            </table>
+            <input type="hidden" id="num_education_listings" name="num_education_listings" value="0">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'educationError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            <div class="smallText">
+            <br/>
+            <table class="center" class="createTable" id="educationTable">
+            </table>
+            </div>
+        </p>
+        
+        <p>
+            <br/>
+            <div class="input_title">
+                <div id="careerInt">Career Interests<br/></div>
+                <div id="careerExp">Career Experience<br/></div>
+            </div>
+            <table>
+                <tr>
+                    <td class="add_attribute_td">
+                        <input list="careerInterests" name="careerInterestField" class="add_attribute_form_style" id="careerInterestField">
+                        <datalist id="careerInterests" name="careerInterestsDatalist" style="overflow-y: auto">
+                            {% for cInt in careerInterests %}
+                                <option value="{{cInt.title}}">
+                            {% endfor %}
+                        </datalist>
+                    </td>
+                    <td class="add_attribute_td">
+                        <input type="button" class="add_attribute add_something_btn" name="addCareerInterest" id="addCareerInterest" value="Add interest" onclick="add_career_interest()">
+                    </td>
+                </tr>
+            </table>
+
+            <input type="hidden" id="num_career_interests" name="num_career_interests" value="0">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'careerInterestError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            <div class="smallText">
+            <br/>
+            <table class="center" class="createTable" id="careerInterestTable">
+            </table>
+            </div>
+        </p>
+
+        <p>
+            <br/>
+            <div class="input_title">
+                Hobbies<br/>
+            </div>
+
+            <table>
+                <tr>
+                    <td class="add_attribute_td">
+                        <input list="interestTags" name="tagField" class="add_attribute_form_style" id="tagField">
+                        <datalist id="interestTags" name="interestTagsDatalist" style="overflow-y: auto">
+                            {% for tag in interestTags %}
+                                <option value="{{tag.title}}">
+                            {% endfor %}
+                        </datalist>
+                    </td>
+                    <td class="add_attribute_td">
+                        <input type="button" class="add_attribute add_something_btn" name="addTag" id="addTag" value="Add hobby" onclick="add_tag()">
+                    </td>
+                </tr>
+            </table>
+
+            <input type="hidden" id="num_tags" name="num_tags" value="0">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'interestError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            <div class="smallText">
+            <br/>
+            <table class="center" class="createTable" id="tagTable">
+            </table>
+            </div>
+        </p>
+        <br/>
+
+        </div>
+        <!-- for getting back so I don't have to call to the database again  -- too much data (1500 entries) to send back
+        {% for tag in interestTags %}
+            <input value="{{tag.title}}" type="hidden" name="interestDatalistOption">
+        {% endfor %}
+        {% for cInt in careerInterests %}
+            <input value="{{cInt.title}}" type="hidden" name="careerInterestDatalistOption">
+        {% endfor %}
+        {% for school in schools %}
+            <input value="{{school.title}}" type="hidden" name="schoolDatalistOption">
+        {% endfor %}
+        -->
+
+        <input type="submit" class="add_something_btn register_btn centerDiv" value="Register"/>
+    </form>
+    </div>
+    </div>
+
+    <div class="bottom_bar_spacing">
+    <div class="bottom_bar"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js_files/register.js')}}"></script>
+    <script type="text/javascript">
+        setPreexistingAttributes({{interestList|tojson}}, {{careerInterestList|tojson}}, {{educationList|tojson}});
+        init("{{email_or_phone}}", "{{register_type}}");
+    </script>
+
+</body>
+</html>

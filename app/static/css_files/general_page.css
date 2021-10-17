@@ -1,0 +1,136 @@
+html, body {
+    width: 100%;
+}
+.regText {
+    font-size: 15px;
+    font-family: Helvetica, sans-serif;
+}
+.link {
+    font-size: 20px;
+    font-family: Helvetica, sans-serif;
+}
+.titleText {
+    font-size: 35px;
+    font-family: Helvetica, sans-serif;
+    color: black;
+    font-weight: 100;
+}
+/* remove */
+.pageTitle {
+    font-size: 30px;
+    font-family: Helvetica, sans-serif;
+}
+
+.headerDiv {
+    width:662px;
+    height:50px;
+    line-height: 50px;
+    background-color: #dec7ff;
+    color: #0f0838;
+    margin: auto;
+    text-align: center;
+    font-size:30px;
+    font-family: Helvetica, sans-serif;
+}
+.infoText {
+    width:662px;
+    color: #737373;
+    margin: auto;
+    text-align: center;
+    font-size:22px;  
+    font-family: Helvetica, sans-serif;
+    line-height: 35px;
+}
+.defaultLink {
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    color: black;
+    background-color: #ededed;
+    font-family: Helvetica, sans-serif;
+}
+.defaultLink:hover {
+    background-color: #d7a1ff;
+    color:black;
+}
+
+.all {
+    text-align: center;
+}
+table.center {
+    margin-left:auto; 
+    margin-right:auto;
+}
+tbody.center {
+    margin-left:auto; 
+    margin-right:auto;
+}
+/* remove */
+.titleBox {
+    margin-right: 200px;
+    margin-left: 200px;
+    padding: 30px;
+}
+.formBox {
+    margin-right: 200px;
+    margin-left: 200px;
+    padding: 30px;
+}
+.centerThis {
+    text-align:center;
+}
+.centerDiv {
+    text-align:center;
+    margin: auto;
+}
+.image_resize {
+    width:30%; 
+    height: auto;
+}
+.media_size {
+    max-width:500px;
+    max-height:500px;
+}
+.media_container {
+    max-width: 500px;
+    max-height: 500px;
+    margin-left:auto; 
+    margin-right:auto;
+}
+.profile_picture {
+    width:400px;
+    height:400px;
+    max-width:400px;
+    max-height:400px;
+}
+.profile_picture_small {
+    width:70px;
+    height:70px;
+}
+
+.bottom_bar_spacing {
+    padding-top: 100px;
+}
+.bottom_bar {
+    background-color: #c4c4c4;
+    width:65%;
+    bottom: 0; /* Position the navbar at the bottom of the page */
+    height: 55px;
+    margin: auto;
+}
+
+/* buttons for adding things */
+.add_something_btn {
+    display: block;
+    color: black;
+    background-color: #ededed;
+    text-align: center;
+    text-decoration: none;
+    border-collapse: collapse;
+    border:none;
+    cursor: pointer;
+}
+.add_something_btn:hover {
+    color: white;
+    background-color:navy;
+}

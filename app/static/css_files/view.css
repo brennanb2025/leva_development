@@ -1,0 +1,92 @@
+.btn {
+    background-color: #dfdfdf;
+    border: none;
+    color: black;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor:pointer;
+    font-family: verdana;
+}
+
+.listSurround {
+    background-clip: padding-box;
+    padding: 8px;
+    border-radius: 5px;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+.listTd {
+    border-spacing: 5px 0;
+    background-clip: padding-box;
+    padding: 8px;
+    background-color: #dfdfdf;
+    border-radius: 8px;
+}
+
+.videoPictureContainer {
+    width:400px;
+    height:400px;
+    max-width:400px;
+    max-height:400px;
+}
+
+.purpleContainer {
+    background-color: #e8ccfc;
+    width: 48%;
+    max-width: 48%;
+    margin:auto;
+}
+
+.space_up {
+    padding-top: 7px;
+}
+.white_container {
+    background-color: white;
+    padding-left: 8px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right:0px;
+    font-size: 16px;
+    width:100%;
+    /*height: 20px;*/
+    text-decoration: none;
+    color: black;
+}
+
+.centerAlign {
+    margin:auto;
+    width:83%;
+}
+.userTitle {
+    margin-left: 10px;
+    font-size: 45px;
+    color: navy;
+    font-family: Helvetica, sans-serif;
+}
+
+.headerText {
+    font-size: 20px;
+    color: navy;
+    font-family: Helvetica, sans-serif;
+    padding-bottom:10px;
+}
+#bio {
+    width:100%;
+    height:200px;
+    border:none;
+    margin: auto;
+    resize: none;
+}
+
+.editProfile {
+    width: 140px;
+    height: 60px;
+    line-height: 60px;
+    font-size: 20px;
+    font-family: Helvetica, sans-serif;
+    color:black;
+}

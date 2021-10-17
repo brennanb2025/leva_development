@@ -1,0 +1,81 @@
+/* The navigation bar */
+.navbar {
+  overflow: hidden;
+  background-color: white;
+  top: 0; /* Position the navbar at the top of the page */
+  margin: auto;
+  text-align: center;
+  font-family: Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 100;
+  width:65%;
+  z-index:1;
+}
+  
+/* Links inside the navbar */
+.bar_a {
+  display: block;
+  color: black;
+  background-color: #ededed;
+  text-align: center;
+  text-decoration: none;
+  line-height: 200%; /* so this centers the text vertically for some reason */
+  width: 100%;
+  height: 100%;
+  border-collapse: collapse;
+}
+
+/* the bar of as */
+.a_bar_table {
+  margin: auto;
+  width: 100%;
+  height: 30px;
+  border-collapse: collapse;
+}
+
+.a_bar_td {
+  width:25%;
+  padding: 0;
+  margin: 0;
+}
+
+.left_border {
+  border-left: 1px solid #c4c4c4;
+}
+
+.navbar_log_in_out {
+  width:145px;
+  height:40px;
+  line-height: 40px;
+  text-align: center;
+  margin-left:42%;
+}
+
+.span_width {
+  width:100%;
+}
+
+.navbar_image {
+  float:left;
+  width:296px;
+  height:92px;
+}
+
+/* Change background on mouse-over */
+.navbar a:hover {
+  background-color: #deccff;
+  color:black;
+}
+
+.purple {
+  color: rgb(98, 26, 231)
+}
+.background_purple {
+  background-color: #221894;
+  color: white;
+}
+
+/* Main content */
+.main {
+  margin-top: 50px; /* Add a top margin to avoid content overlay */
+}

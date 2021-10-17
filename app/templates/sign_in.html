@@ -1,0 +1,120 @@
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/general_page.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/navigation_bar.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/sign_in.css')}}">
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+    <title>Log In | Leva</title>
+</head>
+
+<body>
+    <!--NAVBAR maybe change these links to brace brace url underscore for('link') brace brace? -->
+    <!-- navbar -->
+    <div class="navbar">
+        <table class="span_width">
+            <tr>
+                <td>
+                    <img class="navbar_image" src="{{ url_for('static', filename='Leva_icon.webp')}}">
+                </td>
+                <td>
+                    <a class="bar_a background_purple navbar_log_in_out" href="{{ url_for('sign_in') }}">Log In</a><br/>
+                </td>
+            </tr>
+        </table>
+
+        <table class="a_bar_table">
+            <tr>
+                <td class="a_bar_td"><a class="bar_a" href="/">Home</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('feed') }}">My Feed</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('view', id=userID) }}">My Profile</a></td>
+                <td class="a_bar_td"><a class="bar_a left_border" href="{{ url_for('my_connections') }}">My Connections</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <br/><br/><br/>
+    
+    <div class="titleText centerDiv">
+        Log in
+    </div>
+    <br/><br/>
+    <div class="regText">
+    <div class="purple_container_sign_in">
+        <form action="/sign-in" method="POST">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flashesLogin">
+                    {% for category, message in messages %}
+                        {% if category == 'loginRedirectError' %}
+                            <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="horizontal_spacing">
+            
+            {{ form.csrf_token }}
+            <p>
+                <div class="input_title">
+                    {{ form.email.label }}
+                </div>
+                <div class="white_container">
+                    {{ form.email(class_="form_style") }}<br/>
+                </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class=flashes>
+                        {% for category, message in messages %}
+                            {% if category == 'emailError' %}
+                            <span style="color: red;">[{{ message }}]</span>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+            </p>
+            <p>
+                <div class="input_title">
+                    {{ form.password.label }}
+                </div>
+                <div class="white_container">
+                    {{ form.password(class_="form_style") }}<br/>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class=flashes>
+                        {% for category, message in messages %}
+                            {% if category == 'passwordError' %}
+                            <span style="color: red;">[{{ message }}]</span>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+            </p>
+            </div>
+            <input class="add_something_btn log_in_btn centerDiv" type="submit" value="Log In"/>
+        </form>
+    </div>
+
+    <br/><br/><br/><br/><br/>
+
+    <div class="titleText centerDiv">
+        Sign Up
+    </div>
+    <br/><br/>
+    <a class="add_something_btn make_account centerDiv" href="{{ url_for('register') }}">Make an Account</a>
+
+    </div>
+
+    <div class="bottom_bar_spacing">
+    <div class="bottom_bar"></div>
+    </div>
+
+</body>
+
+</html>
