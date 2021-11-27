@@ -3,7 +3,7 @@ from app import app, db, s3_client#, oauth
 #import lm as well?^
 from app.input_sets.forms import EditCityForm, EditCurrentOccupationForm, LoginForm, EditPasswordForm, EditFirstNameForm, EditLastNameForm, EmptyForm, RegistrationForm, EditCityForm, EditCurrentOccupationForm
 from uuid import uuid4
-from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Swipe
+from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Select
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import datetime
@@ -200,16 +200,19 @@ def registerPost():
             elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
                 flash(u'Accepted file types: .png, .jpg. You uploaded a', imgType + ".", 'imageError')
                 success = False
-    else:
+    #image is optional
+    """else:
         success = False
-        flash(u'Please select a file.', 'pictureError')
+        flash(u'Please select a file.', 'pictureError')"""
 
     vid = None
     if "videoFile" in request.files:
         vid = request.files["videoFile"]
-    else:
+    
+    #video file optional
+    """else:
         success=False
-        flash(u'Please select a file.', 'videoError')
+        flash(u'Please select a file.', 'videoError')"""
     if vid:
         duration = request.form.get("videoDuration")
         if not duration:
@@ -225,7 +228,6 @@ def registerPost():
         if int((len(vid.read())/1024)/1024) > 40: #check size of file. Don't allow file sizes above 40MB.
             flash(u'Video is too big (max 40 MB).', 'videoError')
             success = False
-
 
     if success: #success, registering new user
         
@@ -685,7 +687,7 @@ def editProfilePosition():
         user.set_isStudent(False) 
     else: #make user a student
         user.set_isStudent(True)
-        #TODO: caution against doing this before checking matches and then delete all swipes with this user as the base
+        #TODO: caution against doing this before checking matches and then delete all selects with this user as the base
 
     db.session.commit()
     return redirect(url_for('editProfile'))
@@ -886,8 +888,8 @@ def view():
 
     this_user_is_logged_in = (user.id == session.get('userID'))
     in_network = False
-    if Swipe.query.filter_by(match=True, base_id=user.id, target_id=session.get('userID')).first() != None or \
-        Swipe.query.filter_by(match=True, base_id=session.get('userID'), target_id=user.id).first() != None:
+    if Select.query.filter_by(mentee_id=user.id, mentor_id=session.get('userID')).first() != None or \
+        Select.query.filter_by(mentee_id=session.get('userID'), mentor_id=user.id).first() != None:
         in_network = True
 
     #^if the user looking at this person's profile page is the one who is currently logged in, 
@@ -936,8 +938,8 @@ def deleteProfile():
         delete_profile_picture(user)
         delete_intro_video(user)
         delete_user_attributes(user.id)
-        Swipe.query.filter_by(base_id=user.id).delete()
-        Swipe.query.filter_by(target_id=user.id).delete()
+        Select.query.filter_by(mentee_id=user.id).delete()
+        Select.query.filter_by(mentor_id=user.id).delete()
         
 
         User.query.filter_by(id=userID).delete()
@@ -1008,6 +1010,8 @@ def feed():
     user = User.query.filter_by(id=session.get('userID')).first()
     return render_template('feed.html', isStudent=user.is_student, userID=session.get('userID'))
 
+
+# method called in the feed js script
 @app.route('/getFeed', methods=['GET'])
 def getFeed():
     if not(userLoggedIn()):
@@ -1015,13 +1019,11 @@ def getFeed():
         return redirect(url_for('sign_in'))
     
     user = User.query.filter_by(id=session.get('userID')).first()
-    if user.is_student:
-        return feedStudent(user)
-    else:
-        return feedMentor(user)
+    return feedMentee(user)
+    
 
 
-def feedStudent(user):
+def feedMentee(user):
     """
     Comment about efficiency:
     Right now how this works is it:
@@ -1043,14 +1045,13 @@ def feedStudent(user):
         school = School.query.filter_by(title=educ.entered_name.lower()).first() #the school with this title - should only be one
         if school != None:  #Extra check if the school entered might not be in the database. It won't, but better safe than sorry.
                             #Data is entered automatically - it will have to be in the database to be searched
-            #educationTags = EducationTag.query.filter_by(educationID=school.schoolID).all() 
             educationTags = EducationTag.query.filter_by(educationID=school.id).all() 
             #TODO: I should be able to skip query for school and do educationID=educ.educationID
             #has the EducationTags that are linked to this school's name
             for edTag in educationTags:
                 users = User.query.filter_by(id=edTag.user_id).all() #get the corresponding users
                 for u in users:
-                    if u.id != user.id and not u.is_student and not swipeExists(user.id, u.id): #don't consider the user logged in - also, only recommend mentors
+                    if u.id != user.id and not u.is_student and not mentorSelected(u.id): #don't consider the user logged in - also, only recommend mentors
                         if schoolDict.__contains__(u): #add user to the dict
                             schoolDict[u].append(edTag.entered_name)
                         else:
@@ -1074,7 +1075,7 @@ def feedStudent(user):
             for intT in interestTags:
                 users = User.query.filter_by(id=intT.user_id).all() #get the corresponding users
                 for u in users:
-                    if u.id != user.id and not u.is_student and not swipeExists(user.id, u.id): #don't consider the user logged in
+                    if u.id != user.id and not u.is_student and not mentorSelected(u.id): #don't consider the user logged in
                         if interestTitleDict.__contains__(u): #add user to the dict
                             interestTitleDict[u].append(intT.entered_name)
                         else:
@@ -1098,7 +1099,7 @@ def feedStudent(user):
             for cInt in cInts:
                 users = User.query.filter_by(id=cInt.user_id).all() #get the corresponding users
                 for u in users:
-                    if u.id != user.id and not u.is_student and not swipeExists(user.id, u.id): 
+                    if u.id != user.id and not u.is_student and not mentorSelected(u.id): 
                         #don't consider the user logged in, only consider students, don't consider users who have already been shown to this student.
                         if careerDict.__contains__(u): #add user to the dict
                             careerDict[u].append(cInt.entered_name)
@@ -1158,164 +1159,35 @@ def feedStudent(user):
     return jsonify(dictItems)
 
 
-def feedMentor(user):
-    matchingSwipes = Swipe.query.filter_by(target_id=user.id, likes=True, shown=False).all()
-    #show the users who 1. swiped on them, 2. swiped left, 3. have not been shown to this mentor yet
-
-    matchingStudents = []
-    for matchSwipe in matchingSwipes:
-        matchingStudents.append(User.query.filter_by(id=matchSwipe.base_id).first())
-
-    thisUserEducationIDs = [] #setting these so I don't have to call this on every user check
-    for uS in user.rtn_education():
-        thisUserEducationIDs.append(uS.educationID)
-    thisUserInterestIDs = []
-    for intrst in user.rtn_interests():
-        thisUserInterestIDs.append(intrst.interestID)
-    thisUserCareerInterestIDs = []
-    for cint in user.rtn_career_interests():
-        thisUserCareerInterestIDs.append(cint.careerInterestID)
-
-    userDict = {} #user : number match.
-    schoolDict = {} #contains all the matching schools for each user (user : [school])
-    for u in matchingStudents:
-        for educ in u.rtn_education(): #go thru each educationTag
-            if educ.educationID in thisUserEducationIDs: #if this user has the same educationTag as the matching student
-                if schoolDict.__contains__(u): #add user to the dict
-                    schoolDict[u].append(educ.entered_name)
-                else:
-                    sArr = [educ.entered_name] #not already in the dict --> add a new array
-                    schoolDict[u] = sArr
-
-                if userDict.__contains__(u): #now update match amount in user dict
-                    userDict[u] = userDict[u]+heuristicVals["education"]
-                else:
-                    userDict[u] = heuristicVals["education"] #initialize
-
-    interestTitleDict = {} #contains all the matching tags for each user (user : [interest tag titles])
-    for u in matchingStudents:
-        for intrst in u.rtn_interests():
-            if intrst.interestID in thisUserInterestIDs:
-                if interestTitleDict.__contains__(u): #add user to the dict
-                    interestTitleDict[u].append(intrst.entered_name)
-                else:
-                    iArr = [intrst.entered_name] #not already in the dict --> add a new array
-                    interestTitleDict[u] = iArr
-
-                if userDict.__contains__(u): #now update match amount in user dict
-                    userDict[u] = userDict[u]+heuristicVals["interest"]
-                else:
-                    userDict[u] = heuristicVals["interest"] #initialize
-
-    careerDict = {} #contains all the matching career tags for each user (user : [career experience/interest title])
-    for u in matchingStudents:
-        for cInt in u.rtn_career_interests():
-            if cInt.careerInterestID in thisUserCareerInterestIDs:
-                if careerDict.__contains__(u): #add user to the dict
-                    careerDict[u].append(cInt.entered_name)
-                else:
-                    iArr = [cInt.entered_name] #not already in the dict --> add a new array
-                    careerDict[u] = iArr
-
-                if userDict.__contains__(u): #now update match amount in user dict
-                    userDict[u] = userDict[u]+heuristicVals["career"]
-                else:
-                    userDict[u] = heuristicVals["career"] #initialize
-
-
-    sortedDict = sorted(userDict.items(), key=lambda item: item[1], reverse=True) #is now a list of tuples
-    #sort userDict by value (the number of matches it got in the db.)
-    
-
-    userDictUsefulInfo = {} # { user : { match name : [ matches for this user ] } }
-    
-    for u in userDict.keys():
-        usefulInfo = {}
-        usefulInfo['userFn'] = u.first_name
-        usefulInfo['userLn'] = u.last_name
-        usefulInfo['userBio'] = u.bio
-        usefulInfo['userProfilePicture'] = u.profile_picture
-        usefulInfo['userIntroVideo'] = u.intro_video
-        usefulInfo['userCurrentOccupation'] = u.current_occupation
-        usefulInfo['userIsStudent'] = u.is_student
-
-        
-        #so there is probably a better way of doing this without making two dicts but I'll implement that later
-        if interestTitleDict.__contains__(u):
-            usefulInfo['interest matches'] = interestTitleDict[u]
-        else:
-            usefulInfo['interest matches'] = [] #if no matches, empty array.
-
-        if careerDict.__contains__(u):
-            usefulInfo['career matches'] = careerDict[u]
-        else:
-            usefulInfo['career matches'] = [] #if no matches, empty array.
-
-        if schoolDict.__contains__(u):
-            usefulInfo['school matches'] = schoolDict[u]
-        else:
-            usefulInfo['school matches'] = [] #if no matches, empty array.
-
-        userDictUsefulInfo[str(u.id)] = usefulInfo
-
-    rtnUserArr = [] #array of the users (sorted, unlike the dict)
-    for tup in sortedDict: #(key,value)
-        rtnUserArr.append(tup[0].id)
-
-    dictItems = {}
-    dictItems['userDictUsefulInfo'] = userDictUsefulInfo
-    dictItems['userArr'] = rtnUserArr
-
-    return jsonify(dictItems)
-
-
-def swipeExists(currUserId, mentorId): #for skipping mentors who have already been shown to this student
-    #if the swipe exists with the base = user logged in and target=mentorid: already shown mentor to student. 
-    # The swipe exists, so the student must have seen this mentor and swiped either right or left.
-    if Swipe.query.filter_by(base_id=currUserId, target_id=mentorId).first() != None:
+def mentorSelected(mentorId): #if this mentor has been selected already
+    if Select.query.filter_by(mentor_id=mentorId).first() != None:
         return True
     return False
 
 
 @app.route('/feed', methods=['POST'])
 def feedPost():
+    #A mentee chose a mentor --> post the form with the mentor information
 
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
 
-    user = User.query.filter_by(id=session.get('userID')).first()
-
     form = request.form
-    swipeLikes = False
 
-    if form.get("yesorno") == "yes": #swiped yes
-        swipeLikes = True
-
-    elif form.get("yesorno") == "no": #swiped no
-        swipeLikes = False
+    if form.get('userID') == None:
+        flash(u'Something went wrong.', 'feedError')
+        return redirect(url_for('feed'))
     
-    if user.is_student: #if the user making the swipe is a student: make a new swipe 
-        newSwipe = Swipe(
-            base_id=user.id,
-            target_id=int(form.get("target_user")),
-            likes=swipeLikes,
-            match=False,
-            shown=False
-        )
-        db.session.add(newSwipe)
-        db.session.commit()
+    userMatchID = form.get('userID')
 
-    else: #if the user making the swipe is a mentor: update the student's swipe
-        swipe = Swipe.query.filter_by(base_id=int(form.get("target_user")), target_id=user.id).first() #should only be one
-        swipe.set_shown()
-        if swipeLikes: 
-            #if I got here, the student must have appeared in the mentor's feed,
-            #which means the student must have swiped yes on the mentor. Therefore, it is a match.
-            swipe.set_match()
+    newSelect = Select(mentee_id=session.get('userID'), mentor_id=userMatchID)
+    #selection will only be made by the user logged in - the mentee.
+
+    db.session.add(newSelect)
     db.session.commit()
-
-    return "success" #it doesn't really matter what I return here.
+    
+    return redirect(url_for("my_connections"))
 
 
 @app.route('/my-connections', methods=['GET'])
@@ -1326,13 +1198,20 @@ def my_connections():
 
     user = User.query.filter_by(id=session.get('userID')).first()
 
-    userArr = [] #users in network
-    for s in Swipe.query.filter_by(match=True, base_id=user.id).all():
-        userArr.append(User.query.filter_by(id=s.target_id).first())
-    for s in Swipe.query.filter_by(match=True, target_id=user.id).all(): #I need to check both in case somebody changed their position.
-        userArr.append(User.query.filter_by(id=s.base_id).first())
+    selectUser = None
 
-    return render_template('my_network.html', userArr=userArr, userID=session.get('userID'))
+    isMentee = user.is_student #user.is_mentee
+
+    if isMentee: 
+        selectUser = Select.query.filter_by(mentee_id=user.id).first()
+        if selectUser != None:
+            selectUser = User.query.filter_by(id=selectUser.mentor_id).first() #get the mentor back from the select
+    else:
+        selectUser = Select.query.filter_by(mentor_id=user.id).first()
+        if selectUser != None:
+            selectUser = User.query.filter_by(id=selectUser.mentee_id).first() #get the mentee back from the select
+
+    return render_template('my_network.html', isMentee=isMentee, selectUser=selectUser, userID=session.get('userID'))
 
 
 def userLoggedIn():
