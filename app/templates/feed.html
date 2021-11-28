@@ -47,12 +47,7 @@
     <br/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <div class="titleText centerDiv">
-        My Feed
-        {% if isStudent %}
-            - Matching Mentors
-        {% else %}
-            - Matching Students
-        {% endif %}
+        My Feed - Matching Mentors
     </div>
     <br/>
 
@@ -60,6 +55,20 @@
     <div id="loadingText" class="centerDiv">
         <br/><br/><br/><br/>
         Loading...
+    </div>
+
+    <div class="centerDiv">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class=flashes>
+            {% for category, message in messages %}
+                {% if category == 'feedError' %}
+                <span style="color: red;">[{{ message }}]</span>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
     </div>
 
     <div id="noMatchDiv" class="regText centerDiv"></div>
@@ -73,6 +82,7 @@
     <div class="bottom_bar_spacing">
     <div class="bottom_bar"></div>
     </div>
+    <div id="chosenUser" value="-1" style="display: none;"></div>
     
     <script type="text/javascript" src="{{ url_for('static', filename='js_files/feed.js')}}"></script>
     <script type="text/javascript">
@@ -80,11 +90,12 @@
             init("{{isStudent}}");
             get_new_users(function() { //callback: pass this function as an argument to the get_new_users function.
 
-                async function waitThenShowSlides() { //show the slides
+                async function waitThenShowSlides() { //show the slide
                     return result = await ready_document();
                 }; 
                 waitThenShowSlides().then(function() {
-                    showSlides(slideIndex);
+                    setupSlideIndex();
+                    showAllSlides();
                 });
                 
                 remove_loading();

@@ -46,52 +46,59 @@
     <br/>
     <div class="leftAlign">
     <div class="titleText">
-        My Connections
+        {% if isMentee %}
+            My Mentor
+        {% else %}
+            My Mentee
+        {% endif %}
     </div>
 
-    {% if userArr|length == 0 %} 
+    {% if selectUser is none %} 
         <div class="chtext">
             <br/>
-            There aren't any people in your connections list yet!
+            {% if isMentee %}
+                You haven't selected a mentor yet.
+            {% else %}
+                You haven't been paired with a mentee yet.
+            {% endif %}
         </div>
-    {% endif %}
-    <table class="userTableSurround">
-    {% for u in userArr %}
-        <tr>
-            <td class="userTable">
-            <div class="chtext">
-            <table>
-                <tr>
-                <td>
-                    <a href="{{ url_for('view', id=u.id) }}">
-                    {% if u.profile_picture is none %}
-                        <img class="profile_picture_small" src="{{url_for('static', filename='blank-profile-picture.png')}}" alt="profile_picture">
-                    {% else %}
-                        <img class="profile_picture_small" src="{{u.profile_picture}}" alt="profile_picture">
-                    {% endif %}
-                    </a>
-                </td>
-
-                <td class="space_left">
-                    <a href="{{ url_for('view', id=u.id) }}" class="userTitle">{{ u.first_name }} {{ u.last_name }}</a><br/>
-                    <div class="space_up">
-                    <div class="white_container">
-                        {% if u.email_contact %}
-                            Contact: {{ u.email }}
+    {% else %}
+        <table class="userTableSurround">
+            <tr>
+                <td class="userTable">
+                <div class="chtext">
+                <table>
+                    <tr>
+                    <td>
+                        <a href="{{ url_for('view', id=selectUser.id) }}">
+                        {% if selectUser.profile_picture is none %}
+                            <img class="profile_picture_small" src="{{url_for('static', filename='blank-profile-picture.png')}}" alt="profile_picture">
                         {% else %}
-                            Contact: {{ u.phone_number }}
+                            <img class="profile_picture_small" src="{{selectUser.profile_picture}}" alt="profile_picture">
                         {% endif %}
-                        <br/>
-                    </div>
-                    </div>
+                        </a>
+                    </td>
+
+                    <td class="space_left">
+                        <a href="{{ url_for('view', id=selectUser.id) }}" class="userTitle">{{ selectUser.first_name }} {{ selectUser.last_name }}</a><br/>
+                        <div class="space_up">
+                        <div class="white_container">
+                            {% if selectUser.email_contact %}
+                                Contact: {{ selectUser.email }}
+                            {% else %}
+                                Contact: {{ selectUser.phone_number }}
+                            {% endif %}
+                            <br/>
+                        </div>
+                        </div>
+                    </td>
+                    </tr>
+                </table>
+                </div>
                 </td>
-                </tr>
-            </table>
-            </div>
-            </td>
-        </tr>
-    {% endfor %}
-    </table>
+            </tr>
+        </table>
+    {% endif %}
 
     </div>
     </div>

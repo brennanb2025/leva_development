@@ -26,6 +26,7 @@ class User(UserMixin, db.Model, Base): #inherits from db.Model, base for flask-S
     phone_number = db.Column(db.String(64))
     city_name = db.Column(db.String(128))
     current_occupation = db.Column(db.String(128))
+
  
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
@@ -279,29 +280,11 @@ class CareerInterest(db.Model, Base):
         self.num_use = self.num_use-1
 
 
-class Swipe(db.Model, Base):
-    __tablename__ = "Swipe"
+class Select(db.Model, Base):
+    __tablename__ = "Select"
 
     id = db.Column(db.Integer, primary_key=True)
-    base_id = db.Column(db.Integer)
-    target_id = db.Column(db.Integer)
-    likes = db.Column(db.Boolean)
-    match = db.Column(db.Boolean) #T means both swiped left. F means either not shown to mentor yet or mentor said no.
-    shown = db.Column(db.Boolean) #T means shown to the mentor -- don't show again.
-    #This shown is whether or not this swipe was shown to the mentor. Shown to the student can only be T, or else this swipe wouldn't exist.
-    
-    #likes is if the student swiped yes on the mentor.
-    #I don't need a mentor likes because I don't need to use that info for anything. 
-    #I only care about likes/not likes for adding to the network of each person. To do that, I only have to look at match.
-    #If the mentor likes, match=True, which means add to the network of each.
-    #if the mentor does not like back, match=False, and I don't have to worry about this at all anymore.
+    mentor_id = db.Column(db.Integer)
+    mentee_id = db.Column(db.Integer)
 
-    def set_shown(self):
-        self.shown = True
-    def set_match(self):
-        self.match = True
-    #if match: both swiped left.
-    #if !match and shown: mentor swiped right.
-    #if !match and not shown: wasn't shown to mentor yet.
-
-    #if !likes: student swiped right.
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
