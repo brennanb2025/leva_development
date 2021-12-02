@@ -1008,7 +1008,12 @@ def feed():
         return redirect(url_for('sign_in'))
     
     user = User.query.filter_by(id=session.get('userID')).first()
-    return render_template('feed.html', isStudent=user.is_student, userID=session.get('userID'))
+
+    if Select.query.filter_by(mentee_id=user.id).first() != None: 
+        #user already selected a mentor
+        return render_template('feed.html', isStudent=user.is_student, userID=session.get('userID'), find_match=False)
+    
+    return render_template('feed.html', isStudent=user.is_student, userID=session.get('userID'), find_match=True)
 
 
 # method called in the feed js script
@@ -1019,6 +1024,7 @@ def getFeed():
         return redirect(url_for('sign_in'))
     
     user = User.query.filter_by(id=session.get('userID')).first()
+
     return feedMentee(user)
     
 
@@ -1180,6 +1186,12 @@ def feedPost():
         return redirect(url_for('feed'))
     
     userMatchID = form.get('userID')
+
+    if Select.query.filter_by(mentor_id=userMatchID).first() != None: 
+        #somebody selected this mentor while the current user was on this page
+        flash(u'That mentor has been selected already.', 'feedError')
+        return redirect(url_for('feed'))
+
 
     newSelect = Select(mentee_id=session.get('userID'), mentor_id=userMatchID)
     #selection will only be made by the user logged in - the mentee.

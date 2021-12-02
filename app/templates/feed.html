@@ -71,7 +71,7 @@
     {% endwith %}
     </div>
 
-    <div id="noMatchDiv" class="regText centerDiv"></div>
+    <div id="noMatchDiv" class="pageTitle centerDiv"></div>
     <br/>
     
     <div class="userTableSurround fadeElem" id="matchTable">
@@ -87,19 +87,29 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js_files/feed.js')}}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
-            init("{{isStudent}}");
-            get_new_users(function() { //callback: pass this function as an argument to the get_new_users function.
 
-                async function waitThenShowSlides() { //show the slide
-                    return result = await ready_document();
-                }; 
-                waitThenShowSlides().then(function() {
-                    setupSlideIndex();
-                    showAllSlides();
+            if("{{find_match}}" == "True") {
+                init("{{isStudent}}");
+                get_new_users(function() { //callback: pass this function as an argument to the get_new_users function.
+
+                    async function waitThenShowSlides() { //show the slide
+                        return result = await ready_document();
+                    }; 
+                    waitThenShowSlides().then(function() {
+                        setupSlideIndex();
+                        showAllSlides();
+                    });
+                    remove_loading();
+
                 });
-                
+            } else { //don't find a match
+                noFound = document.createElement("p");
+                noFound.setAttribute("id", "noFound");
+                noFound.appendChild(document.createTextNode("You have already selected a mentor!"));
+                document.getElementById("noMatchDiv").appendChild(noFound);
                 remove_loading();
-            });
+            }
+
         });
 
     </script>

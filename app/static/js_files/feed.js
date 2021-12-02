@@ -128,6 +128,11 @@ function ready_document() { //will check if userArr length == 0 (no matches) and
             noFound.appendChild(document.createTextNode("Please wait until you are selected by a mentee!"));
         }
         document.getElementById("noMatchDiv").appendChild(noFound);
+    } else if(isStudent === "False") {
+        noFound = document.createElement("p");
+        noFound.setAttribute("id", "noFound");
+        noFound.appendChild(document.createTextNode("Please wait until you are selected by a mentee!"));
+        document.getElementById("noMatchDiv").appendChild(noFound);
     } else {
         for(i = 0; i < 10; i++) {
             
