@@ -1,0 +1,388 @@
+body, html{
+    padding: 0%;
+    margin: 0%;
+    scroll-behavior: smooth;
+}
+
+.anchor {
+    display: block;
+    position: relative;
+    top: -225px;
+    visibility: hidden;
+}
+
+.header{
+    flex: 0;
+    background-color: white;
+    width: 96%;
+    height: 100px;
+    padding: 1% 2% 1% 2%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly; 
+    border-bottom: 1px solid gray;
+    position: fixed;
+    z-index: 2;
+}
+
+.header .logo-box{
+    flex: 1;
+    display: flex;
+    background: transparent;
+    justify-content: center;
+    align-items: center;
+}
+
+.header .nav-box{
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-box .nav-button{
+    border: none;
+    flex: 1;
+    outline: none;
+    font-size: medium;
+    color: rgb(37, 37, 37);
+    background: white;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    height: 100%;
+}
+
+.nav-button:hover{
+    color: rgb(152, 84, 201);
+}
+
+.header .register-box{
+    display: flex;
+    flex: 1;
+    justify-content: right;
+}
+
+.register-box .register{
+    border: none; 
+    outline: none;
+    color: white;
+    background-color: rgb(33, 48, 74);
+    padding: 5%;
+    transition-duration: 0.4s;
+}
+
+.register:hover{
+    background-color: rgb(152, 84, 201);
+}
+
+.background{
+    padding-top: 125px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.home{
+    flex: 1;
+    padding: 7%;
+    background-image: url('/images/background.png');
+    background-position: center;
+    background-size: cover;
+}
+
+.home .header-text{
+    font-size: 90px;
+}
+
+.home h1{
+    font-weight: 900;
+    font-size: 90px;
+}
+
+.home .description-text{
+    width: 40%;
+    padding-top: 2%;
+}
+
+.home h3{
+    font-weight: 100;
+    color: gray;
+}
+
+.launch-box{
+    padding-top: 2%;
+}
+
+.launch-box .launch{
+    border: none;
+    outline: none;
+    background-color: rgb(33, 48, 74);
+    color: white;
+    padding: 2%;
+    transition-duration: 0.4s;
+}
+
+.launch:hover{
+    background-color: rgb(152, 84, 201);
+}
+
+.space{
+    padding: 100px;
+}
+
+.product{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 7%;
+    justify-content: center;
+    align-items: center;
+}
+
+.product .title{
+    font-size: 30px;
+    padding-bottom: 4%;
+}
+
+.product .split{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.split .card{
+    width: 25%;
+    padding: 1%;
+    margin-top: 20px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.icon{
+    width: 150px;
+    height: 150px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.icon1{
+    background-image: url("/images/customizable.png");
+}
+
+.icon2{
+    background-image: url("/images/mentorship.png");
+}
+
+.icon3{
+    background-image: url("/images/focus.png");
+}
+
+.label1, .label2{
+    text-align: center;
+}
+
+.label1{
+    margin-top: 8%;
+    font-weight: 500;
+}
+
+.label2{
+    margin-top: 8%;
+    font-weight: 100;
+    color: gray;
+}
+
+.steps{
+    background-color: rgb(22, 22, 63);
+    padding: 7%;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-image{
+    width: 75%;
+    height: 75%;
+}
+
+.about{
+    flex: 1;
+    height: fit-content;
+    display: flex;
+    flex-direction: row;
+}
+
+.half{
+    flex: 1;
+    background-color: transparent;
+}
+
+.about .half{
+    background-image: url('/images/background2.png');
+    background-position: center;
+    background-size: cover;
+    flex: 1;
+}
+
+.half .something{
+    background-color: white;
+    padding: 20% 23% 20% 23%;
+}
+
+.head1{
+    color: rgb(158, 63, 253);
+    letter-spacing: 0.1em;
+    font-weight: 600;
+}
+
+.head2{
+    color: black;
+    font-weight: bold;
+    font-size: 30px;
+    margin-top: 5%;
+    line-height: 40px;
+}
+
+.text1{
+    color: gray;
+    font-weight: lighter;
+    font-size: 17px;
+    margin-top: 8%;
+    line-height: 30px;
+}
+
+.contact{
+    flex: 1;
+    height: fit-content;
+    background-color: white;
+    display: flex;
+    flex-direction: row;
+}
+
+.label{
+    color: gray;
+    border: none;
+    font-size: 5px;
+}
+
+input{
+    padding: 5px;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    outline: none;
+    font-size: 17px;
+    color: gray;
+    font-family: 'Work Sans';
+    height: 50px;
+}
+
+input:focus{
+    border-color: rgb(158, 63, 253);
+}
+
+#leave{
+    height: 75px;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    padding: 5px;
+    outline: none;
+    font-size: 17px;
+    color: gray;
+    font-family: 'Work Sans';
+}
+
+#leave:focus{
+    border-color: rgb(158, 63, 253);
+}
+
+.input-container{
+    display: flex;
+    flex-direction: column;
+    text-align: start;
+    flex: 1;
+    padding: 2%;
+    margin-bottom: 5%;
+}
+
+.firstlast{
+    display: flex;
+    flex-direction: row;
+}
+
+.testimonials{
+    background-color: rgb(158, 63, 253);
+    padding: 7%;
+    position: relative;
+    z-index: 1;
+}
+
+.slide{
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.testimonials .head1{
+    color: white;
+    margin-bottom: 3%;
+    text-align: center;
+}
+
+.slide .head2{
+    color: white;
+    margin-top: 0%;
+    margin-bottom: 3%;
+    font-size: 40px;
+}
+
+.sub1{
+    color: white;
+    font-weight: bold;
+}
+
+.sub2{
+    color: white;
+}
+
+/* From W3Schools */
+
+.dot {
+    cursor: pointer;
+    height: 7px;
+    width: 7px;
+    margin: 0 2px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
+  }
+  
+  .active, .dot:hover {
+    background-color: white;
+  }
+
+  .move-transition {
+    -webkit-animation-name: move-transition;
+    -webkit-animation-duration: 1.5s;
+    animation-name: move-transition;
+    animation-duration: 1.5s;
+  }
+  
+  @-webkit-keyframes move-transition {
+    from {opacity: .4}
+    to {opacity: 1}
+  }
+  
+  @keyframes  move-transition{
+    from {opacity: .4}
+    to {opacity: 1}
+  }
