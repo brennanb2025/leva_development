@@ -1226,6 +1226,33 @@ def my_connections():
     return render_template('my_network.html', isMentee=isMentee, selectUser=selectUser, userID=session.get('userID'))
 
 
+@app.route('/reminders', methods=['GET'])
+def reminders():
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+
+    user = User.query.filter_by(id=session.get('userID')).first()
+    
+    isMentee = user.is_student #user.is_mentee
+
+    if isMentee: 
+        selectEntry = Select.query.filter_by(mentee_id=user.id).first()
+    else:
+        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+    #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
+
+    reminderList = []
+    if selectEntry != None:
+        print("in progress - add this when reminder:time information is given.")
+        #timeDiff = selectEntry.timestamp - GETCURRENTTIME
+        #populate reminderList by going thru remindersByTimeDiff: list of tuples (timeDiff, reminder)
+        #1 month, 2 months, 3 months, each quarter (6, 9, 12, 15) - JUST DO EVERY 30 DAYS
+        #accumulative - show current month, then click button to see past months.
+    
+    return render_template('reminders.html', isMentee=isMentee, selectEntry=selectEntry, userID=user.id, reminderList=reminderList)
+
+
 def userLoggedIn():
     
     #Checks if the user is actually logged in -- commented out for easier testing
