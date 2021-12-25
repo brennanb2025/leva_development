@@ -134,6 +134,25 @@
         </table>
         <p>
             <div class="input_title">
+                {{ form.business.label }}
+            </div>
+            <div class="white_container">
+                {{ form.business(class_="form_style", value=business) }}<br/>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'businessError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+        <p>
+            <div class="input_title">
                 {{ form.email.label }}
             </div>
             <div class="white_container">

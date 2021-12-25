@@ -1,9 +1,11 @@
+#This file is the python flask backend
+
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
 from app.input_sets.forms import EditCityForm, EditCurrentOccupationForm, LoginForm, EditPasswordForm, EditFirstNameForm, EditLastNameForm, EmptyForm, RegistrationForm, EditCityForm, EditCurrentOccupationForm
 from uuid import uuid4
-from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Select
+from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Select, Business
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import datetime
@@ -170,6 +172,21 @@ def registerPost():
         flash(u'Please enter your current occupation.', 'currentOccupationError')
         errors.append("current_occupation")
 
+
+    if form1.get('business') == '' or form1.get('business') == None:
+        success = False
+        flash(u'Please enter the company you are a part of.', 'businessError')
+    else:
+        businessRegisteredUnder = Business.query.filter_by(name=form1.get('business')).first()
+        if businessRegisteredUnder == None: #business doesn't exist in database
+            success = False
+            flash(u'That business is not registered.', 'businessError') 
+        else:
+            if businessRegisteredUnder.number_employees_maximum == businessRegisteredUnder.number_employees_currently_registered:
+                #every spot is taken in this business. 
+                success = False
+                flash(u'That business has no spots left for more users.', 'businessError')
+
     #remove cropping
     #if "croppedImgFile" in request.files:
         #img = request.files["croppedImgFile"]
@@ -237,9 +254,13 @@ def registerPost():
         else: #== "mentor"
             isStudent = False
 
+        businessRegisteredUnder = Business.query.filter_by(name=form1.get('business')).first()
+        businessRegisteredUnder.inc_number_employees_currently_registered() #increment number of users registered for this user
+
         user = User(email=form1.get('email'), first_name=form1.get('first_name'), last_name=form1.get('last_name'), 
                     is_student=isStudent, bio=form1.get('bio'), city_name=form1.get('city_name'), 
-                    current_occupation=form1.get('current_occupation'), email_contact=True, phone_number=None)
+                    current_occupation=form1.get('current_occupation'), email_contact=True, phone_number=None,
+                    business_id=businessRegisteredUnder.id)
         
         db.session.add(user) #add to database
         user.set_password(form1.get('password')) #must set pwd w/ hashing method
@@ -940,6 +961,8 @@ def deleteProfile():
         delete_user_attributes(user.id)
         Select.query.filter_by(mentee_id=user.id).delete()
         Select.query.filter_by(mentor_id=user.id).delete()
+        Business.query.filter_by(id=user.business_id).first().dec_number_employees_currently_registered() 
+        #decrease business number registered by 1 because this user has been deleted
         
 
         User.query.filter_by(id=userID).delete()

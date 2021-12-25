@@ -29,6 +29,7 @@ class RegistrationForm(FlaskForm):
     password2 = PasswordField('Repeat Password')
     city_name = StringField('City')
     current_occupation = StringField('Current Occupation')
+    business = StringField('Business')
     submit = SubmitField('Register')
 
 class EditPasswordForm(FlaskForm):

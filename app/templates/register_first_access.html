@@ -53,86 +53,105 @@
     <form action="/register" method="POST" enctype="multipart/form-data" id="submitForm">
         {{ form.csrf_token }}
         <div class="horizontal_spacing">
-            <table class="first_last_table">
-                <tr>
-                    <td class="first_last_td">
-                        <p>
-                            <div class="input_title">
-                                {{ form.first_name.label }}
-                            </div>
-    
-                            <div class="pad_td">
-                            <div class="white_container">
-                                {{ form.first_name(class_="form_style", value=first_name) }}<br/>
-                            </div>
-                            </div>
-    
-                        </p>
-                    </td>
-                    <td class="first_last_td">
-                        <p>
-                            <div class="input_title">
-                                {{ form.last_name.label }}
-                            </div>
-    
-                            <div class="white_container">
-                                {{ form.last_name(class_="form_style", value=last_name) }}<br/>
-                            </div>
-                            
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <!-- to get correct spacing -->
-                    {% if first_last_error %}
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                            {% if messages %}
-                                <div class=flashes>
-                                {% for category, message in messages %}
-                                    {% if category == 'last_nameError' or category == 'first_nameError' %}
-                                        <td class="errorTd">
-                                            {% if category == 'first_nameError' %}
-                                                <span style="color: red;">[{{ message }}]</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="errorTd">
-                                            {% if category == 'last_nameError' %}
-                                                <span style="color: red;">[{{ message }}]</span>
-                                            {% endif %}
-                                        </td>
-                                    {% endif %}
-                                {% endfor %}
-                                </div>
-                            {% endif %}
-                        {% endwith %}
-                    {% else %}
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                            {% if messages %}
-                                <div class=flashes>
-                                {% for category, message in messages %}
-                                    {% if category == 'first_nameError' %}
-                                        <td class="errorTd">
+        <table class="first_last_table">
+            <tr>
+                <td class="first_last_td">
+                    <p>
+                        <div class="input_title">
+                            {{ form.first_name.label }}
+                        </div>
+
+                        <div class="pad_td">
+                        <div class="white_container">
+                            {{ form.first_name(class_="form_style", value=first_name) }}<br/>
+                        </div>
+                        </div>
+
+                    </p>
+                </td>
+                <td class="first_last_td">
+                    <p>
+                        <div class="input_title">
+                            {{ form.last_name.label }}
+                        </div>
+
+                        <div class="white_container">
+                            {{ form.last_name(class_="form_style", value=last_name) }}<br/>
+                        </div>
+                        
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <!-- to get correct spacing -->
+                {% if first_last_error %}
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class=flashes>
+                            {% for category, message in messages %}
+                                {% if category == 'last_nameError' or category == 'first_nameError' %}
+                                    <td class="errorTd">
                                         {% if category == 'first_nameError' %}
                                             <span style="color: red;">[{{ message }}]</span>
                                         {% endif %}
-                                        </td>
-                                    {% endif %}
-                                {% endfor %}
-                                {% for category, message in messages %}
-                                    {% if category == 'last_nameError' %}
+                                    </td>
                                     <td class="errorTd">
                                         {% if category == 'last_nameError' %}
                                             <span style="color: red;">[{{ message }}]</span>
                                         {% endif %}
                                     </td>
+                                {% endif %}
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% else %}
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class=flashes>
+                            {% for category, message in messages %}
+                                {% if category == 'first_nameError' %}
+                                    <td class="errorTd">
+                                    {% if category == 'first_nameError' %}
+                                        <span style="color: red;">[{{ message }}]</span>
                                     {% endif %}
-                                {% endfor %}
-                                </div>
-                            {% endif %}
-                        {% endwith %}
-                    {% endif %}
-                </tr>
-            </table>
+                                    </td>
+                                {% endif %}
+                            {% endfor %}
+                            {% for category, message in messages %}
+                                {% if category == 'last_nameError' %}
+                                <td class="errorTd">
+                                    {% if category == 'last_nameError' %}
+                                        <span style="color: red;">[{{ message }}]</span>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+            </tr>
+        </table>
+        <p>
+            <div class="input_title">
+                {{ form.business.label }}
+            </div>
+            <div class="white_container">
+                {{ form.business(class_="form_style", value=business) }}<br/>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'businessError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
         <p>
             <div class="input_title">
                 {{ form.email.label }}
