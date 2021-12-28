@@ -122,10 +122,11 @@ if(videoFile) { //ensure not null
 document.getElementById("image_container_div").style.display = "none"; //hide all image
 
 document.getElementById("phoneNumber").style.display = "none"; //hide input for phone number
-document.getElementById("careerExp").style.display = "none"; //hide career experience - assume they are a student
+document.getElementById("careerExp").style.display = "none"; //hide career experience - assume they are a mentee
+document.getElementById("genderMentor").style.display = "none"; //hide gender radio - assume they are a mentee
 document.getElementById("newVideo").style.display = "none"; //hide new video if user hasn't input anything yet
-document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
-
+//document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
+document.getElementById("menteeDivisionPreference").style.display = "none"; //hide mentee preference - assume they are a mentee
 
 
 function radio_email() {
@@ -136,17 +137,25 @@ function radio_phone() {
     document.getElementById("phoneNumber").style.display = "block"; //show phone number
     document.getElementById("whiteContainerPhone").style.display = "block";
 }
-function radio_mentor() {
+function radio_mentor() { //function for if user selected that they are a mentor
     document.getElementById("careerExp").style.display = "block"; //show career experience instead of career interests
+    document.getElementById("genderMentor").style.display = "block";
+    document.getElementById("mentorPreference").style.display = "none"; //hide mentor preference
     document.getElementById("careerInt").style.display = "none"; //hide
     document.getElementById("addCareerInterest").value = "Add experience"; //button change
-    document.getElementById("occupationInput").style.display = "block"; //show occupation entry
+    //document.getElementById("occupationInput").style.display = "block"; //show occupation entry
+    document.getElementById("menteeDivisionPreference").style.display = "block";
+    document.getElementById("mentorDivisionPreference").style.display = "none"; //show the mentee preference and hide mentor preference
 }
-function radio_student() {
+function radio_mentee() { //function for if user selected that they are a mentee
     document.getElementById("careerInt").style.display = "block"; //show career experience instead of career interests
     document.getElementById("careerExp").style.display = "none"; //hide
+    document.getElementById("genderMentor").style.display = "none";
+    document.getElementById("mentorPreference").style.display = "block"; //show mentor preference
     document.getElementById("addCareerInterest").value = "Add interest"; //button change
-    document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
+    //document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
+    document.getElementById("menteeDivisionPreference").style.display = "none";
+    document.getElementById("mentorDivisionPreference").style.display = "block"; //hide the mentee preference and show mentor preference
 }
 
 
@@ -190,8 +199,10 @@ function init(email_or_phone, register_type) {
     if(email_or_phone != "email" && email_or_phone != null) {
         radio_phone()
     }
-    if(register_type != "student" && register_type != null) {
+    if(register_type != "mentee" && register_type != null) {
         radio_mentor()
+    } else {
+        radio_mentee()
     }
 }
 

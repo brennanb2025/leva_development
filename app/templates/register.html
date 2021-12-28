@@ -204,11 +204,11 @@
         </p>
         <p>
             <div class="input_title">
-                {{ form.password.label }}<br>
+                {{ form.password.label }}
             </div>
 
             <div class="white_container">
-                {{ form.password(class_="form_style") }}<br>
+                {{ form.password(class_="form_style") }}
             </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -224,11 +224,11 @@
         </p>
         <p>
             <div class="input_title">
-                {{ form.password2.label }}<br>
+                {{ form.password2.label }}<br/>
             </div>
 
             <div class="white_container">
-                {{ form.password2(class_="form_style") }}<br>
+                {{ form.password2(class_="form_style") }}
             </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -243,24 +243,177 @@
             {% endwith %}
         </p>
         <p>
-            <br/>
             <div class="input_title">
-                I am looking for connections with...<br/>
+                Are you a mentor or a mentee?<br/>
             </div>
             <div class="regText navy">
-                {% if register_type == none or register_type == "student" %}
-                    <input type="radio" id="studentBtn" name="radio_position" value="student" onclick="radio_student()" checked>
-                    <label for="studentBtn">Employers (mentors)</label><br/> <!-- they are a student looking for mentors -->
-                    <input type="radio" id="mentorBtn" name="radio_position" value="mentor" onclick="radio_mentor()">
-                    <label for="mentorBtn">Employees (students)</label> <!-- they are a mentor looking for students -->
+                {% if register_type == none or register_type == "mentee" %}
+                    <input type="radio" id="menteeBtn" name="radio_mentor_mentee" value="mentee" onclick="radio_mentee()" checked>
+                    <label for="menteeBtn">Mentee</label><br/> <!-- they are a mentee looking for mentors -->
+                    <input type="radio" id="mentorBtn" name="radio_mentor_mentee" value="mentor" onclick="radio_mentor()">
+                    <label for="mentorBtn">Mentor</label> <!-- they are a mentor looking for mentees -->
                 {% else %}
-                    <input type="radio" id="studentBtn" name="radio_position" value="student" onclick="radio_student()">
-                    <label for="studentBtn">Employers (mentors)</label><br/> <!-- they are a student looking for mentors -->
-                    <input type="radio" id="mentorBtn" name="radio_position" value="mentor" onclick="radio_mentor()" checked>
-                    <label for="mentorBtn">Employees (students)</label> <!-- they are a mentor looking for students -->
+                    <input type="radio" id="menteeBtn" name="radio_mentor_mentee" value="mentee" onclick="radio_mentee()">
+                    <label for="menteeBtn">Mentee</label><br/> <!-- they are a mentee looking for mentors -->
+                    <input type="radio" id="mentorBtn" name="radio_mentor_mentee" value="mentor" onclick="radio_mentor()" checked>
+                    <label for="mentorBtn">Mentor</label> <!-- they are a mentor looking for mentees -->
                 {% endif %}
             </div>
         </p>
+
+        <p>
+            <div id="genderMentor">
+            <div class="input_title">
+                What is your gender identity?<br>
+            </div>
+            {% if mentorGenderIdentity == none or mentorGenderIdentity == "Male" %}
+                <input type="radio" id="choiceMale" name="radio_gender_identity" value="Male" checked>
+            {% else %}
+                <input type="radio" id="choiceMale" name="radio_gender_identity" value="Male">
+            {% endif %}
+            <label for="choiceMale">Male</label><br>
+
+            {% if mentorGenderIdentity == "Female" %}
+                <input type="radio" id="choiceFemale" name="radio_gender_identity" value="Female" checked>
+            {% else %}
+                <input type="radio" id="choiceFemale" name="radio_gender_identity" value="Female">
+            {% endif %}
+            <label for="choiceFemale">Female</label><br>
+
+            {% if mentorGenderIdentity == "Non-binary/non-conforming" %}
+                <input type="radio" id="choiceOther" name="radio_gender_identity" value="Non-binary/non-conforming" checked>
+            {% else %}
+                <input type="radio" id="choiceOther" name="radio_gender_identity" value="Non-binary/non-conforming">
+            {% endif %}
+            <label for="choiceOther">Non-binary/non-conforming</label><br>
+
+            {% if mentorGenderIdentity == "Prefer not to respond" %}
+                <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="Prefer not to respond" checked>
+            {% else %}
+                <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="Prefer not to respond">
+            {% endif %}
+            <label for="choiceNoResponse">Prefer not to respond</label><br><br>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'gender_identity_error' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            </div>
+        </p>
+
+        <p>
+            <div id="mentorPreference">
+            <div class="input_title">
+                Do you prefer a male or a female mentor?<br>
+            </div>
+
+            {% if menteeGenderPreference == none or menteeGenderPreference == "Male" %}
+                <input type="radio" id="choiceMale" name="radio_gender_preference" value="Male" checked>
+            {% else %}
+                <input type="radio" id="choiceMale" name="radio_gender_preference" value="Male">
+            {% endif %}
+            <label for="choiceMale">Male</label><br>
+            
+            {% if menteeGenderPreference == "Female" %}
+                <input type="radio" id="choiceFemale" name="radio_gender_preference" value="Female" checked>
+            {% else %}
+                <input type="radio" id="choiceFemale" name="radio_gender_preference" value="Female">
+            {% endif %}
+            <label for="choiceFemale">Female</label><br>
+
+            {% if menteeGenderPreference == "No preference" %}
+                <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="No preference" checked>
+            {% else %}
+                <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="No preference">
+            {% endif %}
+            <label for="choiceNoPref">No preference</label><br><br>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'mentor_preference_error' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            </div>
+        </p>
+
+        <p>
+            <div class="input_title">
+                Describe your personality (input 3 words or phrases) <br/>
+            </div>
+            <textarea id="personality1" name="personality1" class="phrase_entry" maxlength="50">{{textPersonality1}}</textarea><br/><br/>
+            <textarea id="personality2" name="personality2" class="phrase_entry" maxlength="50">{{textPersonality2}}</textarea><br/><br/>
+            <textarea id="personality3" name="personality3" class="phrase_entry" maxlength="50">{{textPersonality3}}</textarea><br/><br/>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'personality_error' %}
+                            <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            <br/>
+        </p>
+
+        <p>
+            <div class="input_title">
+                <div id="menteeDivisionPreference">
+                    Do you prefer your mentee be in your division or in a different division at the company?<br/>
+                </div>
+                <div id="mentorDivisionPreference">
+                    Do you prefer your mentor be in your division or in a different division at the company?<br/>
+                </div>
+            </div>
+
+            {% if divisionPreference == none or divisionPreference == "Your division" %}
+                <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="Your division" checked>
+            {% else %}
+                <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="Your division">
+            {% endif %}
+            <label for="yourDivisionChoice">Your division</label><br>
+
+            {% if divisionPreference == "Different division" %}
+                <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="Different division" checked>
+            {% else %}
+                <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="Different division">
+            {% endif %}
+            <label for="differentDivisionChoice">Different division</label><br>
+
+            {% if divisionPreference == "No preference" %}
+                <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="No preference" checked>
+            {% else %}
+                <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="No preference">
+            {% endif %}
+            <label for="noPrefDivisionChoice">No preference</label><br>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'division_preference_error' %}
+                            <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+
         <p>
             <div id="occupationInput">
             <div class="input_title">
@@ -303,6 +456,8 @@
                 {% endif %}
             {% endwith %}
         </p>
+        
+
         <p>
             <div class="input_title">
                 Profile Picture<br/>
@@ -374,7 +529,7 @@
             <div class="input_title">
                 Bio<br/>
             </div>
-            <textarea id="bio" name="bio" maxlength="500">{{bio}}</textarea>
+            <textarea id="bio" name="bio" class="phrase_entry_bio" maxlength="500">{{bio}}</textarea>
             <div id="char_count" class="regText navy" value="">Characters left: {{500}}</div>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -430,8 +585,8 @@
         <p>
             <br/>
             <div class="input_title">
-                <div id="careerInt">Career Interests<br/></div>
-                <div id="careerExp">Career Experience<br/></div>
+                <div id="careerInt">What professional areas are you looking to gain expertise in?<br/></div>
+                <div id="careerExp">What are your professional areas of expertise?<br/></div>
             </div>
             <table>
                 <tr>
@@ -471,7 +626,7 @@
         <p>
             <br/>
             <div class="input_title">
-                Hobbies<br/>
+                What are your personal interests?<br/>
             </div>
 
             <table>
@@ -485,7 +640,7 @@
                         </datalist>
                     </td>
                     <td class="add_attribute_td">
-                        <input type="button" class="add_attribute add_something_btn" name="addTag" id="addTag" value="Add hobby" onclick="add_tag()">
+                        <input type="button" class="add_attribute add_something_btn" name="addTag" id="addTag" value="Add interest" onclick="add_tag()">
                     </td>
                 </tr>
             </table>
