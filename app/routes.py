@@ -1,9 +1,11 @@
+#This file is the python flask backend
+
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
 from app.input_sets.forms import EditCityForm, EditCurrentOccupationForm, LoginForm, EditPasswordForm, EditFirstNameForm, EditLastNameForm, EmptyForm, RegistrationForm, EditCityForm, EditCurrentOccupationForm
 from uuid import uuid4
-from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Select
+from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Select, Business
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import datetime
@@ -135,7 +137,10 @@ def registerPost():
     
     success = True
 
-    register_type = form1.get("radio_position") #student or mentor
+    if form1.get("radio_mentor_mentee") == "mentee":
+        isMentee = True
+    else: #== "mentor"
+        isMentee = False
 
     (success, errors) = checkBasicInfo(form1)
 
@@ -162,13 +167,46 @@ def registerPost():
         flash(u'Your phone number cannot be empty.', 'phoneError')
         success = False
 
-    if register_type == None:
+    if isMentee == None:
         success = False
 
-    if form1.get('current_occupation') == '' and register_type=="mentor": #ok if blank if they're a student
+    #TODO: add the new stuff to user and then do edits for them.
+    if isMentee and form1.get("radio_gender_preference") == None: #mentee and mentor preference empty
+        flash(u"Please enter a preference for your mentor's gender.", 'mentor_preference_error')
+        success = False
+    if not isMentee and form1.get("radio_gender_identity") == None: #mentor and gender identity not entered
+        flash(u"Please enter your gender identity.", 'gender_identity_error')
+        success = False
+    
+    if form1.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
+        flash(u"Please enter a preference for your mentor's division.", 'division_preference_error')
+        success = False
+
+    if (form1.get("personality1") == None or form1.get("personality1") == ''
+                or form1.get("personality2") == None or form1.get("personality2") == ''
+                or form1.get("personality3") == None or form1.get("personality3") == ''):
+        flash(u"Please enter three words or phrases that describe you.", 'personality_error')
+        success = False
+
+    if not isMentee and form1.get('current_occupation') == '': #ok if blank if they're a student
         success = False
         flash(u'Please enter your current occupation.', 'currentOccupationError')
         errors.append("current_occupation")
+
+
+    if form1.get('business') == '' or form1.get('business') == None:
+        success = False
+        flash(u'Please enter the company you are a part of.', 'businessError')
+    else:
+        businessRegisteredUnder = Business.query.filter_by(name=form1.get('business')).first()
+        if businessRegisteredUnder == None: #business doesn't exist in database
+            success = False
+            flash(u'That business is not registered.', 'businessError') 
+        else:
+            if businessRegisteredUnder.number_employees_maximum == businessRegisteredUnder.number_employees_currently_registered:
+                #every spot is taken in this business. 
+                success = False
+                flash(u'That business has no spots left for more users.', 'businessError')
 
     #remove cropping
     #if "croppedImgFile" in request.files:
@@ -229,17 +267,30 @@ def registerPost():
             flash(u'Video is too big (max 40 MB).', 'videoError')
             success = False
 
+
     if success: #success, registering new user
-        
-        isStudent = True
-        if register_type == "student":
-            isStudent = True
-        else: #== "mentor"
-            isStudent = False
+
+        mentor_gender_preferenceForm = form1.get("radio_gender_preference")
+        if not isMentee:
+            mentor_gender_preferenceForm = None #if mentor, this should not be entered.
+
+        gender_identityForm = form1.get("radio_gender_identity")
+        if isMentee:
+            gender_identityForm = None #if mentee, this should not be entered.
+
+
+        businessRegisteredUnder = Business.query.filter_by(name=form1.get('business')).first()
+        businessRegisteredUnder.inc_number_employees_currently_registered() #increment number of users registered for this user
 
         user = User(email=form1.get('email'), first_name=form1.get('first_name'), last_name=form1.get('last_name'), 
-                    is_student=isStudent, bio=form1.get('bio'), city_name=form1.get('city_name'), 
-                    current_occupation=form1.get('current_occupation'), email_contact=True, phone_number=None)
+                    is_student=isMentee, bio=form1.get('bio'), email_contact=True, phone_number=None,
+                    city_name=form1.get('city_name'), current_occupation=form1.get('current_occupation'),
+                    business_id=businessRegisteredUnder.id,
+                    mentor_gender_preference=mentor_gender_preferenceForm,
+                    gender_identity=gender_identityForm,
+                    division_preference=form1.get("divisionPreference"),
+                    personality_1=form1.get("personality1"), personality_2=form1.get("personality2"), 
+                    personality_3=form1.get("personality3"))
         
         db.session.add(user) #add to database
         user.set_password(form1.get('password')) #must set pwd w/ hashing method
@@ -322,23 +373,31 @@ def registerPreviouslyFilledOut(form, errors):
 
     if "email" in errors: #if error - make it blank.
         email = ""
+    elif "first name" in errors:
+        first_name = ""
     elif "city_name" in errors:
         city_name = ""
     elif "current_occupation" in errors:
         current_occupation = ""
-    elif "first name" in errors:
-        first_name = ""
     elif "last name" in errors:
         last_name = ""
         if "first name" in errors:
             first_last_error = True
 
 
-    register_type = form.get("radio_position") #student or mentor
+    register_type = form.get("radio_mentor_mentee") #student or mentor
     #^v will be none if somehow they messed with it
     if form.get('radio_contact') == 'Phone number':
         email_or_phone = "phone"
         phone_num = form.get('phoneNumber')
+    
+    mentorGenderIdentity = form.get("radio_gender_identity")
+    menteeGenderPreference = form.get("radio_gender_preference")
+    textPersonality1 = form.get("personality1")
+    textPersonality2 = form.get("personality2")
+    textPersonality3 = form.get("personality3")
+    divisionPreference = form.get("divisionPreference")
+
 
 
     #get all the input attributes
@@ -371,10 +430,12 @@ def registerPreviouslyFilledOut(form, errors):
     interestTags, careerInterests, schools = get_popular_tags()
 
     return render_template('register.html', email=email, first_name=first_name, last_name=last_name, first_last_error=first_last_error,
-                bio=bio, city_name=city_name, current_occupation=current_occupation, email_or_phone=email_or_phone, 
+                bio=bio, email_or_phone=email_or_phone, city_name=city_name, current_occupation=current_occupation,
                 phone_num=phone_num, register_type=register_type,
                 interestList=interestInputs, educationList=eduInputs, careerInterestList=carIntInputs,
-                interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=formNew)
+                interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=formNew,
+                mentorGenderIdentity=mentorGenderIdentity, menteeGenderPreference=menteeGenderPreference, textPersonality1=textPersonality1,
+                textPersonality2=textPersonality2, textPersonality3=textPersonality3, divisionPreference=divisionPreference)
     
 
 def checkBasicInfo(form1):
@@ -420,6 +481,7 @@ def checkBasicInfo(form1):
         success = False
         flash(u'Please enter a city.', 'cityNameError')
         errors.append("city_name")
+    
     
     return (success, errors)
 
@@ -940,6 +1002,8 @@ def deleteProfile():
         delete_user_attributes(user.id)
         Select.query.filter_by(mentee_id=user.id).delete()
         Select.query.filter_by(mentor_id=user.id).delete()
+        Business.query.filter_by(id=user.business_id).first().dec_number_employees_currently_registered() 
+        #decrease business number registered by 1 because this user has been deleted
         
 
         User.query.filter_by(id=userID).delete()
@@ -1226,6 +1290,33 @@ def my_connections():
     return render_template('my_network.html', isMentee=isMentee, selectUser=selectUser, userID=session.get('userID'))
 
 
+@app.route('/reminders', methods=['GET'])
+def reminders():
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+
+    user = User.query.filter_by(id=session.get('userID')).first()
+    
+    isMentee = user.is_student #user.is_mentee
+
+    if isMentee: 
+        selectEntry = Select.query.filter_by(mentee_id=user.id).first()
+    else:
+        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+    #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
+
+    reminderList = []
+    if selectEntry != None:
+        print("in progress - add this when reminder:time information is given.")
+        #timeDiff = selectEntry.timestamp - GETCURRENTTIME
+        #populate reminderList by going thru remindersByTimeDiff: list of tuples (timeDiff, reminder)
+        #1 month, 2 months, 3 months, each quarter (6, 9, 12, 15) - JUST DO EVERY 30 DAYS
+        #accumulative - show current month, then click button to see past months.
+    
+    return render_template('reminders.html', isMentee=isMentee, selectEntry=selectEntry, userID=user.id, reminderList=reminderList)
+
+
 def userLoggedIn():
     
     #Checks if the user is actually logged in -- commented out for easier testing
@@ -1246,7 +1337,7 @@ def handle_csrf_error(e):
 def not_found(e):
     # defining function
     return render_template("404_error.html")
-
+"""
 @app.errorhandler(Exception)
 # inbuilt function which takes error as parameter
 def error_handler(e):
@@ -1258,4 +1349,4 @@ def error_handler(e):
     if code == 500:
         db.session.rollback()
     
-    return render_template("general_error.html", code=code)
+    return render_template("general_error.html", code=code)"""

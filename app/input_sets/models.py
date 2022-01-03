@@ -1,3 +1,5 @@
+#This file contains information about the database schema.
+
 from app import db, Base
 #from sqlalchemy import DateTime, Float, Boolean, ForeignKey
 #from sqlalchemy.orm import relationship
@@ -26,6 +28,16 @@ class User(UserMixin, db.Model, Base): #inherits from db.Model, base for flask-S
     phone_number = db.Column(db.String(64))
     city_name = db.Column(db.String(128))
     current_occupation = db.Column(db.String(128))
+    business_id = db.Column(db.Integer) #the business that this person is registered under
+    
+    #new stuff:
+    mentor_gender_preference = db.Column(db.Text)
+    gender_identity = db.Column(db.Text)
+    division_preference = db.Column(db.Text)
+    personality_1 = db.Column(db.Text)
+    personality_2 = db.Column(db.Text)
+    personality_3 = db.Column(db.Text)
+    
 
  
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
@@ -288,3 +300,20 @@ class Select(db.Model, Base):
     mentee_id = db.Column(db.Integer)
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+
+#Business stores information about each business that has registered users and how many users are currently registered under each one.
+class Business(db.Model, Base):
+    __tablename__ = "Business"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64))
+
+    number_employees_maximum = db.Column(db.Integer)
+    number_employees_currently_registered = db.Column(db.Integer)
+
+    def inc_number_employees_currently_registered(self):
+        self.number_employees_currently_registered = self.number_employees_currently_registered+1
+    
+    def dec_number_employees_currently_registered(self):
+        self.number_employees_currently_registered = self.number_employees_currently_registered-1

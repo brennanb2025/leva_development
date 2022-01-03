@@ -90,7 +90,7 @@
             <br/><br/>
             <div class="headerText">
                 {% if isStudent == True %}
-                    Student
+                    Mentee
                 {% else %}
                     Mentor
                 {% endif %}
@@ -131,7 +131,63 @@
                     </div>
                 {% endif %}
                 <br/>
+
+                <!--making all this stuff private too-->
+                {% if user.mentor_gender_preference is not none %}
+                    <div class="headerText">
+                        Mentor gender preference:
+                        <div class="space_up">
+                            <div class="white_container">
+                                {{ user.mentor_gender_preference }}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <br/>
+                {% if user.gender_identity is not none %}
+                    <div class="headerText">
+                        Gender identity:
+                        <div class="space_up">
+                            <div class="white_container">
+                                {{ user.gender_identity }}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <br/>
+                {% if isStudent %}
+                    <div class="headerText">
+                        Mentor division preference:
+                        <div class="space_up">
+                            <div class="white_container">
+                                {{ user.division_preference }}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="headerText">
+                        Mentee division preference:
+                        <div class="space_up">
+                            <div class="white_container">
+                                {{ user.division_preference }}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <br/>
+                
             {% endif %}
+
+            <div class="headerText">
+                Personality description:
+                <div class="space_up">
+                    <div class="white_container">
+                        {{ user.personality_1 }}<br/><br/>
+                        {{ user.personality_2 }}<br/><br/>
+                        {{ user.personality_3 }}<br/>
+                    </div>
+                </div>
+            </div>
 
             <div class="headerText">
                 Current location 

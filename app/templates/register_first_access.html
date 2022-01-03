@@ -53,86 +53,105 @@
     <form action="/register" method="POST" enctype="multipart/form-data" id="submitForm">
         {{ form.csrf_token }}
         <div class="horizontal_spacing">
-            <table class="first_last_table">
-                <tr>
-                    <td class="first_last_td">
-                        <p>
-                            <div class="input_title">
-                                {{ form.first_name.label }}
-                            </div>
-    
-                            <div class="pad_td">
-                            <div class="white_container">
-                                {{ form.first_name(class_="form_style", value=first_name) }}<br/>
-                            </div>
-                            </div>
-    
-                        </p>
-                    </td>
-                    <td class="first_last_td">
-                        <p>
-                            <div class="input_title">
-                                {{ form.last_name.label }}
-                            </div>
-    
-                            <div class="white_container">
-                                {{ form.last_name(class_="form_style", value=last_name) }}<br/>
-                            </div>
-                            
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <!-- to get correct spacing -->
-                    {% if first_last_error %}
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                            {% if messages %}
-                                <div class=flashes>
-                                {% for category, message in messages %}
-                                    {% if category == 'last_nameError' or category == 'first_nameError' %}
-                                        <td class="errorTd">
-                                            {% if category == 'first_nameError' %}
-                                                <span style="color: red;">[{{ message }}]</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="errorTd">
-                                            {% if category == 'last_nameError' %}
-                                                <span style="color: red;">[{{ message }}]</span>
-                                            {% endif %}
-                                        </td>
-                                    {% endif %}
-                                {% endfor %}
-                                </div>
-                            {% endif %}
-                        {% endwith %}
-                    {% else %}
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                            {% if messages %}
-                                <div class=flashes>
-                                {% for category, message in messages %}
-                                    {% if category == 'first_nameError' %}
-                                        <td class="errorTd">
+        <table class="first_last_table">
+            <tr>
+                <td class="first_last_td">
+                    <p>
+                        <div class="input_title">
+                            {{ form.first_name.label }}
+                        </div>
+
+                        <div class="pad_td">
+                        <div class="white_container">
+                            {{ form.first_name(class_="form_style", value=first_name) }}<br/>
+                        </div>
+                        </div>
+
+                    </p>
+                </td>
+                <td class="first_last_td">
+                    <p>
+                        <div class="input_title">
+                            {{ form.last_name.label }}
+                        </div>
+
+                        <div class="white_container">
+                            {{ form.last_name(class_="form_style", value=last_name) }}<br/>
+                        </div>
+                        
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <!-- to get correct spacing -->
+                {% if first_last_error %}
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class=flashes>
+                            {% for category, message in messages %}
+                                {% if category == 'last_nameError' or category == 'first_nameError' %}
+                                    <td class="errorTd">
                                         {% if category == 'first_nameError' %}
                                             <span style="color: red;">[{{ message }}]</span>
                                         {% endif %}
-                                        </td>
-                                    {% endif %}
-                                {% endfor %}
-                                {% for category, message in messages %}
-                                    {% if category == 'last_nameError' %}
+                                    </td>
                                     <td class="errorTd">
                                         {% if category == 'last_nameError' %}
                                             <span style="color: red;">[{{ message }}]</span>
                                         {% endif %}
                                     </td>
+                                {% endif %}
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% else %}
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class=flashes>
+                            {% for category, message in messages %}
+                                {% if category == 'first_nameError' %}
+                                    <td class="errorTd">
+                                    {% if category == 'first_nameError' %}
+                                        <span style="color: red;">[{{ message }}]</span>
                                     {% endif %}
-                                {% endfor %}
-                                </div>
-                            {% endif %}
-                        {% endwith %}
-                    {% endif %}
-                </tr>
-            </table>
+                                    </td>
+                                {% endif %}
+                            {% endfor %}
+                            {% for category, message in messages %}
+                                {% if category == 'last_nameError' %}
+                                <td class="errorTd">
+                                    {% if category == 'last_nameError' %}
+                                        <span style="color: red;">[{{ message }}]</span>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+            </tr>
+        </table>
+        <p>
+            <div class="input_title">
+                {{ form.business.label }}
+            </div>
+            <div class="white_container">
+                {{ form.business(class_="form_style", value=business) }}<br/>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'businessError' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
         <p>
             <div class="input_title">
                 {{ form.email.label }}
@@ -183,7 +202,7 @@
             </div>
 
             <div class="white_container">
-                {{ form.password(class_="form_style") }}<br>
+                {{ form.password(class_="form_style") }}
             </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -203,7 +222,7 @@
             </div>
 
             <div class="white_container">
-                {{ form.password2(class_="form_style") }}<br>
+                {{ form.password2(class_="form_style") }}
             </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -220,15 +239,121 @@
         <p>
             <br/>
             <div class="input_title">
-                I am looking for connections with...<br/>
+                Are you a mentor or a mentee?<br/>
             </div>
             <div class="regText navy">
-                <input type="radio" id="studentBtn" name="radio_position" value="student" onclick="radio_student()" checked>
-                <label for="studentBtn">Employers (mentors)</label><br/> <!-- they are a student looking for mentors -->
-                <input type="radio" id="mentorBtn" name="radio_position" value="mentor" onclick="radio_mentor()">
-                <label for="mentorBtn">Employees (students)</label> <!-- they are a mentor looking for students -->
+                <input type="radio" id="menteeBtn" name="radio_mentor_mentee" value="mentee" onclick="radio_mentee()" checked>
+                <label for="menteeBtn">Mentee</label><br/> <!-- they are a mentee looking for mentors -->
+                <input type="radio" id="mentorBtn" name="radio_mentor_mentee" value="mentor" onclick="radio_mentor()">
+                <label for="mentorBtn">Mentor</label> <!-- they are a mentor looking for mentees -->
             </div>
         </p>
+
+
+        <p>
+            <div id="genderMentor">
+            <div class="input_title">
+                What is your gender identity?<br>
+            </div>
+
+            <input type="radio" id="choiceMale" name="radio_gender_identity" value="Male">
+            <label for="choiceMale">Male</label><br>
+            <input type="radio" id="choiceFemale" name="radio_gender_identity" value="Female">
+            <label for="choiceFemale">Female</label><br>
+            <input type="radio" id="choiceOther" name="radio_gender_identity" value="Non-binary/non-conforming">
+            <label for="choiceOther">Non-binary/non-conforming</label><br>
+            <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="Prefer not to respond">
+            <label for="choiceNoResponse">Prefer not to respond</label><br><br>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'gender_identity_error' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            </div>
+        </p>
+
+        <p>
+            <div id="mentorPreference">
+            <div class="input_title">
+                Do you prefer a male or a female mentor?<br>
+            </div>
+
+            <input type="radio" id="choiceMale" name="radio_gender_preference" value="Male">
+            <label for="choiceMale">Male</label><br>
+            <input type="radio" id="choiceFemale" name="radio_gender_preference" value="Female">
+            <label for="choiceFemale">Female</label><br>
+            <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="No preference">
+            <label for="choiceNoPref">No preference</label><br><br>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'mentor_preference_error' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            </div>
+        </p>
+
+        <p>
+            <div class="input_title">
+                Describe your personality (input 3 words or phrases) <br/>
+            </div>
+            <textarea id="personality1" name="personality1" class="phrase_entry" maxlength="50"></textarea><br/><br/>
+            <textarea id="personality2" name="personality2" class="phrase_entry" maxlength="50"></textarea><br/><br/>
+            <textarea id="personality3" name="personality3" class="phrase_entry" maxlength="50"></textarea><br/><br/>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'personality_error' %}
+                            <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            <br/>
+        </p>
+
+        <p>
+            <div class="input_title">
+                <div id="menteeDivisionPreference">
+                    Do you prefer your mentee be in your division or in a different division at the company?<br/>
+                </div>
+                <div id="mentorDivisionPreference">
+                    Do you prefer your mentor be in your division or in a different division at the company?<br/>
+                </div>
+            </div>
+            <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="Your division">
+            <label for="yourDivisionChoice">Your division</label><br>
+            <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="Different division">
+            <label for="differentDivisionChoice">Different division</label><br>
+            <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="No preference">
+            <label for="noPrefDivisionChoice">No preference</label><br>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'division_preference_error' %}
+                            <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+
+
         <p>
             <div id="occupationInput">
             <div class="input_title">
@@ -251,6 +376,7 @@
             {% endwith %}
             </div>
         </p>
+        
         <p>
             <div class="input_title">
                 {{ form.city_name.label }}<br>
@@ -271,6 +397,7 @@
                 {% endif %}
             {% endwith %}
         </p>
+
         <p>
             <div class="input_title">
                 Profile Picture<br/>
@@ -342,7 +469,7 @@
             <div class="input_title">
                 Bio<br/>
             </div>
-            <textarea id="bio" name="bio" maxlength="500"></textarea>
+            <textarea id="bio" name="bio" class="phrase_entry_bio" maxlength="500"></textarea>
             <div id="char_count" class="regText navy" value="">Characters left: {{500}}</div>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -398,8 +525,8 @@
         <p>
             <br/>
             <div class="input_title">
-                <div id="careerInt">Career Interests<br/></div>
-                <div id="careerExp">Career Experience<br/></div>
+                <div id="careerInt">What professional areas are you looking to gain expertise in?<br/></div>
+                <div id="careerExp">What are your professional areas of expertise?<br/></div>
             </div>
             <table>
                 <tr>
@@ -439,7 +566,7 @@
         <p>
             <br/>
             <div class="input_title">
-                Hobbies<br/>
+                What are your personal interests?<br/>
             </div>
 
             <table>
@@ -453,7 +580,7 @@
                         </datalist>
                     </td>
                     <td class="add_attribute_td">
-                        <input type="button" class="add_attribute add_something_btn" name="addTag" id="addTag" value="Add hobby" onclick="add_tag()">
+                        <input type="button" class="add_attribute add_something_btn" name="addTag" id="addTag" value="Add interest" onclick="add_tag()">
                     </td>
                 </tr>
             </table>
