@@ -267,30 +267,30 @@
                 What is your gender identity?<br>
             </div>
             {% if mentorGenderIdentity == none or mentorGenderIdentity == "Male" %}
-                <input type="radio" id="choiceMale" name="radio_gender_identity" value="Male" checked>
+                <input type="radio" id="choiceMale" name="radio_gender_identity" value="male" checked>
             {% else %}
-                <input type="radio" id="choiceMale" name="radio_gender_identity" value="Male">
+                <input type="radio" id="choiceMale" name="radio_gender_identity" value="male">
             {% endif %}
             <label for="choiceMale">Male</label><br>
 
             {% if mentorGenderIdentity == "Female" %}
-                <input type="radio" id="choiceFemale" name="radio_gender_identity" value="Female" checked>
+                <input type="radio" id="choiceFemale" name="radio_gender_identity" value="female" checked>
             {% else %}
-                <input type="radio" id="choiceFemale" name="radio_gender_identity" value="Female">
+                <input type="radio" id="choiceFemale" name="radio_gender_identity" value="female">
             {% endif %}
             <label for="choiceFemale">Female</label><br>
 
             {% if mentorGenderIdentity == "Non-binary/non-conforming" %}
-                <input type="radio" id="choiceOther" name="radio_gender_identity" value="Non-binary/non-conforming" checked>
+                <input type="radio" id="choiceOther" name="radio_gender_identity" value="nonbinaryNonconforming" checked>
             {% else %}
-                <input type="radio" id="choiceOther" name="radio_gender_identity" value="Non-binary/non-conforming">
+                <input type="radio" id="choiceOther" name="radio_gender_identity" value="nonbinaryNonconforming">
             {% endif %}
             <label for="choiceOther">Non-binary/non-conforming</label><br>
 
             {% if mentorGenderIdentity == "Prefer not to respond" %}
-                <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="Prefer not to respond" checked>
+                <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="noResponse" checked>
             {% else %}
-                <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="Prefer not to respond">
+                <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="noResponse">
             {% endif %}
             <label for="choiceNoResponse">Prefer not to respond</label><br><br>
 
@@ -315,23 +315,23 @@
             </div>
 
             {% if menteeGenderPreference == none or menteeGenderPreference == "Male" %}
-                <input type="radio" id="choiceMale" name="radio_gender_preference" value="Male" checked>
+                <input type="radio" id="choiceMale" name="radio_gender_preference" value="male" checked>
             {% else %}
-                <input type="radio" id="choiceMale" name="radio_gender_preference" value="Male">
+                <input type="radio" id="choiceMale" name="radio_gender_preference" value="male">
             {% endif %}
             <label for="choiceMale">Male</label><br>
             
             {% if menteeGenderPreference == "Female" %}
-                <input type="radio" id="choiceFemale" name="radio_gender_preference" value="Female" checked>
+                <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female" checked>
             {% else %}
-                <input type="radio" id="choiceFemale" name="radio_gender_preference" value="Female">
+                <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female">
             {% endif %}
             <label for="choiceFemale">Female</label><br>
 
             {% if menteeGenderPreference == "No preference" %}
-                <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="No preference" checked>
+                <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference" checked>
             {% else %}
-                <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="No preference">
+                <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference">
             {% endif %}
             <label for="choiceNoPref">No preference</label><br><br>
 
@@ -372,6 +372,27 @@
 
         <p>
             <div class="input_title">
+                {{ form.division.label }}<br>
+            </div>
+
+            <div class="white_container">
+                {{ form.division(class_="form_style", value=division) }}<br>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'division_error' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+
+        <p>
+            <div class="input_title">
                 <div id="menteeDivisionPreference">
                     Do you prefer your mentee be in your division or in a different division at the company?<br/>
                 </div>
@@ -381,23 +402,23 @@
             </div>
 
             {% if divisionPreference == none or divisionPreference == "Your division" %}
-                <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="Your division" checked>
+                <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="same" checked>
             {% else %}
-                <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="Your division">
+                <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="same">
             {% endif %}
             <label for="yourDivisionChoice">Your division</label><br>
 
             {% if divisionPreference == "Different division" %}
-                <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="Different division" checked>
+                <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="different" checked>
             {% else %}
-                <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="Different division">
+                <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="different">
             {% endif %}
             <label for="differentDivisionChoice">Different division</label><br>
 
             {% if divisionPreference == "No preference" %}
-                <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="No preference" checked>
+                <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="noPreference" checked>
             {% else %}
-                <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="No preference">
+                <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="noPreference">
             {% endif %}
             <label for="noPrefDivisionChoice">No preference</label><br>
 
@@ -456,7 +477,7 @@
                 {% endif %}
             {% endwith %}
         </p>
-        
+
 
         <p>
             <div class="input_title">

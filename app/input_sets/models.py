@@ -18,7 +18,7 @@ class User(UserMixin, db.Model, Base): #inherits from db.Model, base for flask-S
     password_hash = db.Column(db.String(128)) #not storing plaintext pwd, hashing first.
     first_name = db.Column(db.String(64))
     last_name = db.Column(db.String(64))
-    is_student = db.Column(db.Boolean) #T = student, F = mentor
+    is_student = db.Column(db.Boolean) #T = mentee, F = mentor. Made this back when it was students/mentors. Now it should be mentees/mentors.
     bio = db.Column(db.Text)
     profile_picture = db.Column(db.Text)
     profile_picture_key = db.Column(db.Text)
@@ -32,11 +32,19 @@ class User(UserMixin, db.Model, Base): #inherits from db.Model, base for flask-S
     
     #new stuff:
     mentor_gender_preference = db.Column(db.Text)
+    #this is either male, female, or noPreference
+
     gender_identity = db.Column(db.Text)
+    #this is either male, female, nonbinaryNonconforming, or noResponse
+
     division_preference = db.Column(db.Text)
+    #this is either same, different, or noPreference
+
     personality_1 = db.Column(db.Text)
     personality_2 = db.Column(db.Text)
     personality_3 = db.Column(db.Text)
+
+    division = db.Column(db.Text)
     
 
  

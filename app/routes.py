@@ -36,8 +36,11 @@ import json
 #search other users heuristic constants
 heuristicVals = {} #how much to weight matching attributes
 heuristicVals["education"] = 10     #2 matching schools - weight at +10
-heuristicVals["career"] = 2         #career interest should be more important than regular similar interest
-heuristicVals["interest"] = 1       #least important of the attributes
+heuristicVals["career"] = 20        #career interest
+heuristicVals["interest"] = 15      #personal interest
+heuristicVals["personality"] = 5
+heuristicVals["division_pref"] = 15
+heuristicVals["gender_pref"] = 15
 
 #session timeout
 @app.before_request
@@ -170,7 +173,6 @@ def registerPost():
     if isMentee == None:
         success = False
 
-    #TODO: add the new stuff to user and then do edits for them.
     if isMentee and form1.get("radio_gender_preference") == None: #mentee and mentor preference empty
         flash(u"Please enter a preference for your mentor's gender.", 'mentor_preference_error')
         success = False
@@ -207,6 +209,8 @@ def registerPost():
                 #every spot is taken in this business. 
                 success = False
                 flash(u'That business has no spots left for more users.', 'businessError')
+
+    #TODO: Add resume
 
     #remove cropping
     #if "croppedImgFile" in request.files:
@@ -285,10 +289,10 @@ def registerPost():
         user = User(email=form1.get('email'), first_name=form1.get('first_name'), last_name=form1.get('last_name'), 
                     is_student=isMentee, bio=form1.get('bio'), email_contact=True, phone_number=None,
                     city_name=form1.get('city_name'), current_occupation=form1.get('current_occupation'),
-                    business_id=businessRegisteredUnder.id,
+                    business_id=businessRegisteredUnder.id, 
                     mentor_gender_preference=mentor_gender_preferenceForm,
                     gender_identity=gender_identityForm,
-                    division_preference=form1.get("divisionPreference"),
+                    division_preference=form1.get("divisionPreference"), division=form1.get('division'),
                     personality_1=form1.get("personality1"), personality_2=form1.get("personality2"), 
                     personality_3=form1.get("personality3"))
         
@@ -370,6 +374,7 @@ def registerPreviouslyFilledOut(form, errors):
     city_name = form.get("city_name")
     first_last_error = False
     current_occupation = form.get("current_occupation")
+    division = form.get("division")
 
     if "email" in errors: #if error - make it blank.
         email = ""
@@ -377,6 +382,8 @@ def registerPreviouslyFilledOut(form, errors):
         first_name = ""
     elif "city_name" in errors:
         city_name = ""
+    elif "division" in errors:
+        division = ""
     elif "current_occupation" in errors:
         current_occupation = ""
     elif "last name" in errors:
@@ -431,7 +438,7 @@ def registerPreviouslyFilledOut(form, errors):
 
     return render_template('register.html', email=email, first_name=first_name, last_name=last_name, first_last_error=first_last_error,
                 bio=bio, email_or_phone=email_or_phone, city_name=city_name, current_occupation=current_occupation,
-                phone_num=phone_num, register_type=register_type,
+                division=division, phone_num=phone_num, register_type=register_type,
                 interestList=interestInputs, educationList=eduInputs, careerInterestList=carIntInputs,
                 interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=formNew,
                 mentorGenderIdentity=mentorGenderIdentity, menteeGenderPreference=menteeGenderPreference, textPersonality1=textPersonality1,
@@ -476,6 +483,11 @@ def checkBasicInfo(form1):
             success = False
             flash(u'Passwords do not match.', 'password2Error')
             #errors.append("password") not used for anything - passwords are wiped anyway
+
+    if form1.get('division') == '':
+        success = False
+        flash(u'Please enter your division within the company.', 'division_error')
+        errors.append("division")
     
     if form1.get('city_name') == '':
         success = False
@@ -488,6 +500,8 @@ def checkBasicInfo(form1):
 #perhaps combine all these edit profiles into one and determine type of edit made based on input in html form
 @app.route('/edit-profile', methods = ['GET'])
 def editProfile():
+
+    #TODO: add edits for gender identity/preference, 3 words/phrases, etc.
 
     if not userLoggedIn():
         return redirect(url_for('sign_in'))
@@ -958,7 +972,7 @@ def view():
     # let them logout from or delete their account.
     title="Profile Page"
     return render_template('view.html', title=title, profile_picture=prof_pic_link, intro_video=intro_vid_link,
-                bio=bio, in_network=in_network, logged_in=this_user_is_logged_in, 
+                bio=bio, in_network=in_network, logged_in=this_user_is_logged_in,
                 interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
                 isStudent=isStudent, user=user, userID=session.get('userID'))
     #user logged in: show profile page.
@@ -1110,78 +1124,99 @@ def feedMentee(user):
 
     userDict = {} #user : number match.
 
-    schoolDict = {} #contains all the matching schools for each user (user : [school])
-    for educ in user.rtn_education():
-        school = School.query.filter_by(title=educ.entered_name.lower()).first() #the school with this title - should only be one
-        if school != None:  #Extra check if the school entered might not be in the database. It won't, but better safe than sorry.
-                            #Data is entered automatically - it will have to be in the database to be searched
-            educationTags = EducationTag.query.filter_by(educationID=school.id).all() 
-            #TODO: I should be able to skip query for school and do educationID=educ.educationID
-            #has the EducationTags that are linked to this school's name
-            for edTag in educationTags:
-                users = User.query.filter_by(id=edTag.user_id).all() #get the corresponding users
-                for u in users:
-                    if u.id != user.id and not u.is_student and not mentorSelected(u.id): #don't consider the user logged in - also, only recommend mentors
-                        if schoolDict.__contains__(u): #add user to the dict
-                            schoolDict[u].append(edTag.entered_name)
-                        else:
-                            sArr = [edTag.entered_name] #not already in the dict --> add a new array
-                            schoolDict[u] = sArr
+    #get all mentors in the same business as the user. is_student should remove the user themself from the query.
+    users = User.query.filter_by(business_id=user.business_id).filter_by(is_student=False).all()
 
-                        if userDict.__contains__(u): #now update match amount in user dict
-                            userDict[u] = userDict[u]+heuristicVals["education"]
-                        else:
-                            userDict[u] = heuristicVals["education"] #initialize
+    for u in users: #initialize user dictionary and check gender preference/identity
+        userDict[u] = 0
+        #initialize as 0
+        if (user.mentor_gender_preference == "male" and u.gender_identity == "male") or (user.mentor_gender_preference == "female" and u.gender_identity == "female"):
+            #matching gender preference / gender
+            userDict[u] = heuristicVals["gender_pref"]
+        #ignore case mentor gender preference == "noPreference".
+
+
+    #division preferences
+    for u in users:
+        if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
+            #other user division preference
+            userDict[u] += heuristicVals["division_pref"]
+        if (user.division_preference == "same" and user.division == u.division) or user.division_preference == "noPreference":
+            #this user division preference
+            userDict[u] += heuristicVals["division_pref"]
+
+    #personality
+    for u in users:
+        #match in any personality trait - separate to add to the value per each match.
+        if u.personality_1 == user.personality_1:
+            userDict[u] += heuristicVals["personality"]
+        if u.personality_1 == user.personality_2:
+            userDict[u] += heuristicVals["personality"]
+        if u.personality_1 == user.personality_3:
+            userDict[u] += heuristicVals["personality"]
+        if u.personality_2 == user.personality_2:
+            userDict[u] += heuristicVals["personality"]
+        if u.personality_2 == user.personality_3:
+            userDict[u] += heuristicVals["personality"]
+        if u.personality_3 == user.personality_3:
+            userDict[u] += heuristicVals["personality"]
     
 
-    interestTitleDict = {} #contains all the matching tags for each user (user : [interest tag titles])
-    for intrst in user.rtn_interests():
-        tag = Tag.query.filter_by(title=intrst.entered_name.lower()).first()
-        if tag != None:  #Extra check if the school entered might not be in the database. It won't, but better safe than sorry.
-                            #Data is entered automatically - it will have to be in the database to be searched
-            #interestTags = InterestTag.query.filter_by(interestID=tag.tagID).all() 
-            interestTags = InterestTag.query.filter_by(interestID=tag.id).all() 
-            #has the EducationTags that are linked to this school's name
-            for intT in interestTags:
-                users = User.query.filter_by(id=intT.user_id).all() #get the corresponding users
-                for u in users:
-                    if u.id != user.id and not u.is_student and not mentorSelected(u.id): #don't consider the user logged in
-                        if interestTitleDict.__contains__(u): #add user to the dict
-                            interestTitleDict[u].append(intT.entered_name)
-                        else:
-                            #show the non-lowercase version
-                            tArr = [intT.entered_name] #not already in the dict --> add a new array
-                            interestTitleDict[u] = tArr
+    schoolDict = {} #contains all the matching schools for each user (user : [school])
+    thisUserEducationTagIDs = user.rtn_education()
+    thisUserEducationTagIDs = [edu.id for edu in thisUserEducationTagIDs] #get the ids
 
-                        if userDict.__contains__(u): #now update match amount in user dict
-                            userDict[u] = userDict[u]+heuristicVals["interest"]
-                        else:
-                            userDict[u] = heuristicVals["interest"] #initialize
+    for u in users:
+        for educ in u.rtn_education(): #cycle thru each user education
+            educationTags = EducationTag.query.filter_by(educationID=educ.educationID).all()
+            for edTag in educationTags: #go thru all the educationTags (the ones related to each user ans unique to each input)
+                if edTag.id in thisUserEducationTagIDs:
+                    if schoolDict.__contains__(u): #add user to the dict
+                        schoolDict[u].append(edTag.entered_name)
+                    else:
+                        sArr = [edTag.entered_name] #not already in the dict --> add a new array
+                        schoolDict[u] = sArr
+
+                    #now update match amount in user dict
+                    userDict[u] = userDict[u]+heuristicVals["education"]
+
+
+    interestTitleDict = {} #contains all the matching tags for each user (user : [interest tag titles])
+    thisUserInterestTagIDs = user.rtn_interests()
+    thisUserInterestTagIDs = [intrst.id for intrst in thisUserInterestTagIDs] #get the ids
+
+    for u in users:
+        for intrst in u.rtn_interests(): #cycle thru each user education
+            interestTags = InterestTag.query.filter_by(interestID=intrst.interestID).all()
+            for intT in interestTags: #go thru all the educationTags (the ones related to each user ans unique to each input)
+                if intT.id in thisUserInterestTagIDs:
+                    if interestTitleDict.__contains__(u): #add user to the dict
+                        interestTitleDict[u].append(intT.entered_name)
+                    else:
+                        iArr = [intT.entered_name] #not already in the dict --> add a new array
+                        interestTitleDict[u] = iArr
+
+                    #now update match amount in user dict
+                    userDict[u] = userDict[u]+heuristicVals["interest"]
+
 
     careerDict = {} #contains all the matching career tags for each user (user : [career experience/interest title])
-    for careerInt in user.rtn_career_interests():
-        career = CareerInterest.query.filter_by(title=careerInt.entered_name.lower()).first()
-        if career != None: #Extra check if the school entered might not be in the database. It won't, but better safe than sorry.
-                            #Data is entered automatically - it will have to be in the database to be searched
-            #cInts = CareerInterestTag.query.filter_by(careerInterestID=career.careerInterestID).all() 
-            cInts = CareerInterestTag.query.filter_by(careerInterestID=career.id).all() 
-            #has the EducationTags that are linked to this school's name
-            for cInt in cInts:
-                users = User.query.filter_by(id=cInt.user_id).all() #get the corresponding users
-                for u in users:
-                    if u.id != user.id and not u.is_student and not mentorSelected(u.id): 
-                        #don't consider the user logged in, only consider students, don't consider users who have already been shown to this student.
-                        if careerDict.__contains__(u): #add user to the dict
-                            careerDict[u].append(cInt.entered_name)
-                        else:
-                            #show the non-lowercase version
-                            cArr = [cInt.entered_name] #not already in the dict --> add a new array
-                            careerDict[u] = cArr
+    thisUserCareerInterestIDs = user.rtn_career_interests()
+    thisUserCareerInterestIDs = [cInt.id for cInt in thisUserCareerInterestIDs] #get the ids
 
-                        if userDict.__contains__(u): #now update match amount in user dict
-                            userDict[u] = userDict[u]+heuristicVals["career"]
-                        else:
-                            userDict[u] = heuristicVals["career"] #initialize
+    for u in users:
+        for cInt in u.rtn_career_interests(): #cycle thru each user education
+            careerInterestTags = CareerInterestTag.query.filter_by(careerInterestID=cInt.careerInterestID).all()
+            for cInt in careerInterestTags: #go thru all the educationTags (the ones related to each user ans unique to each input)
+                if cInt.id in thisUserCareerInterestIDs:
+                    if careerDict.__contains__(u): #add user to the dict
+                        careerDict[u].append(cInt.entered_name)
+                    else:
+                        cArr = [cInt.entered_name] #not already in the dict --> add a new array
+                        careerDict[u] = cArr
+
+                    #now update match amount in user dict
+                    userDict[u] = userDict[u]+heuristicVals["career"]
 
 
     sortedDict = sorted(userDict.items(), key=lambda item: item[1], reverse=True) #is now a list of tuples

@@ -256,13 +256,13 @@
                 What is your gender identity?<br>
             </div>
 
-            <input type="radio" id="choiceMale" name="radio_gender_identity" value="Male">
+            <input type="radio" id="choiceMale" name="radio_gender_identity" value="male">
             <label for="choiceMale">Male</label><br>
-            <input type="radio" id="choiceFemale" name="radio_gender_identity" value="Female">
+            <input type="radio" id="choiceFemale" name="radio_gender_identity" value="female">
             <label for="choiceFemale">Female</label><br>
-            <input type="radio" id="choiceOther" name="radio_gender_identity" value="Non-binary/non-conforming">
+            <input type="radio" id="choiceOther" name="radio_gender_identity" value="nonbinaryNonconforming">
             <label for="choiceOther">Non-binary/non-conforming</label><br>
-            <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="Prefer not to respond">
+            <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="noResponse">
             <label for="choiceNoResponse">Prefer not to respond</label><br><br>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -284,11 +284,11 @@
                 Do you prefer a male or a female mentor?<br>
             </div>
 
-            <input type="radio" id="choiceMale" name="radio_gender_preference" value="Male">
+            <input type="radio" id="choiceMale" name="radio_gender_preference" value="male">
             <label for="choiceMale">Male</label><br>
-            <input type="radio" id="choiceFemale" name="radio_gender_preference" value="Female">
+            <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female">
             <label for="choiceFemale">Female</label><br>
-            <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="No preference">
+            <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference">
             <label for="choiceNoPref">No preference</label><br><br>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -327,6 +327,27 @@
 
         <p>
             <div class="input_title">
+                {{ form.division.label }}<br>
+            </div>
+
+            <div class="white_container">
+                {{ form.division(class_="form_style") }}<br>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for category, message in messages %}
+                        {% if category == 'division_error' %}
+                        <span style="color: red;">[{{ message }}]</span>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+        
+        <p>
+            <div class="input_title">
                 <div id="menteeDivisionPreference">
                     Do you prefer your mentee be in your division or in a different division at the company?<br/>
                 </div>
@@ -334,11 +355,11 @@
                     Do you prefer your mentor be in your division or in a different division at the company?<br/>
                 </div>
             </div>
-            <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="Your division">
+            <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="same">
             <label for="yourDivisionChoice">Your division</label><br>
-            <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="Different division">
+            <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="different">
             <label for="differentDivisionChoice">Different division</label><br>
-            <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="No preference">
+            <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="noPreference">
             <label for="noPrefDivisionChoice">No preference</label><br>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -389,7 +410,7 @@
                 {% if messages %}
                     <ul class=flashes>
                     {% for category, message in messages %}
-                        {% if category == 'cityLocationError' %}
+                        {% if category == 'cityNameError' %}
                         <span style="color: red;">[{{ message }}]</span>
                         {% endif %}
                     {% endfor %}
