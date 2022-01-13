@@ -174,6 +174,26 @@ function init(contact_method) {
 
 }
 
+//resume stuff
+inputFileResume = document.getElementById("inputFileResume");
+if(inputFileResume) { //ensure not null
+    inputFileResume.addEventListener('change', function() {
+        if (inputFileResume.files && inputFileResume.files[0]) {
+
+            if(((inputFileResume.files[0].size/1024)/1024).toFixed(4) > 5) { // file size < 5 MB
+                alert("File too big (max file size = 5 MB).");
+                document.getElementById('inputFileResume').value = "";
+                return;
+            }
+            document.getElementById("resumeFilename").textContent = ("File chosen: " + inputFileResume.files[0].name);
+        }
+            
+    }, false);
+} else {
+    //won't proc because of defer
+    console.log("Null");
+}
+
 
 function setPreexistingAttributes(dataInterest, dataCareerInterest, dataEducation) {
     for(var i = 0; i < dataInterest.length; i++) {

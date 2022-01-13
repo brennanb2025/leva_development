@@ -54,11 +54,15 @@ class EditLastNameForm(FlaskForm):
     last_name = StringField('Change last name')
     submit = SubmitField('Change last name')
 
-class ProjectCreationForm(FlaskForm):
-    name = StringField('Project name')
-    description = StringField('Description')
-    #idk how to store all of the goals here
-    submit = SubmitField('Submit project')
+class EditPersonalityForm(FlaskForm):
+    personality_1 = StringField('Word/phrase 1')
+    personality_2 = StringField('Word/phrase 2')
+    personality_3 = StringField('Word/phrase 3')
+    submit = SubmitField('Update personality traits')
+
+class EditDivisionForm(FlaskForm):
+    division = StringField('Change division')
+    submit = SubmitField('Change division')
 
 class EmptyForm(FlaskForm):
     submit = SubmitField('Submit')

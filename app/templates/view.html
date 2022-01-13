@@ -132,6 +132,19 @@
                 {% endif %}
                 <br/>
 
+                {% if resumeUrl is none %}
+                    <div class="headerText">
+                        Resume:<br/>
+                        No resume input<br/><br/>
+                    </div>
+                {% else %}
+                    <a class="headerText" target="_blank" href="{{resumeUrl}}">
+                        Resume link
+                    </a>
+                      (Refresh the page if the link doesn't work.)
+                    <br/>
+                {% endif %}
+
                 <!--making all this stuff private too-->
                 {% if user.mentor_gender_preference is not none %}
                     <div class="headerText">

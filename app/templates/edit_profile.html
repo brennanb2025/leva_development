@@ -203,6 +203,55 @@
                 <br/><br/>
             {% endif %}
             
+            <div class="centerDiv">
+            {% if resumeUrl is none %}
+                <div class="input_title">
+                    Add resume<br/>
+                </div>
+            {% else %}
+                <a class="headerText" target="_blank" href="{{resumeUrl}}">
+                    Resume link
+                </a>
+                <br/>
+                <div class="input_title">
+                    Change resume<br/>
+                </div>
+            {% endif %}
+
+            <form action="/edit-profile-resume" method="POST" class="centerDiv" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <label for="inputFileResume" class="choose_file_container add_something_btn centerDiv">
+                    Choose file
+                </label>
+                <div class="regText navy">(Max size = 5MB)</div>
+                <input type="file" class="hide_this_input" name="resume" value="resume" id="inputFileResume" accept="application/pdf"/>
+                <br/><span id="resumeFilename"></span><br/>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class=flashes>
+                        {% for category, message in messages %}
+                            {% if category == 'resumeError' %}
+                            <span style="color: red;">[{{ message }}]</span>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+                <input class="add_something_btn buttonEditProf centerDiv" type="submit" value="Edit resume"/>
+            </form>
+
+            {% if resumeUrl is not none and user.is_student %}
+                <form action="/delete-resume" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <p>
+                        <input class="add_something_btn buttonEditProf centerDiv" type="submit" value="Delete resume"/>
+                    </p>
+                </form>
+                <br/><br/>
+            {% endif %}
+            </div>
+                
+            
 
             <form action="/edit-profile-first-name" method="POST">
                 {{ formFn.csrf_token }}
@@ -327,7 +376,7 @@
             </form>
             <br/><br/>
         
-            {% if not isStudent %}
+            
             <form action="/edit-profile-current-occupation" method="POST">
                 {{ formCurrentOccupation.csrf_token }}
                 <p>
@@ -351,16 +400,239 @@
                 </p>
                 <input type="submit" id="occupationBtn" class="add_something_btn buttonEditProf" value="Change current occupation"/>
             </form>
-            {% endif %}
+            
             <br/><br/>
+
+            <form action="/edit-profile-personality" method="POST">
+
+                <div class="input_title">Edit personality traits (describe your personality in 3 words or phrases)</div>
+                <br/>
+
+                {{ formPersonality.csrf_token }}
+                <p>
+                    <div class="input_title">
+                        {{ formPersonality.personality_1.label }}<br>
+                    </div>
+                    <div id="personality1" name="personality1" class="phrase_entry" maxlength="50" class="white_container phrase_entry">
+                        {{ formPersonality.personality_1(class_="form_style", value=personality_1) }}<br>
+                    </div>
+                    <div class="input_title">
+                        {{ formPersonality.personality_2.label }}<br>
+                    </div>
+                    <div id="personality2" name="personality2" class="phrase_entry" maxlength="50" class="white_container phrase_entry">
+                        {{ formPersonality.personality_2(class_="form_style", value=personality_2) }}<br>
+                    </div>
+                    <div class="input_title">
+                        {{ formPersonality.personality_3.label }}<br>
+                    </div>
+                    <div id="personality3" name="personality3" class="phrase_entry" maxlength="50" class="white_container phrase_entry">
+                        {{ formPersonality.personality_3(class_="form_style", value=personality_3) }}<br>
+                    </div>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <ul class=flashes>
+                            {% for category, message in messages %}
+                                {% if category == 'personalityError' %}
+                                    <span style="color: red;">[{{ message }}]</span>
+                                {% endif %}
+                            {% endfor %}
+                            </ul>
+                        {% endif %}
+                    {% endwith %}
+                </p>
+                <input type="submit" id="personalityBtn" class="add_something_btn buttonEditProf" value="Update personality traits"/>
+            </form>
+
+            <br/><br/>
+
+            <form action="/edit-profile-division" method="POST">
+                {{ formDivision.csrf_token }}
+                <p>
+                    <div class="input_title">
+                        {{ formDivision.division.label }}<br>
+                    </div>
+                    <div class="white_container">
+                        {{ formDivision.division(class_="form_style", value=division) }}<br>
+                    </div>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <ul class=flashes>
+                            {% for category, message in messages %}
+                                {% if category == 'divisionError' %}
+                                    <span style="color: red;">[{{ message }}]</span>
+                                {% endif %}
+                            {% endfor %}
+                            </ul>
+                        {% endif %}
+                    {% endwith %}
+                </p>
+                <input type="submit" id="divisionBtn" class="add_something_btn buttonEditProf" value="Change division"/>
+            </form>
+
+            <br/><br/>
+
+
+            <form action="/edit-profile-division-preference" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="input_title">
+                    {% if user.is_student %}
+                        <div id="mentorDivisionPreference">
+                            Change division preference (do you prefer your mentor be in your division or in a different division at the company?)<br/>
+                        </div>
+                    {% else %}
+                        <div id="menteeDivisionPreference">
+                            Change division preference (do you prefer your mentee be in your division or in a different division at the company?)<br/>
+                        </div>
+                    {% endif %}
+                </div>
+    
+                {% if divisionPreference == none or divisionPreference == "same" %}
+                    <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="same" checked>
+                {% else %}
+                    <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="same">
+                {% endif %}
+                <label for="yourDivisionChoice">Your division</label><br>
+    
+                {% if divisionPreference == "different" %}
+                    <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="different" checked>
+                {% else %}
+                    <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="different">
+                {% endif %}
+                <label for="differentDivisionChoice">Different division</label><br>
+    
+                {% if divisionPreference == "noPreference" %}
+                    <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="noPreference" checked>
+                {% else %}
+                    <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="noPreference">
+                {% endif %}
+                <label for="noPrefDivisionChoice">No preference</label><br>
+    
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class=flashes>
+                        {% for category, message in messages %}
+                            {% if category == 'divisionPreferenceError' %}
+                                <span style="color: red;">[{{ message }}]</span>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+                <input type="submit" id="divisionPreferenceBtn" class="add_something_btn buttonEditProf" value="Change division preference"/>
+            </form>
+
+            <br/><br/>
+
+            {% if not user.is_student %} <!-- if user is mentor -->
+            <form action="/edit-profile-gender-identity" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div id="genderMentor">
+                <div class="input_title">
+                    What is your gender identity?<br>
+                </div>
+                {% if mentorGenderIdentity == none or mentorGenderIdentity == "male" %}
+                    <input type="radio" id="choiceMale" name="radio_gender_identity" value="male" checked>
+                {% else %}
+                    <input type="radio" id="choiceMale" name="radio_gender_identity" value="male">
+                {% endif %}
+                <label for="choiceMale">Male</label><br>
+    
+                {% if mentorGenderIdentity == "female" %}
+                    <input type="radio" id="choiceFemale" name="radio_gender_identity" value="female" checked>
+                {% else %}
+                    <input type="radio" id="choiceFemale" name="radio_gender_identity" value="female">
+                {% endif %}
+                <label for="choiceFemale">Female</label><br>
+    
+                {% if mentorGenderIdentity == "nonbinaryNonconforming" %}
+                    <input type="radio" id="choiceOther" name="radio_gender_identity" value="nonbinaryNonconforming" checked>
+                {% else %}
+                    <input type="radio" id="choiceOther" name="radio_gender_identity" value="nonbinaryNonconforming">
+                {% endif %}
+                <label for="choiceOther">Non-binary/non-conforming</label><br>
+    
+                {% if mentorGenderIdentity == "noResponse" %}
+                    <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="noResponse" checked>
+                {% else %}
+                    <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="noResponse">
+                {% endif %}
+                <label for="choiceNoResponse">Prefer not to respond</label><br><br>
+    
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class=flashes>
+                        {% for category, message in messages %}
+                            {% if category == 'gender_identity_error' %}
+                            <span style="color: red;">[{{ message }}]</span>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+
+                <input type="submit" id="genderIdentityBtn" class="add_something_btn buttonEditProf" value="Change gender identity"/>
+
+                </div>
+            </form>
+            
+            {% else %}
+
+            <form action="/edit-profile-mentor-gender-preference" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                <div id="mentorPreference">
+                <div class="input_title">
+                    Do you prefer a male or a female mentor?<br>
+                </div>
+    
+                {% if menteeGenderPreference == none or menteeGenderPreference == "male" %}
+                    <input type="radio" id="choiceMale" name="radio_gender_preference" value="male" checked>
+                {% else %}
+                    <input type="radio" id="choiceMale" name="radio_gender_preference" value="male">
+                {% endif %}
+                <label for="choiceMale">Male</label><br>
+                
+                {% if menteeGenderPreference == "female" %}
+                    <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female" checked>
+                {% else %}
+                    <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female">
+                {% endif %}
+                <label for="choiceFemale">Female</label><br>
+    
+                {% if menteeGenderPreference == "noPreference" %}
+                    <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference" checked>
+                {% else %}
+                    <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference">
+                {% endif %}
+                <label for="choiceNoPref">No preference</label><br><br>
+    
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class=flashes>
+                        {% for category, message in messages %}
+                            {% if category == 'mentor_preference_error' %}
+                            <span style="color: red;">[{{ message }}]</span>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+
+                <input type="submit" id="genderPreferenceBtn" class="add_something_btn buttonEditProf" value="Change mentor gender preference"/>
+
+                </div>
+            </form>
+            {% endif %}
         
-            <form action="/edit-profile-position" method="POST">
+            <!--
+                No longer able to do this
+                <form action="/edit-profile-position" method="POST">
                 <div class="input_title">
                     Change position
                 </div>
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <p>
-                    {% if isStudent == true %}
+                    {% if user.is_student == true %}
                         <input type="radio" id="studentBtn" name="radio_isStudent" value="student" checked>
                         <label for="studentBtn">Student</label><br/>
                         <input type="radio" id="mentorBtn" name="radio_isStudent" value="mentor">
@@ -375,7 +647,7 @@
                 </p>
                 <input type="submit" id="positionBtn" class="add_something_btn buttonEditProf" value="Save position"/>
             </form>
-            <br/><br/>
+            <br/><br/>-->
         
             <form action="/edit-profile-contact" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>

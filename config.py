@@ -27,5 +27,7 @@ class Config(object):
     S3_SECRET_ACCESS_KEY = os.environ.get('S3_SECRET_ACCESS_KEY')
     S3_REGION = os.environ.get('S3_REGION')
     BUCKET_NAME = os.environ.get('BUCKET_NAME')
+    BUCKET_NAME_RESUME = os.environ.get('BUCKET_NAME_RESUME')
     ACL = os.environ.get('ACL')
     UPLOAD_EXTENSIONS = os.environ.get('UPLOAD_EXTENSIONS')
+    UPLOAD_EXTENSIONS_RESUME = os.environ.get('UPLOAD_EXTENSIONS_RESUME')

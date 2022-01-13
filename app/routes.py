@@ -3,7 +3,7 @@
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
-from app.input_sets.forms import EditCityForm, EditCurrentOccupationForm, LoginForm, EditPasswordForm, EditFirstNameForm, EditLastNameForm, EmptyForm, RegistrationForm, EditCityForm, EditCurrentOccupationForm
+from app.input_sets.forms import EditCityForm, EditCurrentOccupationForm, LoginForm, EditPasswordForm, EditFirstNameForm, EditLastNameForm, EmptyForm, RegistrationForm, EditCityForm, EditCurrentOccupationForm, EditPersonalityForm, EditDivisionForm
 from uuid import uuid4
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Select, Business
 from werkzeug.utils import secure_filename
@@ -49,13 +49,15 @@ def make_session_permanent():
     app.permanent_session_lifetime = timedelta(hours=10) #10 hours until need to resign in
 
 #different urls that application implements
-#v=decorators, modifies function that follows it. Creates association between URL and fxn.
+#@'s are decorators, modifies function that follows it. Creates association between URL and function.
+
+#index page GET.
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET']) 
 def index():
-    
     return render_template('index.html', userID=session.get('userID'))
 
+#sign-in page GET.
 @app.route('/sign-in', methods=['GET'])
 def sign_in():
 
@@ -66,6 +68,8 @@ def sign_in():
     title="Sign in"
     return render_template('sign_in.html', form=form, title=title)
 
+#sign-in page POST. Checks each input from the form. 
+# If the user correctly inputs their information, makes a new cookie and adds the user to the session. Then sends them to the view GET.
 @app.route('/sign-in', methods=['POST'])
 def sign_inPost():
 
@@ -100,6 +104,7 @@ def sign_inPost():
         return redirect(url_for('sign_in')) #failure
 
 
+#ensures that the image is valid.
 def validate_image(stream):
     header = stream.read(512)
     stream.seek(0)
@@ -108,31 +113,29 @@ def validate_image(stream):
         return None
     return '.' + (format if format != 'jpeg' else 'jpg')
 
-
+#register GET. Creates a registration form and passes popular tags as suggestions.
 @app.route('/register', methods=['GET'])
 def register():
 
-    # Attempts to register an email/password pair; 
+    # Attempts to register an email/password pair.
     form = RegistrationForm()
 
-    #sessionID1 = request.cookies.get("user") #get the session token from the previous page cookies
-    #userID = SessionTokens.query.filter_by(sessionID=sessionID1).first()
     if userLoggedIn():
         return redirect(url_for('view', id=session.get('userID')))
 
     interestTags, careerInterests, schools = get_popular_tags()
-    
     return render_template('register_first_access.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=form)
 
-
-def get_popular_tags(): #returns (tags, careerInterests, schools) - 500 most used from each
+#returns (tags, careerInterests, schools) - the 500 most used tags from each category.
+def get_popular_tags(): 
     tags = Tag.query.order_by(Tag.num_use.desc()).limit(500).all() #sort by num_use and limit to 200
     carInts = CareerInterest.query.order_by(CareerInterest.num_use.desc()).limit(500).all()
     schools = School.query.order_by(School.num_use.desc()).limit(500).all()
     return (tags, carInts, schools)
 
 
-#Current file size limited to 5 MB - with free tier AWS (5GB S3) this limits to a minimum of 1024 images.
+#register POST. Checks form input. If it is correctly input, creates a new user. Then sends them to the sign-in page.
+#Current file size limited to 5 MB.
 @app.route('/register', methods=['POST'])
 def registerPost():
 
@@ -181,7 +184,7 @@ def registerPost():
         success = False
     
     if form1.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
-        flash(u"Please enter a preference for your mentor's division.", 'division_preference_error')
+        flash(u"Please enter a preference for your mentor/mentee's division.", 'division_preference_error')
         success = False
 
     if (form1.get("personality1") == None or form1.get("personality1") == ''
@@ -210,7 +213,40 @@ def registerPost():
                 success = False
                 flash(u'That business has no spots left for more users.', 'businessError')
 
-    #TODO: Add resume
+    #resume pdf
+    if "resume" in request.files and request.files["resume"]:
+        resume = request.files["resume"]
+        #remove cropping
+        #if img and int((img.getbuffer().nbytes/1024)/1024) > 5:
+
+        resumeSize = -1
+        if resume:
+            resume.seek(0, os.SEEK_END)
+            resumeSize = resume.tell()
+            resume.seek(0)
+        
+        if resumeSize == -1:
+            flash(u"Couldn't read resume.", 'resumeError')
+            success = False
+        elif (resumeSize/1024)/1024 > 5:
+            flash(u'Resume is too big (max 5 MB).', 'resumeError')
+            success = False
+        elif resume.filename == '':
+            flash(u'Could not read resume', 'resumeError')
+            success = False
+        else:
+            file_ext = os.path.splitext(resume.filename)[1]
+            if file_ext == None:
+                success = False
+                flash(u"Could not assess file type properties", 'resumeError')
+            elif file_ext not in json.loads(app.config['UPLOAD_EXTENSIONS_RESUME']):
+                flash(u'Accepted file type: .pdf. You uploaded a', file_ext + ".", 'resumeError')
+                success = False
+    else:
+        if not isMentee: #if they didn't input a resume and they're a mentor, send them back.
+            success = False
+            flash(u'Applying mentors must submit their resume.', 'resumeError')
+
 
     #remove cropping
     #if "croppedImgFile" in request.files:
@@ -344,7 +380,7 @@ def registerPost():
         if "file" in request.files:
             img = request.files["file"]
             if img and request.files["file"]:
-                output, filename = upload_file_to_s3(img, user)
+                output, filename = upload_media_file_to_s3(img, user)
                 user.set_profile_picture(output, filename) #set the user profile picture link
                 db.session.commit()
 
@@ -352,8 +388,16 @@ def registerPost():
             vid = request.files["videoFile"]
             if vid:
                 vid.seek(0) #I read the file before to check the length so I must put the cursor at the beginning in order to upload it.
-                output, filename = upload_file_to_s3(vid, user)
+                output, filename = upload_media_file_to_s3(vid, user)
                 user.set_intro_video(output, filename) #set the user profile picture link
+                db.session.commit()
+
+        if "resume" in request.files:
+            resume = request.files["resume"]
+            if resume:
+                resume.seek(0) #I read the file before to check the length so I must put the cursor at the beginning in order to upload it.
+                output, filename = upload_resume_file_to_s3(resume, user)
+                user.set_resume(output, filename) #set the user resume
                 db.session.commit()
 
         db.session.commit()
@@ -363,6 +407,7 @@ def registerPost():
         return registerPreviouslyFilledOut(form1, errors)
 
 
+#gets all the values from the form that was previously filled out, so that they can be sent back and autofilled into a new form.
 def registerPreviouslyFilledOut(form, errors):
 
     email = form.get("email")
@@ -445,6 +490,7 @@ def registerPreviouslyFilledOut(form, errors):
                 textPersonality2=textPersonality2, textPersonality3=textPersonality3, divisionPreference=divisionPreference)
     
 
+#checks the basic registration information.
 def checkBasicInfo(form1):
     errors = []
     success = True
@@ -497,11 +543,14 @@ def checkBasicInfo(form1):
     
     return (success, errors)
 
-#perhaps combine all these edit profiles into one and determine type of edit made based on input in html form
+
+
+#NOTE: perhaps combine all these edit profiles into one and determine type of edit made based on input in html form
+# edit-profile GET. Readies edit profile forms and user information.
 @app.route('/edit-profile', methods = ['GET'])
 def editProfile():
 
-    #TODO: add edits for gender identity/preference, 3 words/phrases, etc.
+    #TODO: add edits for gender identity/preference.
 
     if not userLoggedIn():
         return redirect(url_for('sign_in'))
@@ -512,6 +561,8 @@ def editProfile():
     formFn = EditFirstNameForm()
     formLn = EditLastNameForm()
     formCity = EditCityForm()
+    formPersonality = EditPersonalityForm()
+    formDivision = EditDivisionForm()
     formCurrentOccupation = EditCurrentOccupationForm()
 
     interestList = []
@@ -538,17 +589,28 @@ def editProfile():
     intro_video_link = user.intro_video
     contact_method = user.email_contact
     phone_num = user.phone_number
+    personality_1 = user.personality_1
+    personality_2 = user.personality_2
+    personality_3 = user.personality_3
 
     interestTags, careerInterests, schools = get_popular_tags()
 
+    resumeUrl = create_resume_link(user)
+
     title="Edit profile Page"
-    return render_template('edit_profile.html', isStudent=user.is_student, intro_video=intro_video_link, 
+    return render_template('edit_profile.html', intro_video=intro_video_link, 
             contact_method=contact_method, phone_num=phone_num, profile_picture=prof_pic_link, 
             interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
             title=title, bio=bio, interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
-            formPwd=formPwd, formFn=formFn, formLn=formLn, formCity=formCity, formCurrentOccupation=formCurrentOccupation,
+            personality_1=personality_1, personality_2=personality_2, personality_3=personality_3, division=user.division,
+            divisionPreference=user.division_preference, resumeUrl=resumeUrl,
+            mentorGenderIdentity=user.gender_identity, menteeGenderPreference=user.mentor_gender_preference,
+            formPwd=formPwd, formFn=formFn, formLn=formLn, formCity=formCity, formCurrentOccupation=formCurrentOccupation, 
+            formPersonality=formPersonality, formDivision=formDivision,
             user=user, userID=session.get('userID'))
 
+#edit-profile-password POST.
+#changes the user's password if it is input correctly. Then sends the user back to view.
 @app.route('/edit-profile-password', methods = ['POST'])
 def editProfilePassword():
 
@@ -577,6 +639,8 @@ def editProfilePassword():
     else: 
         return redirect(url_for('editProfile'))
 
+#edit-profile-first-name GET. 
+#changes the user's first name if it is input correctly. Then sends the user back to view.
 @app.route('/edit-profile-first-name', methods = ['POST'])
 def editProfileFirstName():
 
@@ -677,6 +741,49 @@ def editProfileCurrentOccupation():
     else: 
         return redirect(url_for('editProfile'))
 
+
+@app.route('/edit-profile-mentor-gender-preference', methods = ['POST'])
+def editProfileGenderPreference():
+
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+
+    user = User.query.filter_by(id=session['userID']).first()
+    if not user.is_student: #user must be a mentor
+        return redirect(url_for('editProfile'))
+
+    form = request.form
+
+    if form.get("radio_gender_preference") == None: #mentee and mentor preference empty
+        flash(u"Please enter a preference for your mentor's gender.", 'mentor_preference_error')
+        return redirect(url_for('editProfile'))
+    
+    user.set_mentor_gender_preference(form.get("radio_gender_preference"))
+    db.session.commit()
+    return redirect(url_for('editProfile'))
+
+@app.route('/edit-profile-gender-identity', methods = ['POST'])
+def editProfileGenderIdentity():
+
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+
+    user = User.query.filter_by(id=session['userID']).first()
+
+    if user.is_student: #user must be a mentor
+        return redirect(url_for('editProfile'))
+
+    form = request.form
+    if form.get("radio_gender_identity") == None: #mentor and gender identity not entered
+        flash(u"Please enter your gender identity.", 'gender_identity_error')
+        return redirect(url_for('editProfile'))
+    
+    user.set_gender_identity(form.get("radio_gender_identity"))
+    db.session.commit()
+    return redirect(url_for('editProfile'))
+    
+
+
 @app.route('/edit-profile-attributes', methods = ['POST'])
 def editProfileAttributes():
 
@@ -753,6 +860,7 @@ def editProfileAttributes():
 
     return redirect(url_for('editProfile')) #go back on either success or fail
     
+""" No longer able to do this
 @app.route('/edit-profile-position', methods = ['POST'])
 def editProfilePosition():
     if not userLoggedIn():
@@ -766,7 +874,7 @@ def editProfilePosition():
         #TODO: caution against doing this before checking matches and then delete all selects with this user as the base
 
     db.session.commit()
-    return redirect(url_for('editProfile'))
+    return redirect(url_for('editProfile'))"""
 
 @app.route('/edit-profile-bio', methods = ['POST'])
 def editProfileBio():
@@ -781,6 +889,53 @@ def editProfileBio():
     user.set_bio(form.get('bio'))
     db.session.commit()
     return redirect(url_for('editProfile'))
+
+@app.route('/edit-profile-personality', methods = ['POST'])
+def editProfilePersonality():
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+    user = User.query.filter_by(id=session.get('userID')).first()
+    form = request.form
+    if form.get('personality_1') == "" or form.get('personality_2') == "" or form.get('personality_3') == "":
+        flash(u'You must input 3 personality traits/phrases.', 'personalityError')
+        return redirect(url_for('editProfile'))
+
+    user.set_personality(form.get('personality_1'), form.get('personality_2'), form.get('personality_3'))
+    db.session.commit()
+    return redirect(url_for('editProfile'))
+
+@app.route('/edit-profile-division', methods = ['POST'])
+def editProfileDivision():
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+    user = User.query.filter_by(id=session.get('userID')).first()
+    form = request.form
+    if form.get('division') == "":
+        flash(u'You must input what division you are in.', 'divisionError')
+        return redirect(url_for('editProfile'))
+
+    user.set_division(form.get('division'))
+    db.session.commit()
+    return redirect(url_for('editProfile'))
+
+@app.route('/edit-profile-division-preference', methods = ['POST'])
+def editProfileDivisionPreference():
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+    user = User.query.filter_by(id=session.get('userID')).first()
+    form = request.form
+    if form.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
+        if user.is_student:
+            flash(u"Please enter a preference for your mentor's division.", 'divisionPreferenceError')
+        else:
+            flash(u"Please enter a preference for your mentee's division.", 'divisionPreferenceError')
+        return redirect(url_for('editProfile'))
+
+    user.set_division_preference(form.get("divisionPreference"))
+    db.session.commit()
+    return redirect(url_for('editProfile'))
+
+
 
 @app.route('/edit-profile-contact', methods = ['POST'])
 def editProfileContact():
@@ -856,7 +1011,7 @@ def editProfPic():
         if img:
             user = User.query.filter_by(id=session.get('userID')).first()
             delete_profile_picture(user)
-            output, filename = upload_file_to_s3(img, user)
+            output, filename = upload_media_file_to_s3(img, user)
             user.set_profile_picture(output, filename) #set the user profile picture link
             db.session.commit()
         else:
@@ -885,6 +1040,20 @@ def deleteIntroVid():
     
     user = User.query.filter_by(id=session.get('userID')).first()
     delete_intro_video(user)
+
+    return redirect(url_for('editProfile'))
+
+@app.route('/delete-resume', methods=['POST'])
+def deleteResume():
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+    
+    user = User.query.filter_by(id=session.get('userID')).first()
+    if not user.is_student: #resume mandatory for mentor
+        flash(u'Resumes are mandatory for mentors.', 'resumeDeleteError')
+    else:
+        delete_resume(user)
 
     return redirect(url_for('editProfile'))
 
@@ -925,12 +1094,71 @@ def editVideo():
         user = User.query.filter_by(id=session.get('userID')).first()
         delete_intro_video(user)
         vid.seek(0) #I read the file before to check the length so I must put the cursor at the beginning in order to upload it.
-        output, filename = upload_file_to_s3(vid, user)
+        output, filename = upload_media_file_to_s3(vid, user)
         user.set_intro_video(output, filename) #set the user profile picture link
         db.session.commit()
 
     return redirect(url_for('editProfile'))
 
+@app.route('/edit-profile-resume', methods=['POST'])
+def editProfResume():
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+
+    success = True
+
+    user = User.query.filter_by(id=session.get('userID')).first()
+    isMentee = user.is_student
+
+    #resume pdf
+    if "resume" in request.files and request.files["resume"]:
+        resume = request.files["resume"]
+        #remove cropping
+        #if img and int((img.getbuffer().nbytes/1024)/1024) > 5:
+
+        resumeSize = -1
+        if resume:
+            resume.seek(0, os.SEEK_END)
+            resumeSize = resume.tell()
+            resume.seek(0)
+        else:
+            success = False
+            flash(u"No resume input.", 'resumeError')
+        
+        if resumeSize == -1:
+            flash(u"Couldn't read resume.", 'resumeError')
+            success = False
+        elif (resumeSize/1024)/1024 > 5:
+            flash(u'Resume is too big (max 5 MB).', 'resumeError')
+            success = False
+        elif resume.filename == '':
+            flash(u'Could not read resume', 'resumeError')
+            success = False
+        else:
+            file_ext = os.path.splitext(resume.filename)[1]
+            if file_ext == None:
+                success = False
+                flash(u"Could not assess file type properties", 'resumeError')
+            elif file_ext not in json.loads(app.config['UPLOAD_EXTENSIONS_RESUME']):
+                flash(u'Accepted file type: .pdf. You uploaded a', file_ext + ".", 'resumeError')
+                success = False
+    else:
+        flash(u"No resume input.", 'resumeError')
+        success = False
+    
+    if success: 
+        if resume:
+            resume.seek(0) #I read the file before to check the length so I must put the cursor at the beginning in order to upload it.
+            delete_resume(user)
+            output, filename = upload_resume_file_to_s3(resume, user)
+            user.set_resume(output, filename) #set the user profile picture link
+            db.session.commit()
+        else:
+            success=False
+            flash(u'Please select a file.', 'resumeError')
+
+    return redirect(url_for('editProfile'))
 
 @app.route('/view', methods=['GET']) #takes one arg = user.id. This is the user that the person logged in is viewing. Doesn't have to be the same user.
 def view():
@@ -961,6 +1189,9 @@ def view():
 
     prof_pic_link = user.profile_picture
     intro_vid_link = user.intro_video
+    
+
+    resumeUrl = create_resume_link(user)
 
     this_user_is_logged_in = (user.id == session.get('userID'))
     in_network = False
@@ -972,15 +1203,36 @@ def view():
     # let them logout from or delete their account.
     title="Profile Page"
     return render_template('view.html', title=title, profile_picture=prof_pic_link, intro_video=intro_vid_link,
-                bio=bio, in_network=in_network, logged_in=this_user_is_logged_in,
+                bio=bio, in_network=in_network, logged_in=this_user_is_logged_in, resumeUrl=resumeUrl,
                 interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
                 isStudent=isStudent, user=user, userID=session.get('userID'))
     #user logged in: show profile page.
+
+
+
+"""
+The preferred way is to simply create a pre-signed URL for the image, and return a redirect to that URL. 
+This keeps the files private in S3, but generates a temporary, time limited, URL that can be used to download the file directly from S3. 
+That will greatly reduce the amount of work happening on your server, as well as the amount of data transfer being consumed by your server.
+https://stackoverflow.com/questions/52342974/serve-static-files-in-flask-from-private-aws-s3-bucket
+"""
+def create_resume_link(user):
+    if user.resume == None or user.resume_key == None:
+        resumeUrl = None
+    else:
+        resumeUrl = s3_client.generate_presigned_url(
+            'get_object', 
+            Params = {'Bucket': str(app.config['BUCKET_NAME_RESUME']), 'Key': user.resume_key}, 
+            ExpiresIn = 100
+        )
+    return resumeUrl
+
 
 """def createCookie(resp, id):
     #sessionTokenKey = str(uuid4())
     resp.set_cookie(key="user", value=id, max_age=None)
     return resp"""
+
 
 @app.route('/logout', methods=['GET'])
 def logout():
@@ -1014,6 +1266,7 @@ def deleteProfile():
         delete_profile_picture(user)
         delete_intro_video(user)
         delete_user_attributes(user.id)
+        delete_resume(user)
         Select.query.filter_by(mentee_id=user.id).delete()
         Select.query.filter_by(mentor_id=user.id).delete()
         Business.query.filter_by(id=user.business_id).first().dec_number_employees_currently_registered() 
@@ -1028,8 +1281,8 @@ def deleteProfile():
         flash(u'Incorrect first name.', 'deletionError')
         return redirect(url_for('editProfile'))
 
-
-def upload_file_to_s3(file_upload, user):
+#TODO: maybe change aws s3 bucket to NO ACLs and limit access to this account.
+def upload_media_file_to_s3(file_upload, user):
     filename = ""
     filename+=str(user.id)
     filename+="/"
@@ -1042,6 +1295,22 @@ def upload_file_to_s3(file_upload, user):
         ContentType = file_upload.content_type
     )
     output = 'https://s3-{}.amazonaws.com/{}/{}'.format(app.config['S3_REGION'], app.config['BUCKET_NAME'], filename)
+    print(filename, output, file_upload.content_type)
+    db.session.commit() #just in case
+    return (output, filename)
+
+def upload_resume_file_to_s3(file_upload, user):
+    filename = ""
+    filename+=str(user.id)
+    filename+="/"
+    filename+=str(uuid4()) #safe file name: uuid4.
+    s3_client.put_object(
+        Bucket = str(app.config['BUCKET_NAME_RESUME']),
+        Key = filename,
+        Body=file_upload,
+        ContentType = file_upload.content_type
+    )
+    output = 'https://s3-{}.amazonaws.com/{}/{}'.format(app.config['S3_REGION'], app.config['BUCKET_NAME_RESUME'], filename)
     print(filename, output, file_upload.content_type)
     db.session.commit() #just in case
     return (output, filename)
@@ -1078,6 +1347,11 @@ def delete_intro_video(user):
     user.set_intro_video(None, None)
     db.session.commit()
 
+def delete_resume(user):
+    if user.resume is not None:
+        s3_client.delete_object(Bucket=str(app.config["BUCKET_NAME_RESUME"]), Key=user.resume_key)
+    user.set_resume(None, None)
+    db.session.commit()
 
 @app.route('/feed', methods=['GET'])
 def feed():

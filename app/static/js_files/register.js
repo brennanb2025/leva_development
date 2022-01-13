@@ -110,6 +110,26 @@ if(videoFile) { //ensure not null
     console.log("Null");
 }
 
+//resume stuff
+inputFileResume = document.getElementById("inputFileResume");
+if(inputFileResume) { //ensure not null
+    inputFileResume.addEventListener('change', function() {
+        if (inputFileResume.files && inputFileResume.files[0]) {
+
+            if(((inputFileResume.files[0].size/1024)/1024).toFixed(4) > 5) { // file size < 5 MB
+                alert("File too big (max file size = 5 MB).");
+                document.getElementById('inputFileResume').value = "";
+                return;
+            }
+            document.getElementById("resumeFilename").textContent = ("File chosen: " + inputFileResume.files[0].name);
+        }
+            
+    }, false);
+} else {
+    //won't proc because of defer
+    console.log("Null");
+}
+
 
 //document.getElementById("imgStuff").style.display = "none"; //hide all image back
 //document.getElementById("scrollAdvice").style.display = "none"; //hide advice
