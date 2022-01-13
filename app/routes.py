@@ -547,8 +547,6 @@ def checkBasicInfo(form1):
 @app.route('/edit-profile', methods = ['GET'])
 def editProfile():
 
-    #TODO: add edits for gender identity/preference.
-
     if not userLoggedIn():
         return redirect(url_for('sign_in'))
 
