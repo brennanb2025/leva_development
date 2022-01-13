@@ -242,10 +242,7 @@ def registerPost():
             elif file_ext not in json.loads(app.config['UPLOAD_EXTENSIONS_RESUME']):
                 flash(u'Accepted file type: .pdf. You uploaded a', file_ext + ".", 'resumeError')
                 success = False
-    else:
-        if not isMentee: #if they didn't input a resume and they're a mentor, send them back.
-            success = False
-            flash(u'Applying mentors must submit their resume.', 'resumeError')
+    #else: didn't input a resume. That's ok, they're optional.
 
 
     #remove cropping
@@ -1050,10 +1047,8 @@ def deleteResume():
         return redirect(url_for('sign_in'))
     
     user = User.query.filter_by(id=session.get('userID')).first()
-    if not user.is_student: #resume mandatory for mentor
-        flash(u'Resumes are mandatory for mentors.', 'resumeDeleteError')
-    else:
-        delete_resume(user)
+
+    delete_resume(user)
 
     return redirect(url_for('editProfile'))
 
@@ -1109,7 +1104,6 @@ def editProfResume():
     success = True
 
     user = User.query.filter_by(id=session.get('userID')).first()
-    isMentee = user.is_student
 
     #resume pdf
     if "resume" in request.files and request.files["resume"]:

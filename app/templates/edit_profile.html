@@ -240,7 +240,7 @@
                 <input class="add_something_btn buttonEditProf centerDiv" type="submit" value="Edit resume"/>
             </form>
 
-            {% if resumeUrl is not none and user.is_student %}
+            {% if resumeUrl is not none %}
                 <form action="/delete-resume" method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <p>
