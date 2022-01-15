@@ -3,7 +3,7 @@
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
-from app.input_sets.forms import EditCityForm, EditCurrentOccupationForm, LoginForm, EditPasswordForm, EditFirstNameForm, EditLastNameForm, EmptyForm, RegistrationForm, EditCityForm, EditCurrentOccupationForm
+from app.input_sets.forms import EditCityForm, EditCurrentOccupationForm, LoginForm, EditPasswordForm, EditFirstNameForm, EditLastNameForm, EmptyForm, RegistrationForm, EditCityForm, EditCurrentOccupationForm, EditPersonalityForm, EditDivisionForm
 from uuid import uuid4
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Select, Business
 from werkzeug.utils import secure_filename
@@ -36,8 +36,11 @@ import json
 #search other users heuristic constants
 heuristicVals = {} #how much to weight matching attributes
 heuristicVals["education"] = 10     #2 matching schools - weight at +10
-heuristicVals["career"] = 2         #career interest should be more important than regular similar interest
-heuristicVals["interest"] = 1       #least important of the attributes
+heuristicVals["career"] = 20        #career interest
+heuristicVals["interest"] = 15      #personal interest
+heuristicVals["personality"] = 5
+heuristicVals["division_pref"] = 15
+heuristicVals["gender_pref"] = 15
 
 #session timeout
 @app.before_request
@@ -46,13 +49,15 @@ def make_session_permanent():
     app.permanent_session_lifetime = timedelta(hours=10) #10 hours until need to resign in
 
 #different urls that application implements
-#v=decorators, modifies function that follows it. Creates association between URL and fxn.
+#@'s are decorators, modifies function that follows it. Creates association between URL and function.
+
+#index page GET.
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET']) 
 def index():
-    
     return render_template('index.html', userID=session.get('userID'))
 
+#sign-in page GET.
 @app.route('/sign-in', methods=['GET'])
 def sign_in():
 
@@ -63,6 +68,8 @@ def sign_in():
     title="Sign in"
     return render_template('sign_in.html', form=form, title=title)
 
+#sign-in page POST. Checks each input from the form. 
+# If the user correctly inputs their information, makes a new cookie and adds the user to the session. Then sends them to the view GET.
 @app.route('/sign-in', methods=['POST'])
 def sign_inPost():
 
@@ -97,6 +104,7 @@ def sign_inPost():
         return redirect(url_for('sign_in')) #failure
 
 
+#ensures that the image is valid.
 def validate_image(stream):
     header = stream.read(512)
     stream.seek(0)
@@ -105,31 +113,29 @@ def validate_image(stream):
         return None
     return '.' + (format if format != 'jpeg' else 'jpg')
 
-
+#register GET. Creates a registration form and passes popular tags as suggestions.
 @app.route('/register', methods=['GET'])
 def register():
 
-    # Attempts to register an email/password pair; 
+    # Attempts to register an email/password pair.
     form = RegistrationForm()
 
-    #sessionID1 = request.cookies.get("user") #get the session token from the previous page cookies
-    #userID = SessionTokens.query.filter_by(sessionID=sessionID1).first()
     if userLoggedIn():
         return redirect(url_for('view', id=session.get('userID')))
 
     interestTags, careerInterests, schools = get_popular_tags()
-    
     return render_template('register_first_access.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=form)
 
-
-def get_popular_tags(): #returns (tags, careerInterests, schools) - 500 most used from each
+#returns (tags, careerInterests, schools) - the 500 most used tags from each category.
+def get_popular_tags(): 
     tags = Tag.query.order_by(Tag.num_use.desc()).limit(500).all() #sort by num_use and limit to 200
     carInts = CareerInterest.query.order_by(CareerInterest.num_use.desc()).limit(500).all()
     schools = School.query.order_by(School.num_use.desc()).limit(500).all()
     return (tags, carInts, schools)
 
 
-#Current file size limited to 5 MB - with free tier AWS (5GB S3) this limits to a minimum of 1024 images.
+#register POST. Checks form input. If it is correctly input, creates a new user. Then sends them to the sign-in page.
+#Current file size limited to 5 MB.
 @app.route('/register', methods=['POST'])
 def registerPost():
 
@@ -170,7 +176,6 @@ def registerPost():
     if isMentee == None:
         success = False
 
-    #TODO: add the new stuff to user and then do edits for them.
     if isMentee and form1.get("radio_gender_preference") == None: #mentee and mentor preference empty
         flash(u"Please enter a preference for your mentor's gender.", 'mentor_preference_error')
         success = False
@@ -179,7 +184,7 @@ def registerPost():
         success = False
     
     if form1.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
-        flash(u"Please enter a preference for your mentor's division.", 'division_preference_error')
+        flash(u"Please enter a preference for your mentor/mentee's division.", 'division_preference_error')
         success = False
 
     if (form1.get("personality1") == None or form1.get("personality1") == ''
@@ -207,6 +212,38 @@ def registerPost():
                 #every spot is taken in this business. 
                 success = False
                 flash(u'That business has no spots left for more users.', 'businessError')
+
+    #resume pdf
+    if "resume" in request.files and request.files["resume"]:
+        resume = request.files["resume"]
+        #remove cropping
+        #if img and int((img.getbuffer().nbytes/1024)/1024) > 5:
+
+        resumeSize = -1
+        if resume:
+            resume.seek(0, os.SEEK_END)
+            resumeSize = resume.tell()
+            resume.seek(0)
+        
+        if resumeSize == -1:
+            flash(u"Couldn't read resume.", 'resumeError')
+            success = False
+        elif (resumeSize/1024)/1024 > 5:
+            flash(u'Resume is too big (max 5 MB).', 'resumeError')
+            success = False
+        elif resume.filename == '':
+            flash(u'Could not read resume', 'resumeError')
+            success = False
+        else:
+            file_ext = os.path.splitext(resume.filename)[1]
+            if file_ext == None:
+                success = False
+                flash(u"Could not assess file type properties", 'resumeError')
+            elif file_ext not in json.loads(app.config['UPLOAD_EXTENSIONS_RESUME']):
+                flash(u'Accepted file type: .pdf. You uploaded a', file_ext + ".", 'resumeError')
+                success = False
+    #else: didn't input a resume. That's ok, they're optional.
+
 
     #remove cropping
     #if "croppedImgFile" in request.files:
@@ -285,10 +322,10 @@ def registerPost():
         user = User(email=form1.get('email'), first_name=form1.get('first_name'), last_name=form1.get('last_name'), 
                     is_student=isMentee, bio=form1.get('bio'), email_contact=True, phone_number=None,
                     city_name=form1.get('city_name'), current_occupation=form1.get('current_occupation'),
-                    business_id=businessRegisteredUnder.id,
+                    business_id=businessRegisteredUnder.id, 
                     mentor_gender_preference=mentor_gender_preferenceForm,
                     gender_identity=gender_identityForm,
-                    division_preference=form1.get("divisionPreference"),
+                    division_preference=form1.get("divisionPreference"), division=form1.get('division'),
                     personality_1=form1.get("personality1"), personality_2=form1.get("personality2"), 
                     personality_3=form1.get("personality3"))
         
@@ -340,7 +377,7 @@ def registerPost():
         if "file" in request.files:
             img = request.files["file"]
             if img and request.files["file"]:
-                output, filename = upload_file_to_s3(img, user)
+                output, filename = upload_media_file_to_s3(img, user)
                 user.set_profile_picture(output, filename) #set the user profile picture link
                 db.session.commit()
 
@@ -348,8 +385,16 @@ def registerPost():
             vid = request.files["videoFile"]
             if vid:
                 vid.seek(0) #I read the file before to check the length so I must put the cursor at the beginning in order to upload it.
-                output, filename = upload_file_to_s3(vid, user)
+                output, filename = upload_media_file_to_s3(vid, user)
                 user.set_intro_video(output, filename) #set the user profile picture link
+                db.session.commit()
+
+        if "resume" in request.files:
+            resume = request.files["resume"]
+            if resume:
+                resume.seek(0) #I read the file before to check the length so I must put the cursor at the beginning in order to upload it.
+                output, filename = upload_resume_file_to_s3(resume, user)
+                user.set_resume(output, filename) #set the user resume
                 db.session.commit()
 
         db.session.commit()
@@ -359,6 +404,7 @@ def registerPost():
         return registerPreviouslyFilledOut(form1, errors)
 
 
+#gets all the values from the form that was previously filled out, so that they can be sent back and autofilled into a new form.
 def registerPreviouslyFilledOut(form, errors):
 
     email = form.get("email")
@@ -370,6 +416,7 @@ def registerPreviouslyFilledOut(form, errors):
     city_name = form.get("city_name")
     first_last_error = False
     current_occupation = form.get("current_occupation")
+    division = form.get("division")
 
     if "email" in errors: #if error - make it blank.
         email = ""
@@ -377,6 +424,8 @@ def registerPreviouslyFilledOut(form, errors):
         first_name = ""
     elif "city_name" in errors:
         city_name = ""
+    elif "division" in errors:
+        division = ""
     elif "current_occupation" in errors:
         current_occupation = ""
     elif "last name" in errors:
@@ -431,13 +480,14 @@ def registerPreviouslyFilledOut(form, errors):
 
     return render_template('register.html', email=email, first_name=first_name, last_name=last_name, first_last_error=first_last_error,
                 bio=bio, email_or_phone=email_or_phone, city_name=city_name, current_occupation=current_occupation,
-                phone_num=phone_num, register_type=register_type,
+                division=division, phone_num=phone_num, register_type=register_type,
                 interestList=interestInputs, educationList=eduInputs, careerInterestList=carIntInputs,
                 interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=formNew,
                 mentorGenderIdentity=mentorGenderIdentity, menteeGenderPreference=menteeGenderPreference, textPersonality1=textPersonality1,
                 textPersonality2=textPersonality2, textPersonality3=textPersonality3, divisionPreference=divisionPreference)
     
 
+#checks the basic registration information.
 def checkBasicInfo(form1):
     errors = []
     success = True
@@ -476,6 +526,11 @@ def checkBasicInfo(form1):
             success = False
             flash(u'Passwords do not match.', 'password2Error')
             #errors.append("password") not used for anything - passwords are wiped anyway
+
+    if form1.get('division') == '':
+        success = False
+        flash(u'Please enter your division within the company.', 'division_error')
+        errors.append("division")
     
     if form1.get('city_name') == '':
         success = False
@@ -485,7 +540,10 @@ def checkBasicInfo(form1):
     
     return (success, errors)
 
-#perhaps combine all these edit profiles into one and determine type of edit made based on input in html form
+
+
+#NOTE: perhaps combine all these edit profiles into one and determine type of edit made based on input in html form
+# edit-profile GET. Readies edit profile forms and user information.
 @app.route('/edit-profile', methods = ['GET'])
 def editProfile():
 
@@ -498,6 +556,8 @@ def editProfile():
     formFn = EditFirstNameForm()
     formLn = EditLastNameForm()
     formCity = EditCityForm()
+    formPersonality = EditPersonalityForm()
+    formDivision = EditDivisionForm()
     formCurrentOccupation = EditCurrentOccupationForm()
 
     interestList = []
@@ -524,17 +584,28 @@ def editProfile():
     intro_video_link = user.intro_video
     contact_method = user.email_contact
     phone_num = user.phone_number
+    personality_1 = user.personality_1
+    personality_2 = user.personality_2
+    personality_3 = user.personality_3
 
     interestTags, careerInterests, schools = get_popular_tags()
 
+    resumeUrl = create_resume_link(user)
+
     title="Edit profile Page"
-    return render_template('edit_profile.html', isStudent=user.is_student, intro_video=intro_video_link, 
+    return render_template('edit_profile.html', intro_video=intro_video_link, 
             contact_method=contact_method, phone_num=phone_num, profile_picture=prof_pic_link, 
             interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
             title=title, bio=bio, interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
-            formPwd=formPwd, formFn=formFn, formLn=formLn, formCity=formCity, formCurrentOccupation=formCurrentOccupation,
+            personality_1=personality_1, personality_2=personality_2, personality_3=personality_3, division=user.division,
+            divisionPreference=user.division_preference, resumeUrl=resumeUrl,
+            mentorGenderIdentity=user.gender_identity, menteeGenderPreference=user.mentor_gender_preference,
+            formPwd=formPwd, formFn=formFn, formLn=formLn, formCity=formCity, formCurrentOccupation=formCurrentOccupation, 
+            formPersonality=formPersonality, formDivision=formDivision,
             user=user, userID=session.get('userID'))
 
+#edit-profile-password POST.
+#changes the user's password if it is input correctly. Then sends the user back to view.
 @app.route('/edit-profile-password', methods = ['POST'])
 def editProfilePassword():
 
@@ -563,6 +634,8 @@ def editProfilePassword():
     else: 
         return redirect(url_for('editProfile'))
 
+#edit-profile-first-name GET. 
+#changes the user's first name if it is input correctly. Then sends the user back to view.
 @app.route('/edit-profile-first-name', methods = ['POST'])
 def editProfileFirstName():
 
@@ -663,6 +736,49 @@ def editProfileCurrentOccupation():
     else: 
         return redirect(url_for('editProfile'))
 
+
+@app.route('/edit-profile-mentor-gender-preference', methods = ['POST'])
+def editProfileGenderPreference():
+
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+
+    user = User.query.filter_by(id=session['userID']).first()
+    if not user.is_student: #user must be a mentor
+        return redirect(url_for('editProfile'))
+
+    form = request.form
+
+    if form.get("radio_gender_preference") == None: #mentee and mentor preference empty
+        flash(u"Please enter a preference for your mentor's gender.", 'mentor_preference_error')
+        return redirect(url_for('editProfile'))
+    
+    user.set_mentor_gender_preference(form.get("radio_gender_preference"))
+    db.session.commit()
+    return redirect(url_for('editProfile'))
+
+@app.route('/edit-profile-gender-identity', methods = ['POST'])
+def editProfileGenderIdentity():
+
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+
+    user = User.query.filter_by(id=session['userID']).first()
+
+    if user.is_student: #user must be a mentor
+        return redirect(url_for('editProfile'))
+
+    form = request.form
+    if form.get("radio_gender_identity") == None: #mentor and gender identity not entered
+        flash(u"Please enter your gender identity.", 'gender_identity_error')
+        return redirect(url_for('editProfile'))
+    
+    user.set_gender_identity(form.get("radio_gender_identity"))
+    db.session.commit()
+    return redirect(url_for('editProfile'))
+    
+
+
 @app.route('/edit-profile-attributes', methods = ['POST'])
 def editProfileAttributes():
 
@@ -739,6 +855,7 @@ def editProfileAttributes():
 
     return redirect(url_for('editProfile')) #go back on either success or fail
     
+""" No longer able to do this
 @app.route('/edit-profile-position', methods = ['POST'])
 def editProfilePosition():
     if not userLoggedIn():
@@ -752,7 +869,7 @@ def editProfilePosition():
         #TODO: caution against doing this before checking matches and then delete all selects with this user as the base
 
     db.session.commit()
-    return redirect(url_for('editProfile'))
+    return redirect(url_for('editProfile'))"""
 
 @app.route('/edit-profile-bio', methods = ['POST'])
 def editProfileBio():
@@ -767,6 +884,53 @@ def editProfileBio():
     user.set_bio(form.get('bio'))
     db.session.commit()
     return redirect(url_for('editProfile'))
+
+@app.route('/edit-profile-personality', methods = ['POST'])
+def editProfilePersonality():
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+    user = User.query.filter_by(id=session.get('userID')).first()
+    form = request.form
+    if form.get('personality_1') == "" or form.get('personality_2') == "" or form.get('personality_3') == "":
+        flash(u'You must input 3 personality traits/phrases.', 'personalityError')
+        return redirect(url_for('editProfile'))
+
+    user.set_personality(form.get('personality_1'), form.get('personality_2'), form.get('personality_3'))
+    db.session.commit()
+    return redirect(url_for('editProfile'))
+
+@app.route('/edit-profile-division', methods = ['POST'])
+def editProfileDivision():
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+    user = User.query.filter_by(id=session.get('userID')).first()
+    form = request.form
+    if form.get('division') == "":
+        flash(u'You must input what division you are in.', 'divisionError')
+        return redirect(url_for('editProfile'))
+
+    user.set_division(form.get('division'))
+    db.session.commit()
+    return redirect(url_for('editProfile'))
+
+@app.route('/edit-profile-division-preference', methods = ['POST'])
+def editProfileDivisionPreference():
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+    user = User.query.filter_by(id=session.get('userID')).first()
+    form = request.form
+    if form.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
+        if user.is_student:
+            flash(u"Please enter a preference for your mentor's division.", 'divisionPreferenceError')
+        else:
+            flash(u"Please enter a preference for your mentee's division.", 'divisionPreferenceError')
+        return redirect(url_for('editProfile'))
+
+    user.set_division_preference(form.get("divisionPreference"))
+    db.session.commit()
+    return redirect(url_for('editProfile'))
+
+
 
 @app.route('/edit-profile-contact', methods = ['POST'])
 def editProfileContact():
@@ -842,7 +1006,7 @@ def editProfPic():
         if img:
             user = User.query.filter_by(id=session.get('userID')).first()
             delete_profile_picture(user)
-            output, filename = upload_file_to_s3(img, user)
+            output, filename = upload_media_file_to_s3(img, user)
             user.set_profile_picture(output, filename) #set the user profile picture link
             db.session.commit()
         else:
@@ -871,6 +1035,18 @@ def deleteIntroVid():
     
     user = User.query.filter_by(id=session.get('userID')).first()
     delete_intro_video(user)
+
+    return redirect(url_for('editProfile'))
+
+@app.route('/delete-resume', methods=['POST'])
+def deleteResume():
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+    
+    user = User.query.filter_by(id=session.get('userID')).first()
+
+    delete_resume(user)
 
     return redirect(url_for('editProfile'))
 
@@ -911,12 +1087,70 @@ def editVideo():
         user = User.query.filter_by(id=session.get('userID')).first()
         delete_intro_video(user)
         vid.seek(0) #I read the file before to check the length so I must put the cursor at the beginning in order to upload it.
-        output, filename = upload_file_to_s3(vid, user)
+        output, filename = upload_media_file_to_s3(vid, user)
         user.set_intro_video(output, filename) #set the user profile picture link
         db.session.commit()
 
     return redirect(url_for('editProfile'))
 
+@app.route('/edit-profile-resume', methods=['POST'])
+def editProfResume():
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+
+    success = True
+
+    user = User.query.filter_by(id=session.get('userID')).first()
+
+    #resume pdf
+    if "resume" in request.files and request.files["resume"]:
+        resume = request.files["resume"]
+        #remove cropping
+        #if img and int((img.getbuffer().nbytes/1024)/1024) > 5:
+
+        resumeSize = -1
+        if resume:
+            resume.seek(0, os.SEEK_END)
+            resumeSize = resume.tell()
+            resume.seek(0)
+        else:
+            success = False
+            flash(u"No resume input.", 'resumeError')
+        
+        if resumeSize == -1:
+            flash(u"Couldn't read resume.", 'resumeError')
+            success = False
+        elif (resumeSize/1024)/1024 > 5:
+            flash(u'Resume is too big (max 5 MB).', 'resumeError')
+            success = False
+        elif resume.filename == '':
+            flash(u'Could not read resume', 'resumeError')
+            success = False
+        else:
+            file_ext = os.path.splitext(resume.filename)[1]
+            if file_ext == None:
+                success = False
+                flash(u"Could not assess file type properties", 'resumeError')
+            elif file_ext not in json.loads(app.config['UPLOAD_EXTENSIONS_RESUME']):
+                flash(u'Accepted file type: .pdf. You uploaded a', file_ext + ".", 'resumeError')
+                success = False
+    else:
+        flash(u"No resume input.", 'resumeError')
+        success = False
+    
+    if success: 
+        if resume:
+            resume.seek(0) #I read the file before to check the length so I must put the cursor at the beginning in order to upload it.
+            delete_resume(user)
+            output, filename = upload_resume_file_to_s3(resume, user)
+            user.set_resume(output, filename) #set the user profile picture link
+            db.session.commit()
+        else:
+            success=False
+            flash(u'Please select a file.', 'resumeError')
+
+    return redirect(url_for('editProfile'))
 
 @app.route('/view', methods=['GET']) #takes one arg = user.id. This is the user that the person logged in is viewing. Doesn't have to be the same user.
 def view():
@@ -947,6 +1181,9 @@ def view():
 
     prof_pic_link = user.profile_picture
     intro_vid_link = user.intro_video
+    
+
+    resumeUrl = create_resume_link(user)
 
     this_user_is_logged_in = (user.id == session.get('userID'))
     in_network = False
@@ -958,15 +1195,36 @@ def view():
     # let them logout from or delete their account.
     title="Profile Page"
     return render_template('view.html', title=title, profile_picture=prof_pic_link, intro_video=intro_vid_link,
-                bio=bio, in_network=in_network, logged_in=this_user_is_logged_in, 
+                bio=bio, in_network=in_network, logged_in=this_user_is_logged_in, resumeUrl=resumeUrl,
                 interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
                 isStudent=isStudent, user=user, userID=session.get('userID'))
     #user logged in: show profile page.
+
+
+
+"""
+The preferred way is to simply create a pre-signed URL for the image, and return a redirect to that URL. 
+This keeps the files private in S3, but generates a temporary, time limited, URL that can be used to download the file directly from S3. 
+That will greatly reduce the amount of work happening on your server, as well as the amount of data transfer being consumed by your server.
+https://stackoverflow.com/questions/52342974/serve-static-files-in-flask-from-private-aws-s3-bucket
+"""
+def create_resume_link(user):
+    if user.resume == None or user.resume_key == None:
+        resumeUrl = None
+    else:
+        resumeUrl = s3_client.generate_presigned_url(
+            'get_object', 
+            Params = {'Bucket': str(app.config['BUCKET_NAME_RESUME']), 'Key': user.resume_key}, 
+            ExpiresIn = 100
+        )
+    return resumeUrl
+
 
 """def createCookie(resp, id):
     #sessionTokenKey = str(uuid4())
     resp.set_cookie(key="user", value=id, max_age=None)
     return resp"""
+
 
 @app.route('/logout', methods=['GET'])
 def logout():
@@ -1000,6 +1258,7 @@ def deleteProfile():
         delete_profile_picture(user)
         delete_intro_video(user)
         delete_user_attributes(user.id)
+        delete_resume(user)
         Select.query.filter_by(mentee_id=user.id).delete()
         Select.query.filter_by(mentor_id=user.id).delete()
         Business.query.filter_by(id=user.business_id).first().dec_number_employees_currently_registered() 
@@ -1014,8 +1273,8 @@ def deleteProfile():
         flash(u'Incorrect first name.', 'deletionError')
         return redirect(url_for('editProfile'))
 
-
-def upload_file_to_s3(file_upload, user):
+#TODO: maybe change aws s3 bucket to NO ACLs and limit access to this account.
+def upload_media_file_to_s3(file_upload, user):
     filename = ""
     filename+=str(user.id)
     filename+="/"
@@ -1028,6 +1287,22 @@ def upload_file_to_s3(file_upload, user):
         ContentType = file_upload.content_type
     )
     output = 'https://s3-{}.amazonaws.com/{}/{}'.format(app.config['S3_REGION'], app.config['BUCKET_NAME'], filename)
+    print(filename, output, file_upload.content_type)
+    db.session.commit() #just in case
+    return (output, filename)
+
+def upload_resume_file_to_s3(file_upload, user):
+    filename = ""
+    filename+=str(user.id)
+    filename+="/"
+    filename+=str(uuid4()) #safe file name: uuid4.
+    s3_client.put_object(
+        Bucket = str(app.config['BUCKET_NAME_RESUME']),
+        Key = filename,
+        Body=file_upload,
+        ContentType = file_upload.content_type
+    )
+    output = 'https://s3-{}.amazonaws.com/{}/{}'.format(app.config['S3_REGION'], app.config['BUCKET_NAME_RESUME'], filename)
     print(filename, output, file_upload.content_type)
     db.session.commit() #just in case
     return (output, filename)
@@ -1064,6 +1339,11 @@ def delete_intro_video(user):
     user.set_intro_video(None, None)
     db.session.commit()
 
+def delete_resume(user):
+    if user.resume is not None:
+        s3_client.delete_object(Bucket=str(app.config["BUCKET_NAME_RESUME"]), Key=user.resume_key)
+    user.set_resume(None, None)
+    db.session.commit()
 
 @app.route('/feed', methods=['GET'])
 def feed():
@@ -1110,78 +1390,99 @@ def feedMentee(user):
 
     userDict = {} #user : number match.
 
-    schoolDict = {} #contains all the matching schools for each user (user : [school])
-    for educ in user.rtn_education():
-        school = School.query.filter_by(title=educ.entered_name.lower()).first() #the school with this title - should only be one
-        if school != None:  #Extra check if the school entered might not be in the database. It won't, but better safe than sorry.
-                            #Data is entered automatically - it will have to be in the database to be searched
-            educationTags = EducationTag.query.filter_by(educationID=school.id).all() 
-            #TODO: I should be able to skip query for school and do educationID=educ.educationID
-            #has the EducationTags that are linked to this school's name
-            for edTag in educationTags:
-                users = User.query.filter_by(id=edTag.user_id).all() #get the corresponding users
-                for u in users:
-                    if u.id != user.id and not u.is_student and not mentorSelected(u.id): #don't consider the user logged in - also, only recommend mentors
-                        if schoolDict.__contains__(u): #add user to the dict
-                            schoolDict[u].append(edTag.entered_name)
-                        else:
-                            sArr = [edTag.entered_name] #not already in the dict --> add a new array
-                            schoolDict[u] = sArr
+    #get all mentors in the same business as the user. is_student should remove the user themself from the query.
+    users = User.query.filter_by(business_id=user.business_id).filter_by(is_student=False).all()
 
-                        if userDict.__contains__(u): #now update match amount in user dict
-                            userDict[u] = userDict[u]+heuristicVals["education"]
-                        else:
-                            userDict[u] = heuristicVals["education"] #initialize
+    for u in users: #initialize user dictionary and check gender preference/identity
+        userDict[u] = 0
+        #initialize as 0
+        if (user.mentor_gender_preference == "male" and u.gender_identity == "male") or (user.mentor_gender_preference == "female" and u.gender_identity == "female"):
+            #matching gender preference / gender
+            userDict[u] = heuristicVals["gender_pref"]
+        #ignore case mentor gender preference == "noPreference".
+
+
+    #division preferences
+    for u in users:
+        if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
+            #other user division preference
+            userDict[u] += heuristicVals["division_pref"]
+        if (user.division_preference == "same" and user.division == u.division) or user.division_preference == "noPreference":
+            #this user division preference
+            userDict[u] += heuristicVals["division_pref"]
+
+    #personality
+    for u in users:
+        #match in any personality trait - separate to add to the value per each match.
+        if u.personality_1 == user.personality_1:
+            userDict[u] += heuristicVals["personality"]
+        if u.personality_1 == user.personality_2:
+            userDict[u] += heuristicVals["personality"]
+        if u.personality_1 == user.personality_3:
+            userDict[u] += heuristicVals["personality"]
+        if u.personality_2 == user.personality_2:
+            userDict[u] += heuristicVals["personality"]
+        if u.personality_2 == user.personality_3:
+            userDict[u] += heuristicVals["personality"]
+        if u.personality_3 == user.personality_3:
+            userDict[u] += heuristicVals["personality"]
     
 
-    interestTitleDict = {} #contains all the matching tags for each user (user : [interest tag titles])
-    for intrst in user.rtn_interests():
-        tag = Tag.query.filter_by(title=intrst.entered_name.lower()).first()
-        if tag != None:  #Extra check if the school entered might not be in the database. It won't, but better safe than sorry.
-                            #Data is entered automatically - it will have to be in the database to be searched
-            #interestTags = InterestTag.query.filter_by(interestID=tag.tagID).all() 
-            interestTags = InterestTag.query.filter_by(interestID=tag.id).all() 
-            #has the EducationTags that are linked to this school's name
-            for intT in interestTags:
-                users = User.query.filter_by(id=intT.user_id).all() #get the corresponding users
-                for u in users:
-                    if u.id != user.id and not u.is_student and not mentorSelected(u.id): #don't consider the user logged in
-                        if interestTitleDict.__contains__(u): #add user to the dict
-                            interestTitleDict[u].append(intT.entered_name)
-                        else:
-                            #show the non-lowercase version
-                            tArr = [intT.entered_name] #not already in the dict --> add a new array
-                            interestTitleDict[u] = tArr
+    schoolDict = {} #contains all the matching schools for each user (user : [school])
+    thisUserEducationTagIDs = user.rtn_education()
+    thisUserEducationTagIDs = [edu.id for edu in thisUserEducationTagIDs] #get the ids
 
-                        if userDict.__contains__(u): #now update match amount in user dict
-                            userDict[u] = userDict[u]+heuristicVals["interest"]
-                        else:
-                            userDict[u] = heuristicVals["interest"] #initialize
+    for u in users:
+        for educ in u.rtn_education(): #cycle thru each user education
+            educationTags = EducationTag.query.filter_by(educationID=educ.educationID).all()
+            for edTag in educationTags: #go thru all the educationTags (the ones related to each user ans unique to each input)
+                if edTag.id in thisUserEducationTagIDs:
+                    if schoolDict.__contains__(u): #add user to the dict
+                        schoolDict[u].append(edTag.entered_name)
+                    else:
+                        sArr = [edTag.entered_name] #not already in the dict --> add a new array
+                        schoolDict[u] = sArr
+
+                    #now update match amount in user dict
+                    userDict[u] = userDict[u]+heuristicVals["education"]
+
+
+    interestTitleDict = {} #contains all the matching tags for each user (user : [interest tag titles])
+    thisUserInterestTagIDs = user.rtn_interests()
+    thisUserInterestTagIDs = [intrst.id for intrst in thisUserInterestTagIDs] #get the ids
+
+    for u in users:
+        for intrst in u.rtn_interests(): #cycle thru each user education
+            interestTags = InterestTag.query.filter_by(interestID=intrst.interestID).all()
+            for intT in interestTags: #go thru all the educationTags (the ones related to each user ans unique to each input)
+                if intT.id in thisUserInterestTagIDs:
+                    if interestTitleDict.__contains__(u): #add user to the dict
+                        interestTitleDict[u].append(intT.entered_name)
+                    else:
+                        iArr = [intT.entered_name] #not already in the dict --> add a new array
+                        interestTitleDict[u] = iArr
+
+                    #now update match amount in user dict
+                    userDict[u] = userDict[u]+heuristicVals["interest"]
+
 
     careerDict = {} #contains all the matching career tags for each user (user : [career experience/interest title])
-    for careerInt in user.rtn_career_interests():
-        career = CareerInterest.query.filter_by(title=careerInt.entered_name.lower()).first()
-        if career != None: #Extra check if the school entered might not be in the database. It won't, but better safe than sorry.
-                            #Data is entered automatically - it will have to be in the database to be searched
-            #cInts = CareerInterestTag.query.filter_by(careerInterestID=career.careerInterestID).all() 
-            cInts = CareerInterestTag.query.filter_by(careerInterestID=career.id).all() 
-            #has the EducationTags that are linked to this school's name
-            for cInt in cInts:
-                users = User.query.filter_by(id=cInt.user_id).all() #get the corresponding users
-                for u in users:
-                    if u.id != user.id and not u.is_student and not mentorSelected(u.id): 
-                        #don't consider the user logged in, only consider students, don't consider users who have already been shown to this student.
-                        if careerDict.__contains__(u): #add user to the dict
-                            careerDict[u].append(cInt.entered_name)
-                        else:
-                            #show the non-lowercase version
-                            cArr = [cInt.entered_name] #not already in the dict --> add a new array
-                            careerDict[u] = cArr
+    thisUserCareerInterestIDs = user.rtn_career_interests()
+    thisUserCareerInterestIDs = [cInt.id for cInt in thisUserCareerInterestIDs] #get the ids
 
-                        if userDict.__contains__(u): #now update match amount in user dict
-                            userDict[u] = userDict[u]+heuristicVals["career"]
-                        else:
-                            userDict[u] = heuristicVals["career"] #initialize
+    for u in users:
+        for cInt in u.rtn_career_interests(): #cycle thru each user education
+            careerInterestTags = CareerInterestTag.query.filter_by(careerInterestID=cInt.careerInterestID).all()
+            for cInt in careerInterestTags: #go thru all the educationTags (the ones related to each user ans unique to each input)
+                if cInt.id in thisUserCareerInterestIDs:
+                    if careerDict.__contains__(u): #add user to the dict
+                        careerDict[u].append(cInt.entered_name)
+                    else:
+                        cArr = [cInt.entered_name] #not already in the dict --> add a new array
+                        careerDict[u] = cArr
+
+                    #now update match amount in user dict
+                    userDict[u] = userDict[u]+heuristicVals["career"]
 
 
     sortedDict = sorted(userDict.items(), key=lambda item: item[1], reverse=True) #is now a list of tuples

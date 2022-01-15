@@ -18,12 +18,14 @@ class User(UserMixin, db.Model, Base): #inherits from db.Model, base for flask-S
     password_hash = db.Column(db.String(128)) #not storing plaintext pwd, hashing first.
     first_name = db.Column(db.String(64))
     last_name = db.Column(db.String(64))
-    is_student = db.Column(db.Boolean) #T = student, F = mentor
+    is_student = db.Column(db.Boolean) #T = mentee, F = mentor. Made this back when it was students/mentors. Now it should be mentees/mentors.
     bio = db.Column(db.Text)
     profile_picture = db.Column(db.Text)
     profile_picture_key = db.Column(db.Text)
     intro_video = db.Column(db.Text)
     intro_video_key = db.Column(db.Text)
+    resume = db.Column(db.Text)
+    resume_key = db.Column(db.Text)
     email_contact = db.Column(db.Boolean) #true: contact with email. False: contact with phone number
     phone_number = db.Column(db.String(64))
     city_name = db.Column(db.String(128))
@@ -32,11 +34,19 @@ class User(UserMixin, db.Model, Base): #inherits from db.Model, base for flask-S
     
     #new stuff:
     mentor_gender_preference = db.Column(db.Text)
+    #this is either male, female, or noPreference
+
     gender_identity = db.Column(db.Text)
+    #this is either male, female, nonbinaryNonconforming, or noResponse
+
     division_preference = db.Column(db.Text)
+    #this is either same, different, or noPreference
+
     personality_1 = db.Column(db.Text)
     personality_2 = db.Column(db.Text)
     personality_3 = db.Column(db.Text)
+
+    division = db.Column(db.Text)
     
 
  
@@ -104,6 +114,9 @@ class User(UserMixin, db.Model, Base): #inherits from db.Model, base for flask-S
     def set_current_occupation(self, current_occupation):
         self.current_occupation = current_occupation
 
+    def set_division(self, division):
+        self.division=division
+
     def set_phone(self, phoneNumber):
         self.phone_number=phoneNumber
         self.email_contact=False
@@ -119,6 +132,24 @@ class User(UserMixin, db.Model, Base): #inherits from db.Model, base for flask-S
     def set_intro_video(self, videoLink, videoKey):
         self.intro_video=videoLink
         self.intro_video_key=videoKey
+    
+    def set_resume(self, resumeLink, resumeKey):
+        self.resume=resumeLink
+        self.resume_key=resumeKey
+
+    def set_personality(self, personality1, personality2, personality3):
+        self.personality_1 = personality1
+        self.personality_2 = personality2
+        self.personality_3 = personality3
+
+    def set_division_preference(self, division_preference):
+        self.division_preference = division_preference
+
+    def set_mentor_gender_preference(self, mentor_gender_preference):
+        self.mentor_gender_preference = mentor_gender_preference
+        
+    def set_gender_identity(self, gender_identity):
+        self.gender_identity = gender_identity
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password) #<^=pwd hashing logic
