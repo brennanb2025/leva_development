@@ -86,7 +86,7 @@ body, html{
 .home{
     flex: 1;
     padding: 7%;
-    background-image: url('/images/background.png');
+    background-image: url('/static/background.png');
     background-position: center;
     background-size: cover;
 }
@@ -170,15 +170,15 @@ body, html{
 }
 
 .icon1{
-    background-image: url("/images/customizable.png");
+    background-image: url("/static/customizable.png");
 }
 
 .icon2{
-    background-image: url("/images/mentorship.png");
+    background-image: url("/static/mentorship.png");
 }
 
 .icon3{
-    background-image: url("/images/focus.png");
+    background-image: url("/static/focus.png");
 }
 
 .label1, .label2{
@@ -223,7 +223,7 @@ body, html{
 }
 
 .about .half{
-    background-image: url('/images/background2.png');
+    background-image: url('/static/background2.png');
     background-position: center;
     background-size: cover;
     flex: 1;

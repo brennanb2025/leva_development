@@ -2,8 +2,8 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <link rel='stylesheet' href="/css/main.css">
-        <link rel="stylesheet" href="/css/portal.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css_files/main.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css_files/portal.css')}}">
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
         <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,25 +29,25 @@
             </div>
 
             <div class="nav-box">
-                <a href="/portal.html">
+                <a href="/portal_test">
                     <button class="nav-button">
                         Enrollment
                     </button>
                 </a>
 
-                <a href="/profile.html">
+                <a href="/profile_test">
                     <button class="nav-button">
                         Profile
                     </button>
                 </a>
 
-                <a href="/mentor.html">
+                <a href="/mentor_test">
                     <button class="nav-button">
                         Mentor Matches
                     </button>
                 </a>
 
-                <a href="/progress.html">
+                <a href="/progress_test">
                     <button class="nav-button">
                         Progress
                     </button>

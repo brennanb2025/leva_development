@@ -57,6 +57,26 @@ def make_session_permanent():
 def index():
     return render_template('index.html', userID=session.get('userID'))
 
+@app.route('/index_test', methods=['GET'])
+def index_test():
+    return render_template('index1.html', userID=session.get('userID'))
+
+@app.route('/portal_test')
+def portal_test():
+    return render_template('portal.html')
+
+@app.route('/profile_test')
+def profile_test():
+    return render_template('profile.html')
+
+@app.route('/mentor_test')
+def mentor_test():
+    return render_template('mentor.html')
+
+@app.route('/progress_test')
+def progress_test():
+    return render_template('progress.html')
+
 #sign-in page GET.
 @app.route('/sign-in', methods=['GET'])
 def sign_in():
