@@ -70,17 +70,56 @@
                 </div>
 
                 <div class="container">
-                    <div class="text-container">
-                        YOUR UPCOMING 3RD MEETING:
-    (                   this is where the guided content will go... leave space for an article based on which meeting is upcoming for this user)
+                    <div id="loadingText" class="text-container">
+                        <br/><br/><br/><br/>
+                        Loading...
                     </div>
-    
+                
                     <div class="text-container">
-                        PAST GUIDANCE:
-                        (this is where we will put the guided content from their earlier meetings. We will have content for month 1, month 2, month 3, and then quarterly after that.)
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <ul class=flashes>
+                            {% for category, message in messages %}
+                                {% if category == 'feedError' %}
+                                <span style="color: red;">[{{ message }}]</span>
+                                {% endif %}
+                            {% endfor %}
+                            </ul>
+                        {% endif %}
+                    {% endwith %}
                     </div>
                 </div>
             </section>
         </div>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js_files/feed.js')}}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+
+            if("{{find_match}}" == "True") {
+                init("{{isStudent}}");
+                get_new_users(function() { //callback: pass this function as an argument to the get_new_users function.
+
+                    async function waitThenShowSlides() { //show the slide
+                        return result = await ready_document();
+                    }; 
+                    waitThenShowSlides().then(function() {
+                        setupSlideIndex();
+                        showAllSlides();
+                    });
+                    remove_loading();
+
+                });
+            } else { //don't find a match
+                noFound = document.createElement("p");
+                noFound.setAttribute("id", "noFound");
+                noFound.appendChild(document.createTextNode("You have already selected a mentor!"));
+                document.getElementById("noMatchDiv").appendChild(noFound);
+                remove_loading();
+            }
+
+        });
+
+    </script>
     </body>
 </html>

@@ -69,9 +69,13 @@
                     My Leva Profile
                 </div>
 
-                <button>
-                    Edit Profile
-                </button>
+                {% if logged_in is defined %}
+                {% if logged_in == true %}
+                    <button href="{{ url_for('editProfile') }}">
+                        Edit Profile
+                    </button>
+                {% endif %}
+                {% endif %}
 
                 <div class="info">
                     <div class="list">
@@ -81,7 +85,7 @@
                             </div>
     
                             <div class="answer">
-                                Lorem
+                                {{ user.first_name }} {{ user.last_name }}
                             </div>
                         </div>
 
@@ -91,7 +95,7 @@
                             </div>
     
                             <div class="answer">
-                                Lorem
+                                {{ user.current_occupation }}
                             </div>
                         </div>
 
@@ -101,7 +105,13 @@
                             </div>
     
                             <div class="answer">
-                                Lorem
+                                {% if careerInterestList|length == 0 %}
+                                    None
+                                {% else %}
+                                    {% for carInt in careerInterestList %}
+                                        {{ carInt }}<br/>
+                                    {% endfor %}
+                                {% endif %}
                             </div>
                         </div>
 
@@ -111,7 +121,13 @@
                             </div>
     
                             <div class="answer">
-                                Lorem
+                                {% if careerInterestList|length == 0 %}
+                                    None
+                                {% else %}
+                                    {% for interest in interestList %}
+                                    {{ interest }} <br/>
+                                {% endfor %}
+                                {% endif %}
                             </div>
                         </div>
 
@@ -121,7 +137,9 @@
                             </div>
     
                             <div class="answer">
-                                Lorem
+                                {{ user.personality_1 }}<br/><br/>
+                                {{ user.personality_2 }}<br/><br/>
+                                {{ user.personality_3 }}<br/>
                             </div>
                         </div>
 
@@ -131,7 +149,7 @@
                             </div>
     
                             <div class="answer">
-                                Lorem
+                                {{ user.division_preference }}
                             </div>
                         </div>
 
@@ -145,21 +163,29 @@
                             </div>
                         </div>
 
+                        {% if user.mentor_gender_preference is not none %}
+
                         <div class="single">
                             <div class="label">
                                 Gender Preference:
                             </div>
     
                             <div class="answer">
-                                Lorem
+                                {{ user.mentor_gender_preference }}
                             </div>
                         </div>
+
+                        {% endif %}
                         
                     </div>
 
                     <div class="picture">
                         <div class="circle-border">
-                            <img src="/images/steps.webp">
+                            {% if profile_picture is none %}
+                                <img class="profile_picture" src="{{url_for('static', filename='blank-profile-picture.png')}}" alt="profile_picture"><br/>
+                            {% else %}
+                                <img class="profile_picture" src="{{profile_picture}}" alt="profile_picture"><br/>
+                            {% endif %}
                         </div>
 
                         <button>
@@ -170,5 +196,7 @@
                 </div>
             </section>
         </div>
+
+        <script type="text/javascript" src="{{ url_for('static', filename='js_files/view.js')}}"></script>
     </body>
 </html>
