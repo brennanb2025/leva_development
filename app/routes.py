@@ -67,7 +67,48 @@ def portal_test():
 
 @app.route('/profile_test')
 def profile_test():
-    return render_template('profile.html')
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+
+    if request.args.get("id") == None: #they went to view get without a user id in the request args
+        return redirect(url_for('index'))
+
+    user = User.query.filter_by(id=request.args.get("id")).first() #get the correct profile by inputting user id
+    if user == None:
+        return not_found("404")
+
+    interestList = []
+    for interest in user.rtn_interests():
+        interestList.append(interest.entered_name)
+    careerInterestList = []
+    for cint in user.rtn_career_interests():
+        careerInterestList.append(cint.entered_name)
+    educationList = []
+    for educ in user.rtn_education():
+        educationList.append(educ.entered_name)
+    isStudent = user.is_student
+    bio = user.bio
+
+    prof_pic_link = user.profile_picture
+    intro_vid_link = user.intro_video
+    
+
+    resumeUrl = create_resume_link(user)
+
+    this_user_is_logged_in = (user.id == session.get('userID'))
+    in_network = False
+    if Select.query.filter_by(mentee_id=user.id, mentor_id=session.get('userID')).first() != None or \
+        Select.query.filter_by(mentee_id=session.get('userID'), mentor_id=user.id).first() != None:
+        in_network = True
+
+    #^if the user looking at this person's profile page is the one who is currently logged in, 
+    # let them logout from or delete their account.
+    title="Profile Page"
+    return render_template('profile.html', title=title, profile_picture=prof_pic_link, intro_video=intro_vid_link,
+                bio=bio, in_network=in_network, logged_in=this_user_is_logged_in, resumeUrl=resumeUrl,
+                interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
+                isStudent=isStudent, user=user, userID=session.get('userID'))
 
 @app.route('/mentor_test')
 def mentor_test():
@@ -75,7 +116,17 @@ def mentor_test():
 
 @app.route('/progress_test')
 def progress_test():
-    return render_template('progress.html')
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+    
+    user = User.query.filter_by(id=session.get('userID')).first()
+
+    if Select.query.filter_by(mentee_id=user.id).first() != None: 
+        #user already selected a mentor
+        return render_template('progress.html', isStudent=user.is_student, userID=session.get('userID'), find_match=False)
+    
+    return render_template('progress.html', isStudent=user.is_student, userID=session.get('userID'), find_match=True)
 
 #sign-in page GET.
 @app.route('/sign-in', methods=['GET'])
