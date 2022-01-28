@@ -72,15 +72,19 @@
                 <div class="mentor-card">
                     <div class="picture-card">
                         <div class="circle-border">
-                            <img src="/images/steps.webp">
+                            {% if selectUser.profile_picture is none %}
+                                <img class="profile_picture_small" src="{{url_for('static', filename='blank-profile-picture.png')}}" alt="profile_picture">
+                            {% else %}
+                                <img class="profile_picture_small" src="{{selectUser.profile_picture}}" alt="profile_picture">
+                            {% endif %}
                         </div>
 
                         <div class="head2">
-                            Maya
+                            {{ selectUser.first_name }} 
                         </div>
 
                         <div class="head2">
-                            Nelson
+                            {{ selectUser.last_name }}
                         </div>
 
                         <div class="purple-line">
@@ -117,7 +121,7 @@
                     </div>
                 </div>
 
-                <div class="mentor-card">
+                <!-- <div class="mentor-card">
                     <div class="picture-card">
                         <div class="circle-border">
                             <img src="/images/steps.webp">
@@ -163,7 +167,7 @@
                             Below will be the criteria that the two matched on. For example: 
                         </div>
                     </div>
-                </div>
+                </div> -->
             </section>
         </div>
     </body>

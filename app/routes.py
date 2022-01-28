@@ -112,6 +112,12 @@ def profile_test():
 
 @app.route('/mentor_test')
 def mentor_test():
+    user = User.query.filter_by(id=session.get('userID')).first()
+
+    if Select.query.filter_by(mentee_id=user.id).first() != None: 
+        #user already selected a mentor
+        return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=False)
+    
     return render_template('mentor.html')
 
 @app.route('/progress_test')
