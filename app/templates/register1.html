@@ -9,6 +9,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@600&display=swap" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <style>
             body{
                 font-family: 'Work Sans';
@@ -21,73 +22,82 @@
     </head>
 
     <body>
-        <div class="header">
-            <div class="logo-box">
-                <img src="https://static.wixstatic.com/media/12ecaa_e292ca41155b4bee9ea276dc89fef0f3~mv2.png/v1/fill/w_165,h_87,al_c,q_85,usm_0.66_1.00_0.01/IMG_0256_PNG.webp" 
-                alt="IMG_0256.PNG" style="width:165px;height:87px;object-fit:cover;object-position:50% 50%">
-            </div>
-
-            <div class="nav-box">
-                <a href="#home">
-                    <button class="nav-button" onclick="scroll(100)">
-                        Home
-                    </button>
-                </a>
-
-                <a href="#product">
-                    <button class="nav-button">
-                        Product
-                    </button>
-                </a>
-
-                <a href="#about">
-                    <button class="nav-button">
-                        About Us
-                    </button>
-                </a>
-
-                <a href="#testimonials">
-                    <button class="nav-button">
-                        Testimonials
-                    </button>
-                </a>
-
-                <a href="#contact">
-                    <button class="nav-button">
-                        Contact
-                    </button>
-                </a>
-
-            </div>
-
-            <div class="register-box">
-                <button class="register">
-                    Launch Your Program
-                </button>
-            </div>
-        </div>
-
-        <div class="login-container">
-
-            <div class="detail-container" id="detail-container">
-
-                <div class="head2">Login</div>
-
-                <div class="input-container">
-                    <label for="email">E-mail</label>
-                    <input type="text" id="email" placeholder="xxx@email.com">
+        <div class="container">
+            <div class="decoration-container">
+                <div class="shading">
+                    <div class="content">
+                        <div class="logo-box">
+                            <img src="https://static.wixstatic.com/media/12ecaa_e292ca41155b4bee9ea276dc89fef0f3~mv2.png/v1/fill/w_165,h_87,al_c,q_85,usm_0.66_1.00_0.01/IMG_0256_PNG.webp" 
+                            alt="IMG_0256.PNG" style="width:165px;height:87px;object-fit:cover;object-position:50% 50%">
+                        </div>
+    
+                        <div class="text">
+                            <div class="head2">
+                                Leva your workplace.
+                                <div>Register now.</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-        
-                <div class="input-container">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Password">
+
+            </div>
+    
+            <div class="registration-container">
+
+                <div class="content">
+                    <div class="head2">
+                        Register
+                    </div>
+                    
+                    <div class="general info-container">
+                        <div class="firstlast">
+                            <div class="input-container">
+                                <label for="first">First Name</label>
+                                <input type="text" id="first">
+                            </div>
+
+                            <div class="input-container">
+                                <label for="last">Last Name</label>
+                                <input type="text" id="last">
+                            </div>
+                        </div>
+
+                        <div class="email">
+                            <div class="input-container">
+                                <label for="e-mail">E-mail</label>
+                                <input type="text" id="e-mail">
+                            </div>
+                        </div>
+
+                        <div class="password">
+                            <div class="input-container">
+                                <label for="e-mail">Password</label>
+                                <input type="text" id="e-mail">
+                            </div>
+                        </div>
+
+                        <div class="password-retype">
+                            <div class="input-container">
+                                <label for="e-mail">Re-type Password</label>
+                                <input type="text" id="e-mail">
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="personal info-container">
+                        
+                    </div>
+            
+                    <div class="uploading info-container">
+                        
+                    </div>
+                    
+                    <div class="matching info-container">
+                        
+                    </div>
                 </div>
             </div>
-
-            <div class="register-container">
-                Alternatively, <span class="register">click this to make an account</span>:
-            </div>
-
         </div>
     </body>
+
 </html>

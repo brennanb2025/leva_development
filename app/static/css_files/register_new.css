@@ -1,53 +1,59 @@
-.login-container{
-    margin-top: 130px;
-    width: 94%;
-    max-width: 100%;
-    height: auto;
+body, html{
+    height: 100%;
+}
+
+.container{
     display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    padding: 3%;
+    height: 100%;
+    width: 100%;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.decoration-container{
+    background-image: url('../background2.png');
     background-position: center;
     background-size: cover;
+    background-repeat: no-repeat;
+    flex-basis: 40%;
 }
 
-.detail-container{
-    background-color: white;
-    box-sizing: border-box;
-    margin-top: 20px;
-    width: 30%;
-    padding: 3%;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.2);
-    transition-duration: 0.75s;
-    transition-timing-function: ease-in-out;
+.registration-container{
+    flex-basis: 60%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-.head2{
-    margin-top: 0%;
-    margin-bottom: 40px;
-    color: rgb(158, 63, 253);
-}
-
-.input-container{
+.registration-container .content{
     padding: 0%;
+    width: 50%;
 }
 
-.input-container input{
+.shading{
+    height: 100%;
+    width: 100%;
+    background-color: rgba(158, 63, 253, 0.301);
+}
+
+.content{
+    padding: 5% 10% 5% 10%;
+}
+
+.text{
+    margin-top: 20%;
+}
+
+.text .head2{
+    color: white;
+}
+
+.info-container{
+    margin-top: 30px;
+}
+
+input{
     height: 30px;
-}
-
-.register-container{
-    margin-top: 20px;
-}
-
-.register{
-    color: rgb(158, 63, 253);
-    text-decoration: underline;
-}
-
-.register:hover{
-    background-color: none;
-    background: none;
-    cursor: pointer;
+    width: 100%;
 }
