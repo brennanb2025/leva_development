@@ -9,6 +9,8 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@600&display=swap" rel="stylesheet">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+        <title>My profile | Leva</title>
         <style>
             body{
                 font-family: 'Work Sans';
@@ -29,36 +31,35 @@
             </div>
 
             <div class="nav-box">
-                <a href="/portal_test">
+                <a href="{{ url_for('portal') }}">
                     <button class="nav-button">
                         Enrollment
                     </button>
                 </a>
 
-                <a href="/profile_test">
+                <a href="{{ url_for('view', id=userID) }}">
                     <button class="nav-button">
                         Profile
                     </button>
                 </a>
 
-                <a href="/mentor_test">
+                <a href="{{ url_for('mentor') }}">
                     <button class="nav-button">
                         Mentor Matches
                     </button>
                 </a>
 
-                <a href="/progress_test">
+                <a href="{{ url_for('progress') }}">
                     <button class="nav-button">
                         Progress
                     </button>
                 </a>
-
             </div>
 
             <div class="register-box">
-                <button class="register">
+                <a class="register" href="{{ url_for('register') }}">
                     Enroll In Program
-                </button>
+                </a>
             </div>
         </div>
 
@@ -69,12 +70,10 @@
                     My Leva Profile
                 </div>
 
-                {% if logged_in is defined %}
-                {% if logged_in == true %}
+                {% if logged_in is defined and logged_in %}
                     <button href="{{ url_for('editProfile') }}">
                         Edit Profile
                     </button>
-                {% endif %}
                 {% endif %}
 
                 <div class="info">
@@ -143,6 +142,8 @@
                             </div>
                         </div>
 
+                        <!--hide all this if the current user is viewing another user's profile-->
+                        {% if logged_in is defined and logged_in %}
                         <div class="single">
                             <div class="label">
                                 Division Preference:
@@ -153,6 +154,7 @@
                             </div>
                         </div>
 
+                        <!--
                         <div class="single">
                             <div class="label">
                                 Structure Preference:
@@ -161,10 +163,10 @@
                             <div class="answer">
                                 Lorem
                             </div>
-                        </div>
+                        </div> 
+                        -->
 
                         {% if user.mentor_gender_preference is not none %}
-
                         <div class="single">
                             <div class="label">
                                 Gender Preference:
@@ -174,6 +176,7 @@
                                 {{ user.mentor_gender_preference }}
                             </div>
                         </div>
+                        {% endif %}
 
                         {% endif %}
                         

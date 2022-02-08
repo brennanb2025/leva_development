@@ -55,84 +55,59 @@ def make_session_permanent():
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET']) 
 def index():
-    return render_template('index.html', userID=session.get('userID'))
-
-@app.route('/index_test', methods=['GET'])
-def index_test():
     return render_template('index1.html', userID=session.get('userID'))
+    #return render_template('index.html', userID=session.get('userID')) (old)
 
-@app.route('/portal_test')
-def portal_test():
-    return render_template('portal.html')
+@app.route('/portal')
+def portal():
+    return render_template('portal.html', userID=session.get('userID'))
 
-@app.route('/profile_test')
-def profile_test():
+
+@app.route('/mentor')
+def mentor():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
 
-    if request.args.get("id") == None: #they went to view get without a user id in the request args
-        return redirect(url_for('index'))
-
-    user = User.query.filter_by(id=request.args.get("id")).first() #get the correct profile by inputting user id
-    if user == None:
-        return not_found("404")
-
-    interestList = []
-    for interest in user.rtn_interests():
-        interestList.append(interest.entered_name)
-    careerInterestList = []
-    for cint in user.rtn_career_interests():
-        careerInterestList.append(cint.entered_name)
-    educationList = []
-    for educ in user.rtn_education():
-        educationList.append(educ.entered_name)
-    isStudent = user.is_student
-    bio = user.bio
-
-    prof_pic_link = user.profile_picture
-    intro_vid_link = user.intro_video
-    
-
-    resumeUrl = create_resume_link(user)
-
-    this_user_is_logged_in = (user.id == session.get('userID'))
-    in_network = False
-    if Select.query.filter_by(mentee_id=user.id, mentor_id=session.get('userID')).first() != None or \
-        Select.query.filter_by(mentee_id=session.get('userID'), mentor_id=user.id).first() != None:
-        in_network = True
-
-    #^if the user looking at this person's profile page is the one who is currently logged in, 
-    # let them logout from or delete their account.
-    title="Profile Page"
-    return render_template('profile.html', title=title, profile_picture=prof_pic_link, intro_video=intro_vid_link,
-                bio=bio, in_network=in_network, logged_in=this_user_is_logged_in, resumeUrl=resumeUrl,
-                interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
-                isStudent=isStudent, user=user, userID=session.get('userID'))
-
-@app.route('/mentor_test')
-def mentor_test():
     user = User.query.filter_by(id=session.get('userID')).first()
 
     if Select.query.filter_by(mentee_id=user.id).first() != None: 
         #user already selected a mentor
         return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=False)
     
-    return render_template('mentor.html')
+    return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=True)
 
-@app.route('/progress_test')
-def progress_test():
+@app.route('/progress')
+def progress():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
-    
-    user = User.query.filter_by(id=session.get('userID')).first()
 
-    if Select.query.filter_by(mentee_id=user.id).first() != None: 
-        #user already selected a mentor
-        return render_template('progress.html', isStudent=user.is_student, userID=session.get('userID'), find_match=False)
+    user = User.query.filter_by(id=session.get('userID')).first()
     
-    return render_template('progress.html', isStudent=user.is_student, userID=session.get('userID'), find_match=True)
+    isMentee = user.is_student #user.is_mentee
+
+    select_mentor_mentee = None #the mentor or mentee that the user logged in has selected, or None
+    if isMentee: 
+        selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        if selectEntry != None:
+            select_mentor_mentee = User.query.filter_by(id=selectEntry.mentor_id).first()
+    else:
+        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+        if selectEntry != None:
+            select_mentor_mentee = User.query.filter_by(id=selectEntry.mentee_id).first()
+    #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
+
+    reminderList = [] #reminders for the future
+    progressCompletedList = [] #reminders that have already passed
+    if selectEntry != None:
+        print("in progress - add this when reminder:time information is given.")
+        #timeDiff = GETCURRENTTIME - selectEntry.timestamp
+        #populate reminderList by going thru remindersByTimeDiff: list of tuples (timeDiff, reminder)
+        #1 month, 2 months, 3 months, each quarter (6, 9, 12, 15) - JUST DO EVERY 30 DAYS
+        #accumulative - show current month, then click button to see past months.
+    
+    return render_template('progress.html', selectEntry=selectEntry, progressCompletedList=progressCompletedList, isMentee=isMentee, selectMentorMentee=select_mentor_mentee, userID=user.id, reminderList=reminderList)
 
 #sign-in page GET.
 @app.route('/sign-in', methods=['GET'])
@@ -1271,7 +1246,7 @@ def view():
     #^if the user looking at this person's profile page is the one who is currently logged in, 
     # let them logout from or delete their account.
     title="Profile Page"
-    return render_template('view.html', title=title, profile_picture=prof_pic_link, intro_video=intro_vid_link,
+    return render_template('profile.html', title=title, profile_picture=prof_pic_link, intro_video=intro_vid_link,
                 bio=bio, in_network=in_network, logged_in=this_user_is_logged_in, resumeUrl=resumeUrl,
                 interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
                 isStudent=isStudent, user=user, userID=session.get('userID'))
@@ -1422,6 +1397,8 @@ def delete_resume(user):
     user.set_resume(None, None)
     db.session.commit()
 
+#changed to /mentor
+"""
 @app.route('/feed', methods=['GET'])
 def feed():
     if not(userLoggedIn()):
@@ -1435,7 +1412,7 @@ def feed():
         return render_template('feed.html', isStudent=user.is_student, userID=session.get('userID'), find_match=False)
     
     return render_template('feed.html', isStudent=user.is_student, userID=session.get('userID'), find_match=True)
-
+"""
 
 # method called in the feed js script
 @app.route('/getFeed', methods=['GET'])
@@ -1576,6 +1553,7 @@ def feedMentee(user):
         usefulInfo['userIntroVideo'] = u.intro_video
         usefulInfo['userCurrentOccupation'] = u.current_occupation
         usefulInfo['userIsStudent'] = u.is_student
+        usefulInfo['resumeURL'] = create_resume_link(u)
 
         
         #so there is probably a better way of doing this without making two dicts but I'll implement that later
@@ -1613,7 +1591,7 @@ def mentorSelected(mentorId): #if this mentor has been selected already
     return False
 
 
-@app.route('/feed', methods=['POST'])
+@app.route('/mentor', methods=['POST'])
 def feedPost():
     #A mentee chose a mentor --> post the form with the mentor information
 
@@ -1625,25 +1603,26 @@ def feedPost():
 
     if form.get('userID') == None:
         flash(u'Something went wrong.', 'feedError')
-        return redirect(url_for('feed'))
+        return redirect(url_for('mentor'))
     
     userMatchID = form.get('userID')
 
     if Select.query.filter_by(mentor_id=userMatchID).first() != None: 
         #somebody selected this mentor while the current user was on this page
         flash(u'That mentor has been selected already.', 'feedError')
-        return redirect(url_for('feed'))
+        return redirect(url_for('mentor'))
 
 
-    newSelect = Select(mentee_id=session.get('userID'), mentor_id=userMatchID)
+    """newSelect = Select(mentee_id=session.get('userID'), mentor_id=userMatchID)
     #selection will only be made by the user logged in - the mentee.
 
     db.session.add(newSelect)
-    db.session.commit()
+    db.session.commit()"""
+    print("successfully made new selection with", User.query.filter_by(id=userMatchID).first())
     
-    return redirect(url_for("my_connections"))
+    return redirect(url_for("progress"))
 
-
+""" NO LONGER IN USE
 @app.route('/my-connections', methods=['GET'])
 def my_connections():
     if not(userLoggedIn()):
@@ -1666,7 +1645,7 @@ def my_connections():
             selectUser = User.query.filter_by(id=selectUser.mentee_id).first() #get the mentee back from the select
 
     return render_template('my_network.html', isMentee=isMentee, selectUser=selectUser, userID=session.get('userID'))
-
+"""
 
 @app.route('/reminders', methods=['GET'])
 def reminders():

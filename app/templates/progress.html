@@ -9,6 +9,8 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@600&display=swap" rel="stylesheet">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+        <title>Progress | Leva</title>
         <style>
             body{
                 font-family: 'Work Sans';
@@ -29,36 +31,35 @@
             </div>
 
             <div class="nav-box">
-                <a href="/portal_test">
+                <a href="{{ url_for('portal') }}">
                     <button class="nav-button">
                         Enrollment
                     </button>
                 </a>
 
-                <a href="/profile_test">
+                <a href="{{ url_for('view', id=userID) }}">
                     <button class="nav-button">
                         Profile
                     </button>
                 </a>
 
-                <a href="/mentor_test">
+                <a href="{{ url_for('mentor') }}">
                     <button class="nav-button">
                         Mentor Matches
                     </button>
                 </a>
 
-                <a href="/progress_test">
+                <a href="{{ url_for('progress') }}">
                     <button class="nav-button">
                         Progress
                     </button>
                 </a>
-
             </div>
 
             <div class="register-box">
-                <button class="register">
+                <a class="register" href="{{ url_for('register') }}">
                     Enroll In Program
-                </button>
+                </a>
             </div>
         </div>
 
@@ -69,57 +70,33 @@
                     My Progress & Guidance
                 </div>
 
-                <div class="container">
-                    <div id="loadingText" class="text-container">
-                        <br/><br/><br/><br/>
-                        Loading...
-                    </div>
-                
-                    <div class="text-container">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            <ul class=flashes>
-                            {% for category, message in messages %}
-                                {% if category == 'feedError' %}
-                                <span style="color: red;">[{{ message }}]</span>
-                                {% endif %}
-                            {% endfor %}
-                            </ul>
-                        {% endif %}
-                    {% endwith %}
-                    </div>
-                </div>
+                <br/><br/><br/>
+
+                {% if selectEntry != none %}
+                    {% if isMentee %}
+                        Your mentor:<br/>
+                    {% else %}
+                        Your mentee:<br/>
+                    {% endif %}
+                    {{selectMentorMentee}}
+                    <br/><br/>
+
+                    Reminders:
+                    {{reminderList}}<br/><br/>
+
+                    Progress (completed stuff):
+                    {{progressCompletedList}}
+                    <br/>
+                {% else %}
+                    {% if isMentee %}
+                        Select a mentor in the Mentor Matches tab!<br/>
+                    {% else %}
+                        Please wait until you have been selected by a mentee!<br/>
+                    {% endif %}
+                {% endif %}
+
             </section>
         </div>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='js_files/feed.js')}}"></script>
-    <script type="text/javascript">
-        $(document).ready(function(){
-
-            if("{{find_match}}" == "True") {
-                init("{{isStudent}}");
-                get_new_users(function() { //callback: pass this function as an argument to the get_new_users function.
-
-                    async function waitThenShowSlides() { //show the slide
-                        return result = await ready_document();
-                    }; 
-                    waitThenShowSlides().then(function() {
-                        setupSlideIndex();
-                        showAllSlides();
-                    });
-                    remove_loading();
-
-                });
-            } else { //don't find a match
-                noFound = document.createElement("p");
-                noFound.setAttribute("id", "noFound");
-                noFound.appendChild(document.createTextNode("You have already selected a mentor!"));
-                document.getElementById("noMatchDiv").appendChild(noFound);
-                remove_loading();
-            }
-
-        });
-
-    </script>
     </body>
 </html>

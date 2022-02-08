@@ -9,6 +9,8 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@600&display=swap" rel="stylesheet">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+        <title>Portal | Leva</title>
         <style>
             body{
                 font-family: 'Work Sans';
@@ -29,36 +31,35 @@
             </div>
 
             <div class="nav-box">
-                <a href="/portal_test">
+                <a href="{{ url_for('portal') }}">
                     <button class="nav-button">
                         Enrollment
                     </button>
                 </a>
 
-                <a href="/profile_test">
+                <a href="{{ url_for('view', id=userID) }}">
                     <button class="nav-button">
                         Profile
                     </button>
                 </a>
 
-                <a href="/mentor_test">
+                <a href="{{ url_for('mentor') }}">
                     <button class="nav-button">
                         Mentor Matches
                     </button>
                 </a>
 
-                <a href="/progress_test">
+                <a href="{{ url_for('progress') }}">
                     <button class="nav-button">
                         Progress
                     </button>
                 </a>
-
             </div>
 
             <div class="register-box">
-                <button class="register">
+                <a class="register" href="{{ url_for('register') }}">
                     Enroll In Program
-                </button>
+                </a>
             </div>
         </div>
 
@@ -81,9 +82,9 @@
                 </div>
 
                 <div class="launch-box">
-                    <button class="launch">
+                    <a class="launch register" href="{{ url_for('register') }}">
                         Enroll In Program
-                    </button>
+                    </a>
                 </div>
 
             </section>

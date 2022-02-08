@@ -67,6 +67,11 @@ body, html{
     border: none; 
     outline: none;
     color: white;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-content: center;
     background-color: rgb(33, 48, 74);
     padding: 5%;
     transition-duration: 0.4s;
@@ -117,6 +122,7 @@ body, html{
 .launch-box .launch{
     border: none;
     outline: none;
+    text-decoration: none;
     background-color: rgb(33, 48, 74);
     color: white;
     padding: 2%;

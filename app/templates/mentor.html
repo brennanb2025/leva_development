@@ -4,11 +4,19 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/main.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/portal.css')}}">
+        <!-- added -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css_files/feed.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css_files/media_gallery.css')}}">
+        <!-- added -->
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
         <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@600&display=swap" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        {{ JSGlue.include() }}
+        <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+        <title>Mentorship Matches | Leva</title>
         <style>
             body{
                 font-family: 'Work Sans';
@@ -21,6 +29,7 @@
     </head>
 
     <body>
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <div class="header">
             <div class="logo-box">
@@ -29,146 +38,96 @@
             </div>
 
             <div class="nav-box">
-                <a href="/portal_test">
+                <a href="{{ url_for('portal') }}">
                     <button class="nav-button">
                         Enrollment
                     </button>
                 </a>
 
-                <a href="/profile_test">
+                <a href="{{ url_for('view', id=userID) }}">
                     <button class="nav-button">
                         Profile
                     </button>
                 </a>
 
-                <a href="/mentor_test">
+                <a href="{{ url_for('mentor') }}">
                     <button class="nav-button">
                         Mentor Matches
                     </button>
                 </a>
 
-                <a href="/progress_test">
+                <a href="{{ url_for('progress') }}">
                     <button class="nav-button">
                         Progress
                     </button>
                 </a>
-
             </div>
 
             <div class="register-box">
-                <button class="register">
+                <a class="register" href="{{ url_for('register') }}">
                     Enroll In Program
-                </button>
+                </a>
             </div>
         </div>
 
         <div class="background">
-            <section class="mentor">
 
+            <section class="mentor" id="matchTable">
                 <div class="head">
-                    My Mentorship Matches
+                    My Mentorship Matches<br/>
                 </div>
 
-                <div class="mentor-card">
-                    <div class="picture-card">
-                        <div class="circle-border">
-                            {% if selectUser.profile_picture is none %}
-                                <img class="profile_picture_small" src="{{url_for('static', filename='blank-profile-picture.png')}}" alt="profile_picture">
-                            {% else %}
-                                <img class="profile_picture_small" src="{{selectUser.profile_picture}}" alt="profile_picture">
+                <!-- here's the actual mentor list. -->
+                <div id="loadingText" class="head">
+                    <br/><br/><br/><br/>
+                    Loading...
+                </div>
+
+                <div class="centerDiv">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class=flashes>
+                        {% for category, message in messages %}
+                            {% if category == 'feedError' %}
+                            <span style="color: red;">[{{ message }}]</span>
                             {% endif %}
-                        </div>
-
-                        <div class="head2">
-                            {{ selectUser.first_name }} 
-                        </div>
-
-                        <div class="head2">
-                            {{ selectUser.last_name }}
-                        </div>
-
-                        <div class="purple-line">
-
-                        </div>
-
-                        <div class="division">
-                            PROJECT MANAGER
-                        </div>
-                    </div>
-
-                    <div class="info-card">
-                        <div class="head2">
-                            My Standard Mentor
-                        </div>
-
-                        <div class="button-container">
-                            <div class="rounded-button button1">
-                                <button>RESUME</button>
-                            </div>
-
-                            <div class="rounded-button button2">
-                                <button>Full Profile</button>
-                            </div>
-                        </div>
-
-                        <div class="text1">
-                            This will be a 3 sentence description of the mentor/mentee (written by them in their enrollment survey). 
-                        </div>
-
-                        <div class="text1">
-                            Below will be the criteria that the two matched on. For example: 
-                        </div>
-                    </div>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
                 </div>
 
-                <!-- <div class="mentor-card">
-                    <div class="picture-card">
-                        <div class="circle-border">
-                            <img src="/images/steps.webp">
-                        </div>
+                <div id="noMatchDiv" class="pageTitle centerDiv"></div>
+                <br/>
 
-                        <div class="head2">
-                            Maya
-                        </div>
-
-                        <div class="head2">
-                            Nelson
-                        </div>
-
-                        <div class="purple-line">
-
-                        </div>
-
-                        <div class="division">
-                            PROJECT MANAGER
-                        </div>
-                    </div>
-
-                    <div class="info-card">
-                        <div class="head2">
-                            My Reverse Mentor
-                        </div>
-
-                        <div class="button-container">
-                            <div class="rounded-button button1">
-                                <button>RESUME</button>
-                            </div>
-
-                            <div class="rounded-button button2">
-                                <button>Full Profile</button>
-                            </div>
-                        </div>
-
-                        <div class="text1">
-                            This will be a 3 sentence description of the mentor/mentee (written by them in their enrollment survey). 
-                        </div>
-
-                        <div class="text1">
-                            Below will be the criteria that the two matched on. For example: 
-                        </div>
-                    </div>
-                </div> -->
             </section>
         </div>
+
+
+        
+
+        <script type="text/javascript" src="{{ url_for('static', filename='js_files/feed.js')}}"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+
+                if("{{find_match}}" == "True") {
+                    init("{{isStudent}}");
+                    get_new_users(function() { //callback: pass this function as an argument to the get_new_users function.
+
+                        ready_document();
+                        remove_loading();
+
+                    });
+                } else { //don't find a match
+                    noFound = document.createElement("p");
+                    noFound.setAttribute("id", "noFound");
+                    noFound.appendChild(document.createTextNode("You have already selected a mentor!"));
+                    document.getElementById("noMatchDiv").appendChild(noFound);
+                    remove_loading();
+                }
+
+            });
+
+        </script>
     </body>
 </html>
