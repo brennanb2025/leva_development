@@ -1,0 +1,174 @@
+body, html{
+    height: 100%;
+}
+
+.container{
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.decoration-container{
+    background-image: url('../background2.png');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    flex-basis: 40%;
+}
+
+.registration-container{
+    flex-basis: 60%;
+    display: flex;
+    flex-direction: column;
+    padding-top: 5%;
+    padding-bottom: 5%;
+    align-items: center;
+    overflow: scroll;
+}
+
+.registration-container .content{
+    padding: 0%;
+    width: 50%;
+}
+
+.shading{
+    height: 100%;
+    width: 100%;
+    background-color: rgba(158, 63, 253, 0.301);
+}
+
+.content{
+    padding: 5% 10% 5% 10%;
+}
+
+.text{
+    margin-top: 20%;
+}
+
+.text .head2{
+    color: white;
+}
+
+.info-container{
+    margin-top: 30px;
+}
+
+input{
+    height: 30px;
+    width: 100%;
+}
+
+.register-box{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.register-box .register{
+    min-width: 150px;
+    height: 50px;
+    padding: 3%;
+}
+
+.general1{
+    display: block;
+}
+
+.personal1{
+    display: none;
+}
+
+.personal2{
+    display: none;
+}
+
+.uploading{
+    display: none;
+}
+
+.matching{
+    display: none;
+}
+
+.uploading button{
+    border: none;
+    outline: none;
+    background-color: rgb(158, 63, 253);
+    color: white;
+    height: 40px;
+    width: 150px;
+    margin-top: 30px;
+    transition-duration: 0.3s;
+}
+
+.uploading button:hover{
+    background-color: rgb(33, 48, 74);
+}
+
+/* Source: W3Schools */
+
+.regtext {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    font-size: 15px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+  
+  /* Hide the browser's default radio button */
+  .regtext input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* Create a custom radio button */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: #eee;
+  border-radius: 50%;
+}
+
+/* On mouse-over, add a grey background color */
+.regtext:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the radio button is checked, add a blue background */
+.regtext input:checked ~ .checkmark {
+  background-color: rgb(158, 63, 253);
+}
+
+/* Create the indicator (the dot/circle - hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the indicator (dot/circle) when checked */
+.regtext input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the indicator (dot/circle) */
+.regtext .checkmark:after {
+ 	top: 5px;
+	left: 5px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: white;
+}
+  
