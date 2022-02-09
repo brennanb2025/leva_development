@@ -49,7 +49,7 @@
                         Register
                     </div>
                     
-                    <div class="general info-container">
+                    <div class="general1 info-container" id="general1">
                         <div class="firstlast">
                             <div class="input-container">
                                 <label for="first">First Name</label>
@@ -72,32 +72,246 @@
                         <div class="password">
                             <div class="input-container">
                                 <label for="e-mail">Password</label>
-                                <input type="text" id="e-mail">
+                                <input type="text" id="">
                             </div>
                         </div>
 
                         <div class="password-retype">
                             <div class="input-container">
                                 <label for="e-mail">Re-type Password</label>
-                                <input type="text" id="e-mail">
+                                <input type="text" id="">
+                            </div>
+                        </div>
+
+                        <label>Contact Method</label>
+                        <div class="input-container">
+                            <label class="regtext">E-mail
+                                <input type="radio" checked="checked" name="contact">
+                                <span class="checkmark"></span>
+                            </label>
+    
+                            <label class="regtext">Phone Number
+                                <input type="radio" checked="checked" name="contact">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+            
+                    <div class="personal1 info-container" id="personal1">
+                        <div class="location">
+                            <div class="input-container">
+                                <label for="e-mail">Location</label>
+                                <input type="text" id="">
+                            </div>
+                        </div>
+
+                        <div class="business">
+                            <div class="input-container">
+                                <label for="e-mail">Business</label>
+                                <input type="text" id="">
+                            </div>
+                        </div>
+
+                        <div class="education">
+                            <div class="input-container">
+                                <label for="e-mail">Education</label>
+                                <input type="text" id="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="personal2 info-container" id="personal2">
+                        <div class="personalities">
+                            <div class="input-container">
+                                <label for="e-mail">3 personalities:</label>
+                                <input type="text" id="">
+                                <input type="text" id="">
+                                <input type="text" id="">
+                            </div>
+                        </div>
+
+                        <div class="interests">
+                            <div class="input-container">
+                                <label for="e-mail">Personal interests</label>
+                                <input type="text" id="">
+                            </div>
+                        </div>
+
+                        <div class="expertise">
+                            <div class="input-container">
+                                <label for="e-mail">Professional areas to gain experience in?</label>
+                                <input type="text" id="">
+                            </div>
+                        </div>
+
+                        <div class="bio">
+                            <div class="input-container">
+                                <label for="e-mail">Short bio (max 300 words)</label>
+                                <input type="text" id="">
                             </div>
                         </div>
                     </div>
             
-                    <div class="personal info-container">
+                    <div class="uploading info-container" id="uploading">
+
+                        <div class="input-container">
+                            <label>Profile Picture</label>
+                            <button>Upload File</button>
+                            (Max size = 5MB)
+                        </div>
                         
-                    </div>
-            
-                    <div class="uploading info-container">
-                        
+                        <div class="input-container">
+                            <label>Introduction Video</label>
+                            <button>Upload File</button>
+                            (Max size = 40MB, max duration = 30seconds)
+                        </div>
+
+                        <div class="input-container">
+                            <label>Resume (Optional)</label>
+                            <button>Upload File</button>
+                            (Max size = 5MB)
+                        </div>
                     </div>
                     
-                    <div class="matching info-container">
-                        
+                    <div class="matching info-container" id="matching">
+                        <div class="division">
+                            <div class="input-container">
+                                <label for="e-mail">Division</label>
+                                <input type="text" id="">
+                            </div>
+                        </div>
+
+                        <div class="occupation">
+                            <div class="input-container">
+                                <label for="e-mail">Current Occupation</label>
+                                <input type="text" id="">
+                            </div>
+                        </div>
+
+                        <div class="Mentor">
+                            <label>Mentor or Mentee?</label>
+                            <div class="input-container">
+                                <label class="regtext">Mentor
+                                    <input type="radio" checked="checked" name="mentor">
+                                    <span class="checkmark"></span>
+                                </label>
+        
+                                <label class="regtext">Mentee
+                                    <input type="radio" checked="checked" name="mentor">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="Mentor">
+                            <label>Male or Female mentor?</label>
+                            <div class="input-container">
+                                <label class="regtext">Male
+                                    <input type="radio" checked="checked" name="gender">
+                                    <span class="checkmark"></span>
+                                </label>
+        
+                                <label class="regtext">Female
+                                    <input type="radio" checked="checked" name="gender">
+                                    <span class="checkmark"></span>
+                                </label>
+
+                                <label class="regtext">No preference
+                                    <input type="radio" checked="checked" name="gender">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="Mentor">
+                            <label>Your division mentor, or different division mentor?</label>
+                            <div class="input-container">
+                                <label class="regtext">Your division
+                                    <input type="radio" checked="checked" name="division">
+                                    <span class="checkmark"></span>
+                                </label>
+        
+                                <label class="regtext">Other division
+                                    <input type="radio" checked="checked" name="division">
+                                    <span class="checkmark"></span>
+                                </label>
+
+                                <label class="regtext">No preference
+                                    <input type="radio" checked="checked" name="division">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="register-box">
+                        <button class="register" id="back" onclick="register_prev()">
+                            Previous
+                        </button>
+
+                        <button class="register" id="register" onclick="register_next()">
+                            Next
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <script>
+            var count = 1
+
+            function update_page(){
+
+                general1 = document.getElementById("general1")
+                personal1 = document.getElementById("personal1")
+                personal2 = document.getElementById("personal2")
+                uploading = document.getElementById("uploading")
+                matching = document.getElementById("matching")
+                button = document.getElementById("register")
+
+                general1.style.display = "none"
+                personal1.style.display = "none"
+                personal2.style.display = "none"
+                uploading.style.display = "none"
+                matching.style.display = "none"
+
+                if(count == 1){
+                    general1.style.display = "block"
+                }
+                else if (count == 2){
+                    personal1.style.display = "block"
+                }
+                else if(count == 3){
+                    personal2.style.display = "block"
+                }
+                else if(count == 4){
+                    uploading.style.display = "block"
+                }
+                else if(count == 5){
+                    matching.style.display = "block"
+                }
+
+                if (count == 5){
+                    button.innerHTML = "Register"
+                }
+                else{
+                    button.innerHTML = "Next"
+                }
+            }
+
+            function register_next(){
+                count++
+                console.log(count)
+                update_page()
+            }
+
+            function register_prev(){
+                count = Math.max(1, count - 1)
+                console.log(count)
+                update_page()
+            }
+        </script>
     </body>
 
 </html>
