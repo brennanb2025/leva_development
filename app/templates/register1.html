@@ -4,6 +4,9 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="../static/css_files/main.css">
         <link rel="stylesheet" href="../static/css_files/register_new.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css_files/create_user_table.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css_files/register.css')}}">
+
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
         <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,6 +22,9 @@
                 font-family: 'Work Sans';
             }
         </style>
+
+        <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+        <title>Register | Leva</title>
     </head>
 
     <body>
@@ -43,220 +49,676 @@
             </div>
     
             <div class="registration-container">
+                <form action="/register" method="POST" enctype="multipart/form-data" id="submitForm">
+                    {{ form.hidden_tag() }}
 
-                <div class="content">
-                    <div class="head2">
-                        Register
-                    </div>
-                    
-                    <div class="general1 info-container" id="general1">
-                        <div class="firstlast">
-                            <div class="input-container">
-                                <label for="first">First Name</label>
-                                <input type="text" id="first">
-                            </div>
-
-                            <div class="input-container">
-                                <label for="last">Last Name</label>
-                                <input type="text" id="last">
-                            </div>
-                        </div>
-
-                        <div class="email">
-                            <div class="input-container">
-                                <label for="e-mail">E-mail</label>
-                                <input type="text" id="e-mail">
-                            </div>
-                        </div>
-
-                        <div class="password">
-                            <div class="input-container">
-                                <label for="e-mail">Password</label>
-                                <input type="text" id="">
-                            </div>
-                        </div>
-
-                        <div class="password-retype">
-                            <div class="input-container">
-                                <label for="e-mail">Re-type Password</label>
-                                <input type="text" id="">
-                            </div>
-                        </div>
-
-                        <label>Contact Method</label>
-                        <div class="input-container">
-                            <label class="regtext">E-mail
-                                <input type="radio" checked="checked" name="contact">
-                                <span class="checkmark"></span>
-                            </label>
-    
-                            <label class="regtext">Phone Number
-                                <input type="radio" checked="checked" name="contact">
-                                <span class="checkmark"></span>
-                            </label>
-                        </div>
-                    </div>
-            
-                    <div class="personal1 info-container" id="personal1">
-                        <div class="location">
-                            <div class="input-container">
-                                <label for="e-mail">Location</label>
-                                <input type="text" id="">
-                            </div>
-                        </div>
-
-                        <div class="business">
-                            <div class="input-container">
-                                <label for="e-mail">Business</label>
-                                <input type="text" id="">
-                            </div>
-                        </div>
-
-                        <div class="education">
-                            <div class="input-container">
-                                <label for="e-mail">Education</label>
-                                <input type="text" id="">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="personal2 info-container" id="personal2">
-                        <div class="personalities">
-                            <div class="input-container">
-                                <label for="e-mail">3 personalities:</label>
-                                <input type="text" id="">
-                                <input type="text" id="">
-                                <input type="text" id="">
-                            </div>
-                        </div>
-
-                        <div class="interests">
-                            <div class="input-container">
-                                <label for="e-mail">Personal interests</label>
-                                <input type="text" id="">
-                            </div>
-                        </div>
-
-                        <div class="expertise">
-                            <div class="input-container">
-                                <label for="e-mail">Professional areas to gain experience in?</label>
-                                <input type="text" id="">
-                            </div>
-                        </div>
-
-                        <div class="bio">
-                            <div class="input-container">
-                                <label for="e-mail">Short bio (max 300 words)</label>
-                                <input type="text" id="">
-                            </div>
-                        </div>
-                    </div>
-            
-                    <div class="uploading info-container" id="uploading">
-
-                        <div class="input-container">
-                            <label>Profile Picture</label>
-                            <button>Upload File</button>
-                            (Max size = 5MB)
+                    <div class="content">
+                        <div class="head2">
+                            Register
                         </div>
                         
-                        <div class="input-container">
-                            <label>Introduction Video</label>
-                            <button>Upload File</button>
-                            (Max size = 40MB, max duration = 30seconds)
+                        <div class="general1 info-container" id="general1">
+                            <div class="firstlast">
+                                <div class="input-container">
+                                    <label for="first">{{ form.first_name.label }}</label>
+                                    {{ form.first_name(value=first_name) }}<br/>
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'first_nameError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+
+                                <div class="input-container">
+                                    <label for="last">{{ form.last_name.label }}</label>
+                                    {{ form.last_name(value=last_name) }}<br/>
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'last_nameError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+
+                            <div class="email">
+                                <div class="input-container">
+                                    <label for="email">{{ form.email.label }}</label>
+                                    {{ form.email(value=email) }}
+                                    {% with messages = get_flashed_messages(with_categories=true) %}
+                                        {% if messages %}
+                                            <ul class=flashes>
+                                            {% for category, message in messages %}
+                                                {% if category == 'emailError' %}
+                                                <span style="color: red;">[{{ message }}]</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+
+                            <label>Contact Method</label>
+                            <div class="input-container">
+                                {% if email_or_phone is not defined or email_or_phone == none or email_or_phone == "email" %}
+                                    <label class="regtext">Email
+                                        <input type="radio" id="emailBtn" name="radio_contact" value="Email" onclick="radio_email()" checked="checked">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                    
+                                    <label class="regtext">Phone Number
+                                        <input type="radio" id="phonenumBtn" name="radio_contact" value="Phone number" onclick="radio_phone()">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                {% else %}
+                                    <label class="regtext">Email
+                                        <input type="radio" id="emailBtn" name="radio_contact" value="Email" onclick="radio_email()">
+                                        <span class="checkmark"></span>
+                                    </label>
+
+                                    <label class="regtext">Phone Number
+                                        <input type="radio" id="phonenumBtn" name="radio_contact" value="Phone number" onclick="radio_phone()" checked="checked">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                {% endif %}
+                            </div>
+
+                            <div class="email" id="whiteContainerPhone">
+                                <div class="input-container">
+                                    <input type="tel" id="phoneNumber" name="phoneNumber" class="form_style" placeholder="123-456-7890" value="{{phone_num}}">
+                                    {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'phoneError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                                </div>
+                            </div>
+
+                            
+
+                            <div class="password">
+                                <div class="input-container">
+                                    <label for="password1">{{ form.password.label }}</label>
+                                    {{ form.password }}
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'passwordError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+
+                            <div class="password-retype">
+                                <div class="input-container">
+                                    <label for="password2">{{ form.password2.label }}</label>
+                                    {{ form.password2 }}
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'password2Error' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+
+                        </div>
+                
+                        <div class="personal1 info-container" id="personal1">
+                            <div class="location">
+                                <div class="input-container">
+                                    <label for="location">{{ form.city_name.label }}</label>
+                                    {{ form.city_name(value=city_name) }}
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'cityNameError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}   
+                            </div>
+
+                            <div class="business">
+                                <div class="input-container">
+                                    <label for="business">{{ form.business.label }}</label>
+                                    {{ form.business(value=business) }}
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'businessError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+
+                            <div class="Mentor">
+                                <label>Are you a mentor or a mentee?</label>
+                                <div class="input-container">
+
+                                    {% if register_type is not defined or register_type == none or register_type == "mentee" %}
+                                        <label class="regtext">Mentee
+                                            <input type="radio" id="menteeBtn" name="radio_mentor_mentee" value="mentee" onclick="radio_mentee()" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+
+                                        <label class="regtext">Mentor
+                                            <input type="radio" id="mentorBtn" name="radio_mentor_mentee" value="mentor" onclick="radio_mentor()">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% else %}
+                                        <label class="regtext">Mentee
+                                            <input type="radio" id="menteeBtn" name="radio_mentor_mentee" value="mentee" onclick="radio_mentee()">
+                                            <span class="checkmark"></span>
+                                        </label>
+
+                                        <label class="regtext">Mentor
+                                            <input type="radio" id="mentorBtn" name="radio_mentor_mentee" value="mentor" onclick="radio_mentor()" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+
                         </div>
 
-                        <div class="input-container">
-                            <label>Resume (Optional)</label>
-                            <button>Upload File</button>
-                            (Max size = 5MB)
+                        <div class="personal2 info-container" id="personal2">
+                            <div class="personalities">
+                                <div class="input-container">
+                                    <label for="e-mail">Describe your personality (input 3 words or phrases)</label>
+                                    <input type="text" id="personality1" name="personality1" maxlength="50" value="{{textPersonality1}}">
+                                    <input type="text" id="personality2" name="personality2" maxlength="50" value="{{textPersonality2}}">
+                                    <input type="text" id="personality3" name="personality3" maxlength="50" value="{{textPersonality3}}">
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'personality_error' %}
+                                                <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+
+                            <div class="interests">
+                                <div class="input-container">
+                                    <label for="e-mail">What are your personal interests?</label>
+                                </div>
+                                <table>
+                                    <tr>
+                                        <td class="add_attribute_td">
+                                            <div class="input-container">
+                                                <input list="interestTags" name="tagField" id="tagField">
+                                                <datalist id="interestTags" name="interestTagsDatalist" style="overflow-y: auto">
+                                                    {% for tag in interestTags %}
+                                                        <option value="{{tag.title}}">
+                                                    {% endfor %}
+                                                </datalist>
+                                            </div>
+                                        </td>
+                                        <td class="add_attribute_td">
+                                            <input type="button" class="add_attribute add_something_btn" name="addTag" id="addTag" value="Add interest" onclick="add_tag()">
+                                        </td>
+                                    </tr>
+                                </table>
+                    
+                                <input type="hidden" id="num_tags" name="num_tags" value="0">
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'interestError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                                <table class="center" class="createTable" id="tagTable"></table>
+                            </div>
+
+                            <div class="expertise">
+                                <div class="input-container">
+                                    <label for="e-mail">
+                                        <div id="careerInt">What professional areas are you looking to gain expertise in?</div>
+                                        <div id="careerExp">What are your professional areas of expertise?</div>
+                                    </label>
+                                </div>
+
+                                <table>
+                                    <tr>
+                                        <td class="add_attribute_td">
+                                            <div class="input-container">
+                                                <input list="careerInterests" name="careerInterestField" id="careerInterestField">
+                                                <datalist id="careerInterests" name="careerInterestsDatalist" style="overflow-y: auto">
+                                                    {% for cInt in careerInterests %}
+                                                        <option value="{{cInt.title}}">
+                                                    {% endfor %}
+                                                </datalist>
+                                            </div>
+                                        </td>
+                                        <td class="add_attribute_td">
+                                            <input type="button" class="add_attribute add_something_btn" name="addCareerInterest" id="addCareerInterest" value="Add interest" onclick="add_career_interest()">
+                                        </td>
+                                    </tr>
+                                </table>
+                    
+                                <input type="hidden" id="num_career_interests" name="num_career_interests" value="0">
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'careerInterestError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                                <table class="center" class="createTable" id="careerInterestTable"></table>
+                            </div>
+
+                            <div class="education">
+                                <div class="input-container">
+                                    <label for="e-mail">Education</label>
+                                </div>
+                                <table>
+                                    <tr>
+                                        <td class="add_attribute_td">
+                                            <div class="input-container">
+                                                <input list="schools" name="educationField" id="educationField">
+                                                <datalist id="schools" name="schoolsDatalist" style="overflow-y: auto">
+                                                    {% for school in schools %}
+                                                        <option value="{{school.title}}">
+                                                    {% endfor %}
+                                                </datalist>
+                                            </div>
+                                        </td>
+                                        <td class="add_attribute_td">
+                                            <input type="button" class="add_attribute add_something_btn" name="addEducation" id="addEducation" value="Add school" onclick="add_education()">
+                                        </td>
+                                    </tr>
+                                </table>
+                                <input type="hidden" id="num_education_listings" name="num_education_listings" value="0">
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'educationError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                                <table class="center" class="createTable" id="educationTable"></table>
+                            </div>
+
+                            <div class="bio">
+                                <div class="input-container">
+                                    <label for="e-mail">Short bio (max 500 words)</label>
+                                    <textarea id="bio" name="bio" maxlength="500">{{bio}}</textarea>
+                                    <div id="char_count" value="">Characters left: {{500}}</div>
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'bioError' %}
+                                                <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                
+                        <div class="uploading info-container" id="uploading">
+
+                            <div class="input-container">
+                                <label>Profile Picture (Max size = 5MB)</label>
+                                <label for="inputFile">
+                                    Choose file
+                                </label>
+                                <input type="file" class="hide_this_input" name="file" value="file" id="inputFile" accept="image/x-png,image/png,image/jpeg">
+
+                                <div class="image_container centerDiv pad_top" id="image_container_div"></div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'imageError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                            
+                            <div class="input-container">
+                                <label>Introduction Video</label>
+                                (Max size = 40MB, max duration = 30seconds)
+
+                                <input type="hidden" name="videoDuration" id="videoDuration" value="">
+
+                                <label for="videoFile" class="choose_file_container add_something_btn">
+                                    Choose file
+                                </label>
+                                <input type="file" class="hide_this_input" name="videoFile" value="videoFile" id="videoFile" accept="video/mp4">
+                                
+                                <video id="newVideo" class="video_container" controls>
+                                    
+                                    Your browser does not support the video tag.
+                                </video>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'videoError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+
+                            <div class="input-container">
+                                <label>Resume (Optional)</label>
+
+                                <label for="inputFileResume" class="choose_file_container add_something_btn">
+                                    Choose file (max size: 5MB)
+                                </label>
+                                <input type="file" class="hide_this_input" name="resume" value="resume" id="inputFileResume" accept="application/pdf">
+                                <br/><span id="resumeFilename"></span><br/>
+                    
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'resumeError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                        
+                        <div class="matching info-container" id="matching">
+                            <div class="division">
+                                <div class="input-container">
+                                    <label for="e-mail">{{ form.division.label }}</label>
+                                    {{ form.division(value=division) }}
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'division_error' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+
+                            <div class="occupation">
+                                <div class="input-container">
+                                    <label for="e-mail">{{ form.current_occupation.label }}</label>
+                                    {{ form.current_occupation(value=current_occupation) }}
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'currentOccupationError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+
+                            <div class="mentor">
+                                <div id="genderMentor">
+                                    <label>What is your gender identity?</label>
+                                    <div class="input-container">
+                                        {% if mentorGenderIdentity is not defined or mentorGenderIdentity == none or mentorGenderIdentity == "Male" %}
+                                            <label class="regtext">Male
+                                                <input type="radio" id="choiceMale" name="radio_gender_identity" value="male" checked="checked">
+                                                <span class="checkmark"></span>
+                                            </label>    
+                                        {% else %}
+                                            <label class="regtext">Male
+                                                <input type="radio" id="choiceMale" name="radio_gender_identity" value="male">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        {% endif %}
+                            
+                                        {% if mentorGenderIdentity is defined and mentorGenderIdentity == "Female" %}
+                                            <label class="regtext">Female
+                                                <input type="radio" id="choiceFemale" name="radio_gender_identity" value="female" checked="checked">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        {% else %}
+                                            <label class="regtext">Female
+                                                <input type="radio" id="choiceFemale" name="radio_gender_identity" value="female">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        {% endif %}
+                            
+                                        {% if mentorGenderIdentity is defined and mentorGenderIdentity == "Non-binary/non-conforming" %}
+                                            <label class="regtext">Non-binary/non-conforming
+                                                <input type="radio" id="choiceOther" name="radio_gender_identity" value="nonbinaryNonconforming" checked="checked">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        {% else %}
+                                            <label class="regtext">Non-binary/non-conforming
+                                                <input type="radio" id="choiceOther" name="radio_gender_identity" value="nonbinaryNonconforming">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        {% endif %}
+                            
+                                        {% if mentorGenderIdentity is defined and mentorGenderIdentity == "Prefer not to respond" %}
+                                            <label class="regtext">Prefer not to respond
+                                                <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="noResponse" checked="checked">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        {% else %}
+                                            <label class="regtext">Prefer not to respond
+                                                <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="noResponse">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        {% endif %}
+                            
+                                        {% with messages = get_flashed_messages(with_categories=true) %}
+                                            {% if messages %}
+                                                <ul class=flashes>
+                                                {% for category, message in messages %}
+                                                    {% if category == 'gender_identity_error' %}
+                                                    <span style="color: red;">[{{ message }}]</span>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="Mentor">
+                                <div id="mentorPreference">
+                                <label>Do you prefer a male or a female mentor?</label>
+                                <div class="input-container">
+                                    {% if menteeGenderPreference is not defined or menteeGenderPreference == none or menteeGenderPreference == "Male" %}
+                                        <label class="regtext">Male
+                                            <input type="radio" id="choiceMale" name="radio_gender_preference" value="male" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>    
+                                    {% else %}
+                                        <label class="regtext">Male
+                                            <input type="radio" id="choiceMale" name="radio_gender_preference" value="male">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+                                    
+                                    {% if menteeGenderPreference is defined and menteeGenderPreference == "Female" %}
+                                        <label class="regtext">Female
+                                            <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>   
+                                    {% else %}
+                                        <label class="regtext">Female
+                                            <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female">
+                                            <span class="checkmark"></span>
+                                        </label> 
+                                    {% endif %}
+
+                                    {% if menteeGenderPreference is defined and menteeGenderPreference == "No preference" %}
+                                        <label class="regtext">No preferece
+                                            <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label> 
+                                    {% else %}
+                                    <label class="regtext">No preferece
+                                        <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference">
+                                        <span class="checkmark"></span>
+                                    </label> 
+                                    {% endif %}
+
+                                    {% with messages = get_flashed_messages(with_categories=true) %}
+                                        {% if messages %}
+                                            <ul class=flashes>
+                                            {% for category, message in messages %}
+                                                {% if category == 'mentor_preference_error' %}
+                                                <span style="color: red;">[{{ message }}]</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                                </div>
+                            </div>
+
+                            <div class="Mentor">
+                                <label>
+                                    <div id="menteeDivisionPreference">
+                                        Do you prefer your mentee be in your division or in a different division at the company?<br/>
+                                    </div>
+                                    <div id="mentorDivisionPreference">
+                                        Do you prefer your mentor be in your division or in a different division at the company?<br/>
+                                    </div>
+                                </label>
+                                <div class="input-container">
+                                    {% if divisionPreference is not defined or divisionPreference == none or divisionPreference == "Your division" %}
+                                        <label class="regtext">Your division
+                                            <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="same" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% else %}
+                                        <label class="regtext">Your division
+                                            <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="same">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+
+                                    {% if divisionPreference is defined and divisionPreference == "Different division" %}
+                                        <label class="regtext">Different division
+                                            <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="different" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% else %}
+                                        <label class="regtext">Different division
+                                            <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="different">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+
+                                    {% if divisionPreference is defined and divisionPreference == "No preference" %}
+                                        <label class="regtext">No preference
+                                            <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="noPreference" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% else %}
+                                        <label class="regtext">No preference
+                                            <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="noPreference">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="register-box">
+                            <button class="register" type="button" id="back" onclick="register_prev()">
+                                Previous
+                            </button>
+
+                            <button class="register" type="button" id="register" onclick="register_next()">
+                                Next
+                            </button>
                         </div>
                     </div>
                     
-                    <div class="matching info-container" id="matching">
-                        <div class="division">
-                            <div class="input-container">
-                                <label for="e-mail">Division</label>
-                                <input type="text" id="">
-                            </div>
-                        </div>
+                </form>
 
-                        <div class="occupation">
-                            <div class="input-container">
-                                <label for="e-mail">Current Occupation</label>
-                                <input type="text" id="">
-                            </div>
-                        </div>
-
-                        <div class="Mentor">
-                            <label>Mentor or Mentee?</label>
-                            <div class="input-container">
-                                <label class="regtext">Mentor
-                                    <input type="radio" checked="checked" name="mentor">
-                                    <span class="checkmark"></span>
-                                </label>
-        
-                                <label class="regtext">Mentee
-                                    <input type="radio" checked="checked" name="mentor">
-                                    <span class="checkmark"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="Mentor">
-                            <label>Male or Female mentor?</label>
-                            <div class="input-container">
-                                <label class="regtext">Male
-                                    <input type="radio" checked="checked" name="gender">
-                                    <span class="checkmark"></span>
-                                </label>
-        
-                                <label class="regtext">Female
-                                    <input type="radio" checked="checked" name="gender">
-                                    <span class="checkmark"></span>
-                                </label>
-
-                                <label class="regtext">No preference
-                                    <input type="radio" checked="checked" name="gender">
-                                    <span class="checkmark"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="Mentor">
-                            <label>Your division mentor, or different division mentor?</label>
-                            <div class="input-container">
-                                <label class="regtext">Your division
-                                    <input type="radio" checked="checked" name="division">
-                                    <span class="checkmark"></span>
-                                </label>
-        
-                                <label class="regtext">Other division
-                                    <input type="radio" checked="checked" name="division">
-                                    <span class="checkmark"></span>
-                                </label>
-
-                                <label class="regtext">No preference
-                                    <input type="radio" checked="checked" name="division">
-                                    <span class="checkmark"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="register-box">
-                        <button class="register" id="back" onclick="register_prev()">
-                            Previous
-                        </button>
-
-                        <button class="register" id="register" onclick="register_next()">
-                            Next
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
+
+        <script src="{{ url_for('static', filename='js_files/register.js')}}"></script>
+        <script type="text/javascript">
+            init("{{email_or_phone}}", "{{register_type}}");
+        </script>
 
         <script>
             var count = 1

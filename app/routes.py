@@ -176,7 +176,8 @@ def register():
         return redirect(url_for('view', id=session.get('userID')))
 
     interestTags, careerInterests, schools = get_popular_tags()
-    return render_template('register_first_access.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=form)
+    return render_template('register1.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=form)
+    #return render_template('register_first_access.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=form)
 
 #returns (tags, careerInterests, schools) - the 500 most used tags from each category.
 def get_popular_tags(): 

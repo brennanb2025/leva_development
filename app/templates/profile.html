@@ -67,7 +67,11 @@
             <section class="profile">
 
                 <div class="head">
-                    My Leva Profile
+                    {% if logged_in is defined and logged_in %}
+                        My Leva Profile
+                    {% else %}
+                        Leva Profile
+                    {% endif %}
                 </div>
 
                 {% if logged_in is defined and logged_in %}

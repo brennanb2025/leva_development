@@ -138,9 +138,6 @@ if(inputFileResume) { //ensure not null
 //document.getElementById("crop-btn").style.display = "none"; //hide crop btn
 //document.getElementById("croppedImgFile").style.display = "none"; //hide input for post form
 
-//had to add this now that cropping is out
-document.getElementById("image_container_div").style.display = "none"; //hide all image
-
 document.getElementById("phoneNumber").style.display = "none"; //hide input for phone number
 document.getElementById("careerExp").style.display = "none"; //hide career experience - assume they are a mentee
 document.getElementById("genderMentor").style.display = "none"; //hide gender radio - assume they are a mentee
@@ -148,6 +145,8 @@ document.getElementById("newVideo").style.display = "none"; //hide new video if 
 //document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
 document.getElementById("menteeDivisionPreference").style.display = "none"; //hide mentee preference - assume they are a mentee
 
+//had to add this now that cropping is out
+document.getElementById("image_container_div").style.display = "none"; //hide all image
 
 function radio_email() {
     document.getElementById("phoneNumber").style.display = "none"; //hide input for phone number
@@ -158,24 +157,25 @@ function radio_phone() {
     document.getElementById("whiteContainerPhone").style.display = "block";
 }
 function radio_mentor() { //function for if user selected that they are a mentor
+    document.getElementById("menteeDivisionPreference").style.display = "block";
+    document.getElementById("mentorDivisionPreference").style.display = "none"; //show the mentee preference and hide mentor preference
     document.getElementById("careerExp").style.display = "block"; //show career experience instead of career interests
+    document.getElementById("careerInt").style.display = "none"; //hide
     document.getElementById("genderMentor").style.display = "block";
     document.getElementById("mentorPreference").style.display = "none"; //hide mentor preference
     document.getElementById("careerInt").style.display = "none"; //hide
     document.getElementById("addCareerInterest").value = "Add experience"; //button change
     //document.getElementById("occupationInput").style.display = "block"; //show occupation entry
-    document.getElementById("menteeDivisionPreference").style.display = "block";
-    document.getElementById("mentorDivisionPreference").style.display = "none"; //show the mentee preference and hide mentor preference
 }
 function radio_mentee() { //function for if user selected that they are a mentee
+    document.getElementById("menteeDivisionPreference").style.display = "none";
+    document.getElementById("mentorDivisionPreference").style.display = "block"; //hide the mentee preference and show mentor preference
     document.getElementById("careerInt").style.display = "block"; //show career experience instead of career interests
     document.getElementById("careerExp").style.display = "none"; //hide
     document.getElementById("genderMentor").style.display = "none";
     document.getElementById("mentorPreference").style.display = "block"; //show mentor preference
     document.getElementById("addCareerInterest").value = "Add interest"; //button change
     //document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
-    document.getElementById("menteeDivisionPreference").style.display = "none";
-    document.getElementById("mentorDivisionPreference").style.display = "block"; //hide the mentee preference and show mentor preference
 }
 
 
@@ -210,19 +210,18 @@ cropBtn.addEventListener('click', function(event) {
 });
 */
 
-
 document.getElementById('bio').onkeyup = function () {
     document.getElementById('char_count').innerHTML = "Characters left: " + (500 - this.value.length);
 };
 
 function init(email_or_phone, register_type) {
-    if(email_or_phone != "email" && email_or_phone != null) {
-        radio_phone()
+    if(email_or_phone != "email" && email_or_phone != null && email_or_phone != "") {
+        radio_phone();
     }
-    if(register_type != "mentee" && register_type != null) {
-        radio_mentor()
+    if(register_type != "mentee" && register_type != null && register_type != "") {
+        radio_mentor();
     } else {
-        radio_mentee()
+        radio_mentee();
     }
 }
 

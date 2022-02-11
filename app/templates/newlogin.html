@@ -67,8 +67,7 @@
                 <div class="head2">Login</div>
 
                 <form action="/sign-in" method="POST">
-                    {{ form.hidden_tag() }}
-                    
+                    {{ form.csrf_token }}
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             <div class="flashesLogin">

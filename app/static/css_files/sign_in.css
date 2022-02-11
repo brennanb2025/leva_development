@@ -1,81 +1,53 @@
-.btn {
-    background-color: #dfdfdf;
-    border: none;
-    color: black;
-    padding: 6px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 17px;
-    cursor:pointer;
-    font-family: verdana;
-}
-.google_btn {
-    background-color: #dfdfdf;
-    border: 2px solid black;
-    color: black;
-    border-radius:13px;
-    padding: 6px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 17px;
-    cursor:pointer;
-    font-family: verdana;
-}
-.make_account {
-    width: 170px;
-    height: 60px;
-    line-height: 60px;
-    font-size: 15px;
-    font-family: Helvetica, sans-serif;
-    color:black;
-}
-.log_in_btn {
-    width: 120px;
-    height: 40px;
-    line-height: 40px;
-    font-size: 15px;
-    font-family: Helvetica, sans-serif;
-    color:navy;
+.login-container{
+    margin-top: 130px;
+    width: 94%;
+    max-width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 3%;
+    background-position: center;
+    background-size: cover;
 }
 
-.purple_container_sign_in {
-    background-color: #e8ccfc;
-    padding-top: 15px;
-    padding-bottom: 5px;
-    width: 32%;
-    margin: auto;
-}
-.white_container {
+.detail-container{
     background-color: white;
-    padding: 0px;
-    font-size: 16px;
-    width:100%;
-    text-decoration: none;
-    color: black;
-}
-.horizontal_spacing {
-    padding-left: 15px;
-    padding-right: 15px;
-}
-.form_style {
-    border: none;
-    width:100%;
-    height:25px;
-}
-.input_title {
-    font-size: 20px;
-    font-family: Helvetica, sans-serif;
-    color:navy;
-    padding-bottom: 3px;
-}
-.navy {
-    color:navy;
+    box-sizing: border-box;
+    margin-top: 20px;
+    width: 30%;
+    padding: 3%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.2);
+    transition-duration: 0.75s;
+    transition-timing-function: ease-in-out;
 }
 
-.flashesLogin {
-    text-align: center;
-    margin:auto;
-    font-size: 20px;
+.head2{
+    margin-top: 0%;
+    margin-bottom: 40px;
+    color: rgb(158, 63, 253);
+}
+
+.input-container{
+    padding: 0%;
+}
+
+.input-container input{
+    height: 30px;
+}
+
+.register-container{
+    margin-top: 20px;
+}
+
+.register{
+    color: rgb(158, 63, 253);
+    text-decoration: underline;
+}
+
+.register:hover{
+    background-color: none;
+    background: none;
+    cursor: pointer;
 }
