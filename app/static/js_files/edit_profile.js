@@ -63,7 +63,7 @@ function init(contact_method) {
         console.log("Null");
     }
 
-
+    /*
     //video stuff
     videoFile = document.getElementById("videoFile");
     if(videoFile) { //ensure not null
@@ -112,15 +112,16 @@ function init(contact_method) {
         //won't proc because of defer
         console.log("Null");
     }
+    */
 
     //document.getElementById("scrollAdvice").style.display = "none"; //hide advice
     //comment out cropping
     //document.getElementById("cropPreview").style.display = "none"; //hide preview
     //document.getElementById("crop-btn").style.display = "none"; //hide crop btn
     //document.getElementById("croppedImgFile").style.display = "none"; //hide input for post form
-    document.getElementById("newVideo").style.display = "none"; //hide new video if user hasn't input anything yet
+    //document.getElementById("newVideo").style.display = "none"; //hide new video if user hasn't input anything yet
     //document.getElementById("imgStuff").style.display = "none"; //hide all image back
-    document.getElementById("vidStuff").style.display = "none"; //hide all video back
+    //document.getElementById("vidStuff").style.display = "none"; //hide all video back
 
     if(contact_method === "True") {
         document.getElementById("phoneNum").style.display = "none"; //hide input for phone number div
@@ -185,7 +186,7 @@ if(inputFileResume) { //ensure not null
                 document.getElementById('inputFileResume').value = "";
                 return;
             }
-            document.getElementById("resumeFilename").textContent = ("File chosen: " + inputFileResume.files[0].name);
+            //document.getElementById("resumeFilename").textContent = ("File chosen: " + inputFileResume.files[0].name);
         }
             
     }, false);
@@ -193,6 +194,7 @@ if(inputFileResume) { //ensure not null
     //won't proc because of defer
     console.log("Null");
 }
+
 
 
 function setPreexistingAttributes(dataInterest, dataCareerInterest, dataEducation) {
@@ -406,6 +408,7 @@ document.getElementById('bio').onkeyup = function () {
 
 
 function add_tag() {
+    set_attributes_changed()
     arrTds = document.getElementsByName("tagName");
     var tag = document.getElementById("tagField").value;
     if(!checkOnEnter(tag, arrTds)) {
@@ -479,6 +482,7 @@ function add_tag() {
 }
 
 function removeTag() {
+    set_attributes_changed()
     cellRemove = this.parentNode.parentNode.parentNode.parentNode.parentNode;
     tags = cellRemove.parentNode; //the education tray = this.parent x 5
     tags.removeChild(cellRemove);
@@ -487,6 +491,7 @@ function removeTag() {
 }
 
 function add_education() {
+    set_attributes_changed()
     arrTds = document.getElementsByName("educationName");
     var education = document.getElementById("educationField").value;
     if(!checkOnEnter(education, arrTds)) {
@@ -560,6 +565,7 @@ function add_education() {
 }
 
 function removeEducation() {
+    set_attributes_changed()
     cellRemove = this.parentNode.parentNode.parentNode.parentNode.parentNode;
     educationTr = cellRemove.parentNode; //the education tray = this.parent.parent
     educationTr.removeChild(cellRemove);
@@ -568,6 +574,7 @@ function removeEducation() {
 }
 
 function add_career_interest() {
+    set_attributes_changed()
     arrTds = document.getElementsByName("careerInterestName");
     var careerInterest = document.getElementById("careerInterestField").value;
     if(!checkOnEnter(careerInterest, arrTds)) {
@@ -641,6 +648,7 @@ function add_career_interest() {
 }
 
 function removeCareerInterest() {
+    set_attributes_changed()
     cellRemove = this.parentNode.parentNode.parentNode.parentNode.parentNode;
     careerInterestTr = cellRemove.parentNode;
     careerInterestTr.removeChild(cellRemove);
@@ -660,4 +668,8 @@ function checkOnEnter(word, arr) {
         }
     }
     return true;
+}
+
+function set_attributes_changed() {
+    document.getElementById("changedAttributes").value = "True"
 }

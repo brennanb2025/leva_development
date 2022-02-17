@@ -75,9 +75,11 @@
                 </div>
 
                 {% if logged_in is defined and logged_in %}
-                    <button href="{{ url_for('editProfile') }}">
-                        Edit Profile
-                    </button>
+                    <a href="{{ url_for('editProfile') }}">
+                        <button class="register">
+                            Edit Profile
+                        </button>
+                    </a>
                 {% endif %}
 
                 <div class="info">
@@ -104,6 +106,46 @@
 
                         <div class="single">
                             <div class="label">
+                                Division:
+                            </div>
+    
+                            <div class="answer">
+                                {{ user.division }}
+                            </div>
+                        </div>
+
+                        <div class="single">
+                            <div class="label">
+                                Bio:
+                            </div>
+    
+                            <div class="answer">
+                                {{ user.bio }}
+                            </div>
+                        </div>
+
+                        <div class="single">
+                            <div class="label">
+                                Resume:
+                            </div>
+    
+                            <div class="answer">
+                                {{ resumeUrl }}
+                            </div>
+                        </div>
+
+                        <div class="single">
+                            <div class="label">
+                                Location:
+                            </div>
+    
+                            <div class="answer">
+                                {{ user.city_name }}
+                            </div>
+                        </div>
+
+                        <div class="single">
+                            <div class="label">
                                 Professional Goals/Areas of Expertise:
                             </div>
     
@@ -124,12 +166,28 @@
                             </div>
     
                             <div class="answer">
-                                {% if careerInterestList|length == 0 %}
+                                {% if interestList|length == 0 %}
                                     None
                                 {% else %}
                                     {% for interest in interestList %}
-                                    {{ interest }} <br/>
-                                {% endfor %}
+                                        {{ interest }} <br/>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="single">
+                            <div class="label">
+                                Education:
+                            </div>
+    
+                            <div class="answer">
+                                {% if educationList|length == 0 %}
+                                    None
+                                {% else %}
+                                    {% for e in educationList %}
+                                        {{ e }} <br/>
+                                    {% endfor %}
                                 {% endif %}
                             </div>
                         </div>
@@ -148,39 +206,54 @@
 
                         <!--hide all this if the current user is viewing another user's profile-->
                         {% if logged_in is defined and logged_in %}
-                        <div class="single">
-                            <div class="label">
-                                Division Preference:
+                        
+                            {% if divisionPreference is not none %}
+                            <div class="single">
+                                <div class="label">
+                                    Division Preference:
+                                </div>
+        
+                                <div class="answer">
+                                    {{ divisionPreference }}
+                                </div>
                             </div>
-    
-                            <div class="answer">
-                                {{ user.division_preference }}
-                            </div>
-                        </div>
+                            {% endif %}
 
-                        <!--
-                        <div class="single">
-                            <div class="label">
-                                Structure Preference:
-                            </div>
-    
-                            <div class="answer">
-                                Lorem
-                            </div>
-                        </div> 
-                        -->
+                            <!--
+                            <div class="single">
+                                <div class="label">
+                                    Structure Preference:
+                                </div>
+        
+                                <div class="answer">
+                                    Lorem
+                                </div>
+                            </div> 
+                            -->
 
-                        {% if user.mentor_gender_preference is not none %}
-                        <div class="single">
-                            <div class="label">
-                                Gender Preference:
+                            {% if mentorGenderPreference is not none and user.is_student  %}
+                            <div class="single">
+                                <div class="label">
+                                    Gender Preference:
+                                </div>
+        
+                                <div class="answer">
+                                    {{ mentorGenderPreference }}
+                                </div>
                             </div>
-    
-                            <div class="answer">
-                                {{ user.mentor_gender_preference }}
+                            {% endif %}
+
+                            {% if genderIdentity is not none and not user.is_student  %}
+                            <div class="single">
+                                <div class="label">
+                                    Gender Identity:
+                                </div>
+        
+                                <div class="answer">
+                                    {{ genderIdentity }}
+                                </div>
                             </div>
-                        </div>
-                        {% endif %}
+                            {% endif %}
 
                         {% endif %}
                         
@@ -204,6 +277,6 @@
             </section>
         </div>
 
-        <script type="text/javascript" src="{{ url_for('static', filename='js_files/view.js')}}"></script>
+        <!--<script type="text/javascript" src="{{ url_for('static', filename='js_files/view.js')}}"></script>-->
     </body>
 </html>

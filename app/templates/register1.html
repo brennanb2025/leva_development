@@ -717,6 +717,7 @@
 
         <script src="{{ url_for('static', filename='js_files/register.js')}}"></script>
         <script type="text/javascript">
+            setPreexistingAttributes({{interestList|tojson}}, {{careerInterestList|tojson}}, {{educationList|tojson}});
             init("{{email_or_phone}}", "{{register_type}}");
         </script>
 

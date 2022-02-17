@@ -176,7 +176,9 @@ def register():
         return redirect(url_for('view', id=session.get('userID')))
 
     interestTags, careerInterests, schools = get_popular_tags()
-    return render_template('register1.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=form)
+    
+    return render_template('register1.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
+    interestList=list(), educationList=list(), careerInterestList=list(), form=form)
     #return render_template('register_first_access.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=form)
 
 #returns (tags, careerInterests, schools) - the 500 most used tags from each category.
@@ -606,12 +608,6 @@ def editProfile():
     user = User.query.filter_by(id=session.get('userID')).first() #get the correct profile by inputting user id
 
     formPwd = EditPasswordForm()
-    formFn = EditFirstNameForm()
-    formLn = EditLastNameForm()
-    formCity = EditCityForm()
-    formPersonality = EditPersonalityForm()
-    formDivision = EditDivisionForm()
-    formCurrentOccupation = EditCurrentOccupationForm()
 
     interestList = []
     for interest in user.rtn_interests():
@@ -641,21 +637,319 @@ def editProfile():
     personality_2 = user.personality_2
     personality_3 = user.personality_3
 
+    mentorGenderPreference = user.mentor_gender_preference
+    if mentorGenderPreference != None:
+        if mentorGenderPreference == "male":
+            mentorGenderPreference = "Male mentor"
+        elif mentorGenderPreference == "female":
+            mentorGenderPreference = "Female mentor"
+        else:
+            mentorGenderPreference = "No preference"
+
+    divisionPreference = user.division_preference
+    if divisionPreference != None:
+        if divisionPreference == "same":
+            divisionPreference = "Same division"
+        elif divisionPreference == "different":
+            divisionPreference = "Different division"
+        else:
+            divisionPreference = "No preference"
+
+    genderIdentity = user.gender_identity
+    if genderIdentity != None:
+        if genderIdentity == "male":
+            genderIdentity = "Male"
+        elif genderIdentity == "female":
+            genderIdentity = "Female"
+        elif genderIdentity == "nonbinaryNonconforming":
+            genderIdentity = "Non-binary/non-conforming"
+        else:
+            genderIdentity = "Prefer not to respond"
+
     interestTags, careerInterests, schools = get_popular_tags()
 
     resumeUrl = create_resume_link(user)
 
     title="Edit profile Page"
-    return render_template('edit_profile.html', intro_video=intro_video_link, 
+    #return render_template('edit_profile.html', intro_video=intro_video_link, 
+    return render_template('editProfileNew.html', intro_video=intro_video_link, 
             contact_method=contact_method, phone_num=phone_num, profile_picture=prof_pic_link, 
             interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
             title=title, bio=bio, interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
             personality_1=personality_1, personality_2=personality_2, personality_3=personality_3, division=user.division,
-            divisionPreference=user.division_preference, resumeUrl=resumeUrl,
-            mentorGenderIdentity=user.gender_identity, menteeGenderPreference=user.mentor_gender_preference,
-            formPwd=formPwd, formFn=formFn, formLn=formLn, formCity=formCity, formCurrentOccupation=formCurrentOccupation, 
-            formPersonality=formPersonality, formDivision=formDivision,
+            resumeUrl=resumeUrl, divisionPreference=divisionPreference,
+            mentorGenderPreference=mentorGenderPreference, genderIdentity=genderIdentity,
+            formPwd=formPwd, 
             user=user, userID=session.get('userID'))
+
+
+@app.route('/edit-profile', methods = ['POST'])
+def editProfilePost():
+    form = request.form
+    print(form)
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+
+    success = True
+    u = User.query.filter_by(id=session['userID']).first()
+
+    changedFnSuccess = False #init as false in case they didn't change it
+    if form.get("first_name") != u.first_name: #changed first name --> check it
+        changedFnSuccess=checkFirstName(form)
+        if not changedFnSuccess: #changed first name unsuccessful.
+            success = False
+
+    changedLnSuccess = False #init as false in case they didn't change it
+    if form.get("last_name") != u.last_name: #changed last name --> check it
+        changedLnSuccess=checkLastName(form)
+        if not changedLnSuccess: #change unsuccessful.
+            success = False
+
+    changedCitySuccess = False #init as false in case they didn't change it
+    if form.get("city_name") != u.city_name: #changed city name --> check it
+        changedCitySuccess=checkCityName(form)
+        if not changedCitySuccess: #change unsuccessful.
+            success = False
+    
+    changedOccupationSuccess = False #init as false in case they didn't change it
+    if form.get("current_occupation") != u.current_occupation: #changed current occupation --> check it
+        changedOccupationSuccess=checkCityName(form)
+        if not changedOccupationSuccess: #change unsuccessful.
+            success = False
+
+    changedBioSuccess = False #init as false in case they didn't change it
+    if form.get("bio") != u.bio: #changed bio --> check it
+        changedBioSuccess=checkBio(form)
+        if not changedBioSuccess: #change unsuccessful.
+            success = False
+    
+    changedMentorGenderSuccess = False
+    if u.is_student and form.get("radio_gender_preference") != None:
+        #ensuring that this form actually exists
+        if form.get("radio_gender_preference") != u.mentor_gender_preference: #changed preference --> check it
+            changedMentorGenderSuccess=checkMentorGenderPreference(form)
+            if not changedMentorGenderSuccess: #change unsuccessful.
+                success = False
+
+    changedGenderIdentitySuccess = False
+    if not u.is_student and form.get("radio_gender_identity") != None:
+        if form.get("radio_gender_identity") != u.gender_identity: #changed gender identity --> check it
+            changedGenderIdentitySuccess=checkGenderIdentity(form)
+            if not changedGenderIdentitySuccess: #change unsuccessful.
+                success = False
+            
+    changedInputsSuccess = False
+    if form.get("changedAttributes") == "True": #changed attributes --> check them
+        changedInputsSuccess=checkAttributes(form, u.is_student)
+        if not changedInputsSuccess: #change unsuccessful.
+            success = False
+    
+    changedPersonalitySuccess = False
+    if form.get("personality1") != u.personality_1 or form.get("personality2") != u.personality_2 or form.get("personality3") != u.personality_3: #changed --> check it
+        changedPersonalitySuccess=checkPersonality(form)
+        if not changedPersonalitySuccess: #change unsuccessful.
+            success = False
+    
+    changedDivisionSuccess = False
+    if form.get("division") != u.division: #changed --> check it
+        changedDivisionSuccess=checkDivision(form)
+        if not changedDivisionSuccess: #change unsuccessful.
+            success = False
+    
+    changedDivisionPreferenceSuccess = False
+    if form.get("divisionPreference") != u.division_preference: #changed --> check it
+        changedDivisionPreferenceSuccess=checkDivisionPreference(form, u.is_student)
+        if not changedDivisionPreferenceSuccess: #change unsuccessful.
+            success = False
+
+    changedContactMethodSuccess = False
+    if form.get("radio_contact") == "Phone number" and u.email_contact \
+                or form.get("radio_contact") == "Email" and not u.email_contact: #changed --> check it
+        changedContactMethodSuccess=checkContactPreference(form)
+        if not changedContactMethodSuccess: #change unsuccessful.
+            success = False
+    
+    #TODO: more here
+
+
+    if success:
+        #set here
+        if changedFnSuccess:
+            u.set_first_name(form.get("first_name"))
+        if changedLnSuccess:
+            u.set_last_name(form.get("last_name"))
+        if changedCitySuccess:
+            u.set_city_name(form.get("city_name"))
+        if changedOccupationSuccess:
+            u.set_current_occupation(form.get("current_occupation"))
+        if changedBioSuccess:
+            u.set_bio(form.get("bio"))
+        if changedMentorGenderSuccess:
+            u.set_mentor_gender_preference(form.get("radio_gender_preference"))
+        if changedGenderIdentitySuccess:
+            u.set_gender_identity(form.get("radio_gender_identity"))
+        if changedInputsSuccess:
+            changeAttributes(form,u)
+        if changedPersonalitySuccess:
+            u.set_personality(form.get('personality1'), form.get('personality2'), form.get('personality3'))
+        if changedDivisionSuccess:
+            u.set_division(form.get("division"))
+        if changedDivisionPreferenceSuccess:
+            u.set_division_preference(form.get("divisionPreference"))
+        if changedContactMethodSuccess:
+            if form.get('radio_contact') == 'Email': #checked the email box
+                u.remove_phone()
+            if form.get('radio_contact') == 'Phone number':
+                u.set_phone(form.get('phoneNumber'))
+        
+        db.session.commit()
+        return redirect(url_for('view', id=session.get('userID')))
+    else: 
+        return redirect(url_for('editProfile'))
+
+def checkFirstName(form):
+    if form.get("first_name") == '':
+        flash(u'Please enter a new first name.', 'firstNameError')
+        return False
+    else:
+        return True
+
+def checkLastName(form):
+    if form.get("last_name") == '':
+        flash(u'Please enter a new last name.', 'lastNameError')
+        return False
+    else:
+        return True
+
+def checkCityName(form):
+    if form.get("city_name") == '':
+        flash(u'Please enter a new city name.', 'cityNameError')
+        return False
+    else:
+        return True
+
+def checkCurrentOccupationName(form):
+    if form.get("current_occupation") == '':
+        flash(u'Please enter a new current occupation.', 'currentOccupationError')
+        return False
+    else:
+        return True
+
+def checkMentorGenderPreference(form):
+    if form.get("radio_gender_preference") == None or form.get("radio_gender_preference") == '': #preference empty
+        flash(u"Please enter a preference for your mentor's gender.", 'mentor_preference_error')
+        return False
+    else:
+        return True
+
+def checkGenderIdentity(form):
+    if form.get("radio_gender_identity") == None or form.get("radio_gender_identity") == '': #empty
+        flash(u"Please enter your gender identity.", 'gender_identity_error')
+        return False
+    else:
+        return True
+
+def checkBio(form):
+    if form.get("bio") == '': #bio empty
+        flash(u'Your bio cannot be empty.', 'bioError')
+        return False
+    else:
+        return True
+
+def checkAttributes(form, isMentee):
+    if int(form.get('num_tags')) == 0:
+        flash(u'Please enter at least one interest.', 'interestError')
+        return False
+
+    if int(form.get('num_education_listings')) == 0:
+        flash(u'Please enter at least one school.', 'educationError')
+        return False
+
+    if int(form.get('num_career_interests')) == 0:
+        if isMentee:
+            flash(u'Please enter at least one career interest.', 'careerInterestError')
+        else:
+            flash(u'Please enter at least one career experience.', 'careerInterestError')
+        return False
+    return True
+def changeAttributes(form, user):
+    #I want to register the new attributes - delete the old ones.
+    delete_user_attributes(user.id)
+
+    #get interests
+    #I don't actually need num_tags since I can iterate thru getlist, 
+    # but I can see it being useful/efficient for future features.
+    #ok I'm just going to iterate through the list to protect against index out of bounds exceptions
+    interestArr = form.getlist("tagName")
+    #for i in range(int(form1.get('num_tags'))):
+    for i in range(len(interestArr)):
+        interestTag = InterestTag(
+            user_id=user.id,
+            entered_name=interestArr[i]
+        )
+        db.session.add(interestTag)
+        db.session.commit() #I have to do this before I set the resource so the id will be set.
+        interestTag.set_interestID(interestArr[i], db.session)
+
+    #get education
+    eduArr = form.getlist("educationName")
+    #for i in range(int(form1.get('num_education_listings'))):
+    for i in range(len(eduArr)):
+        educationTag = EducationTag(
+            user_id=user.id,
+            entered_name=eduArr[i]
+        )
+        db.session.add(educationTag)
+        db.session.commit() #I have to do this before I set the resource so the id will be set.
+        educationTag.set_educationID(eduArr[i], db.session)
+
+    #get career interests
+    cintArr = form.getlist("careerInterestName")
+    #for i in range(int(form1.get('num_career_interests'))):
+    for i in range(len(cintArr)):
+        cintTag = CareerInterestTag(
+            user_id=user.id,
+            entered_name=cintArr[i]
+        )
+        db.session.add(cintTag)
+        db.session.commit() #I have to do this before I set the resource so the id will be set.
+        cintTag.set_careerInterestID(cintArr[i], db.session)
+
+    db.session.commit()
+
+def checkPersonality(form):
+    if form.get('personality1') == "" or form.get('personality2') == "" or form.get('personality3') == "":
+        flash(u'You must input 3 personality traits/phrases.', 'personalityError')
+        return False
+    return True
+
+def checkDivision(form):
+    if form.get('division') == "":
+        flash(u'You must input what division you are in.', 'divisionError')
+        return False
+    return True
+
+def checkDivisionPreference(form, isMentee):
+    if form.get("divisionPreference") == None and form.get("divisionPreference") != "": 
+        #mentee and mentor division preference empty or mentor and mentee division preference empty
+        if isMentee:
+            flash(u"Please enter a preference for your mentor's division.", 'divisionPreferenceError')
+        else:
+            flash(u"Please enter a preference for your mentee's division.", 'divisionPreferenceError')
+        return False
+    return True
+
+def checkContactPreference(form):
+    if form.get('radio_contact') == 'Phone number' and form.get('phoneNumber') == "": #user chose to be contacted by phone
+        flash(u'Your phone number cannot be empty.', 'phoneError')
+        return False
+
+    if form.get('radio_contact') != 'Email' and form.get('radio_contact') != 'Phone number': #somehow removed the check
+        return False
+    
+    return True
+
+
 
 #edit-profile-password POST.
 #changes the user's password if it is input correctly. Then sends the user back to view.
@@ -687,6 +981,7 @@ def editProfilePassword():
     else: 
         return redirect(url_for('editProfile'))
 
+"""
 #edit-profile-first-name GET. 
 #changes the user's first name if it is input correctly. Then sends the user back to view.
 @app.route('/edit-profile-first-name', methods = ['POST'])
@@ -739,6 +1034,7 @@ def editProfileLastName():
     else: 
         return redirect(url_for('editProfile'))
 
+
 @app.route('/edit-profile-city', methods = ['POST'])
 def editProfileCityName():
 
@@ -763,6 +1059,7 @@ def editProfileCityName():
         return redirect(url_for('view', id=session.get('userID')))
     else: 
         return redirect(url_for('editProfile'))
+
 
 @app.route('/edit-profile-current-occupation', methods = ['POST'])
 def editProfileCurrentOccupation():
@@ -789,7 +1086,6 @@ def editProfileCurrentOccupation():
     else: 
         return redirect(url_for('editProfile'))
 
-
 @app.route('/edit-profile-mentor-gender-preference', methods = ['POST'])
 def editProfileGenderPreference():
 
@@ -810,6 +1106,7 @@ def editProfileGenderPreference():
     db.session.commit()
     return redirect(url_for('editProfile'))
 
+
 @app.route('/edit-profile-gender-identity', methods = ['POST'])
 def editProfileGenderIdentity():
 
@@ -829,7 +1126,6 @@ def editProfileGenderIdentity():
     user.set_gender_identity(form.get("radio_gender_identity"))
     db.session.commit()
     return redirect(url_for('editProfile'))
-    
 
 
 @app.route('/edit-profile-attributes', methods = ['POST'])
@@ -907,22 +1203,6 @@ def editProfileAttributes():
         db.session.commit()
 
     return redirect(url_for('editProfile')) #go back on either success or fail
-    
-""" No longer able to do this
-@app.route('/edit-profile-position', methods = ['POST'])
-def editProfilePosition():
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-    user = User.query.filter_by(id=session.get('userID')).first()
-    form = request.form
-    if form.get('radio_isStudent') == 'mentor': #make the user a mentor
-        user.set_isStudent(False) 
-    else: #make user a student
-        user.set_isStudent(True)
-        #TODO: caution against doing this before checking matches and then delete all selects with this user as the base
-
-    db.session.commit()
-    return redirect(url_for('editProfile'))"""
 
 @app.route('/edit-profile-bio', methods = ['POST'])
 def editProfileBio():
@@ -951,6 +1231,7 @@ def editProfilePersonality():
     user.set_personality(form.get('personality_1'), form.get('personality_2'), form.get('personality_3'))
     db.session.commit()
     return redirect(url_for('editProfile'))
+
 
 @app.route('/edit-profile-division', methods = ['POST'])
 def editProfileDivision():
@@ -983,8 +1264,6 @@ def editProfileDivisionPreference():
     db.session.commit()
     return redirect(url_for('editProfile'))
 
-
-
 @app.route('/edit-profile-contact', methods = ['POST'])
 def editProfileContact():
     if not userLoggedIn():
@@ -1004,6 +1283,8 @@ def editProfileContact():
 
     db.session.commit()
     return redirect(url_for('editProfile'))
+
+"""
 
 @app.route('/edit-profile-picture', methods=['POST'])
 def editProfPic():
@@ -1080,6 +1361,7 @@ def deleteProfPic():
 
     return redirect(url_for('editProfile'))
 
+"""
 @app.route('/delete-intro-video', methods=['POST'])
 def deleteIntroVid():
     if not(userLoggedIn()):
@@ -1090,6 +1372,7 @@ def deleteIntroVid():
     delete_intro_video(user)
 
     return redirect(url_for('editProfile'))
+"""
 
 @app.route('/delete-resume', methods=['POST'])
 def deleteResume():
@@ -1103,7 +1386,7 @@ def deleteResume():
 
     return redirect(url_for('editProfile'))
 
-
+"""
 @app.route('/edit-video', methods=['POST'])
 def editVideo():
     if not(userLoggedIn()):
@@ -1145,6 +1428,7 @@ def editVideo():
         db.session.commit()
 
     return redirect(url_for('editProfile'))
+"""
 
 @app.route('/edit-profile-resume', methods=['POST'])
 def editProfResume():
@@ -1244,13 +1528,43 @@ def view():
         Select.query.filter_by(mentee_id=session.get('userID'), mentor_id=user.id).first() != None:
         in_network = True
 
+    mentorGenderPreference = user.mentor_gender_preference
+    if mentorGenderPreference != None:
+        if mentorGenderPreference == "male":
+            mentorGenderPreference = "Male mentor"
+        elif mentorGenderPreference == "female":
+            mentorGenderPreference = "Female mentor"
+        else:
+            mentorGenderPreference = "No preference"
+
+    divisionPreference = user.division_preference
+    if divisionPreference != None:
+        if divisionPreference == "same":
+            divisionPreference = "Same division"
+        elif divisionPreference == "different":
+            divisionPreference = "Different division"
+        else:
+            divisionPreference = "No preference"
+
+    genderIdentity = user.gender_identity
+    if genderIdentity != None:
+        if genderIdentity == "male":
+            genderIdentity = "Male"
+        elif genderIdentity == "female":
+            genderIdentity = "Female"
+        elif genderIdentity == "nonbinaryNonconforming":
+            genderIdentity = "Non-binary/non-conforming"
+        else:
+            genderIdentity = "Prefer not to respond"
+
     #^if the user looking at this person's profile page is the one who is currently logged in, 
     # let them logout from or delete their account.
     title="Profile Page"
     return render_template('profile.html', title=title, profile_picture=prof_pic_link, intro_video=intro_vid_link,
                 bio=bio, in_network=in_network, logged_in=this_user_is_logged_in, resumeUrl=resumeUrl,
                 interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
-                isStudent=isStudent, user=user, userID=session.get('userID'))
+                genderIdentity=genderIdentity, divisionPreference=divisionPreference,
+                isStudent=isStudent, mentorGenderPreference=mentorGenderPreference, user=user, userID=session.get('userID'))
     #user logged in: show profile page.
 
 

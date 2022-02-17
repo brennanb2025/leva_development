@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css_files/main.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css_files/portal.css')}}">
+        <link rel="stylesheet" href="../static/css_files/register_new.css">
+        <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+        <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@600&display=swap" rel="stylesheet">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+        <title>My profile | Leva</title>
+        <style>
+            body{
+                font-family: 'Work Sans';
+            }
+
+            button{
+                font-family: 'Work Sans';
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="header">
+            <div class="logo-box">
+                <img src="https://static.wixstatic.com/media/12ecaa_e292ca41155b4bee9ea276dc89fef0f3~mv2.png/v1/fill/w_165,h_87,al_c,q_85,usm_0.66_1.00_0.01/IMG_0256_PNG.webp" 
+                alt="IMG_0256.PNG" style="width:165px;height:87px;object-fit:cover;object-position:50% 50%">
+            </div>
+
+            <div class="nav-box">
+                <a href="{{ url_for('portal') }}">
+                    <button class="nav-button">
+                        Enrollment
+                    </button>
+                </a>
+
+                <a href="{{ url_for('view', id=userID) }}">
+                    <button class="nav-button">
+                        Profile
+                    </button>
+                </a>
+
+                <a href="{{ url_for('mentor') }}">
+                    <button class="nav-button">
+                        Mentor Matches
+                    </button>
+                </a>
+
+                <a href="{{ url_for('progress') }}">
+                    <button class="nav-button">
+                        Progress
+                    </button>
+                </a>
+            </div>
+
+            <div class="register-box">
+                <a class="register" href="{{ url_for('register') }}">
+                    Enroll In Program
+                </a>
+            </div>
+        </div>
+
+        <div class="background">
+            <section class="profile">
+
+                <div class="head">
+                    Edit My Profile
+                </div>
+
+
+                <div class="info">
+                    <form action="/edit-profile" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="list">
+                            <div class="single">
+                                <div class="label">
+                                    Name:
+                                </div>
+        
+                                <div class="answer">
+                                    <input value="{{ user.first_name }}" id="first_name" name="first_name"> <input value="{{ user.last_name }}" id="last_name" name="last_name">
+                                </div>
+                            </div>
+
+                            <div class="single">
+                                <div class="label">
+                                    Change contact method:<br/><br/>
+                                </div>
+                                <div class="answer">
+                                    {% if contact_method == true %}
+                                        <label class="regtext">Email
+                                            <input type="radio" id="emailBtn" name="radio_contact" value="Email" onclick="radio_email()" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                        
+                                        <label class="regtext">Phone Number
+                                            <input type="radio" id="phonenumBtn" name="radio_contact" value="Phone number" onclick="radio_phone()">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% else %}
+                                        <label class="regtext">Email
+                                            <input type="radio" id="emailBtn" name="radio_contact" value="Email" onclick="radio_email()">
+                                            <span class="checkmark"></span>
+                                        </label>
+
+                                        <label class="regtext">Phone Number
+                                            <input type="radio" id="phonenumBtn" name="radio_contact" value="Phone number" onclick="radio_phone()" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+                                    <div id="phoneNum">
+                                        Change phone number:<br/>
+                                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="123-456-7890">
+                                    </div>
+
+                                    <!--
+                                    {% if contact_method == true %}
+                                        <input type="radio" id="emailBtn" name="radio_contact" value="Email" onclick="radio_email()" checked>
+                                        <label for="emailBtn">Email</label><br/>
+                                        <input type="radio" id="phonenumBtn" name="radio_contact" value="Phone number" onclick="radio_phone()">
+                                        <label for="phonenumBtn">Phone number</label>
+                                        <div id="phoneNum">
+                                            Change phone number:<br/>
+                                            <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="123-456-7890">
+                                        </div>
+                                    {% else %}
+                                        <br/>
+                                        Current phone number: {{phone_num}}<br/><br/>
+                                        <input type="radio" id="emailBtn" name="radio_contact" value="Email" onclick="radio_email()">
+                                        <label for="emailBtn">Email</label><br/>
+                                        <input type="radio" id="phonenumBtn" name="radio_contact" value="Phone number" onclick="radio_phone()" checked>
+                                        <label for="phonenumBtn">Phone number</label>
+                                        <div id="phoneNum">
+                                            Change phone number:<br/>
+                                            <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="123-456-7890">
+                                        </div>
+                                    {% endif %}-->
+                                    {% with messages = get_flashed_messages(with_categories=true) %}
+                                        {% if messages %}
+                                            <ul class=flashes>
+                                            {% for category, message in messages %}
+                                                {% if category == 'phoneError' %}
+                                                <span style="color: red;">[{{ message }}]</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+
+                            <div class="single">
+                                <div class="label">
+                                    Job Title:
+                                </div>
+        
+                                <div class="answer">
+                                    <input id="current_occupation" name="current_occupation" value="{{ user.current_occupation }}">
+                                </div>
+                            </div>
+
+                            <div class="single">
+                                <div class="label">
+                                    Division:
+                                </div>
+        
+                                <div class="answer">
+                                    <input id="division" name="division" value="{{ user.division }}">
+                                </div>
+                            </div>
+
+                            <div class="single">
+                                <div class="label">
+                                    Bio:
+                                </div>
+        
+                                <div class="answer">
+                                    <input id="bio" name="bio" value="{{ user.bio }}">
+                                </div>
+                            </div>
+    
+                            <div class="single">
+                                <div class="label">
+                                    Resume:
+                                </div>
+        
+                                <div class="answer">
+                                    TODO EDIT THIS {{ resumeUrl }}
+                                </div>
+                            </div>
+
+                            <div class="single">
+                                <div class="label">
+                                    Location:
+                                </div>
+        
+                                <div class="answer">
+                                    <input id="city_name" name="city_name" value="{{ user.city_name }}">
+                                </div>
+                            </div>
+
+
+                            <div class="single">
+                                <input type="hidden" id="changedAttributes" name="changedAttributes" value="False">
+                                <div class="label">
+                                    {%- if register_type == "student" -%}
+                                        <div class="input_title">Career Interests:<br/></div>
+                                    {%- else -%}
+                                        <div class="input_title">Career Experience:<br/></div>
+                                    {%- endif -%}
+                                </div>
+        
+                                <div class="answer">
+                                    <br/>
+                                    <input list="careerInterests" name="careerInterestField" id="careerInterestField">
+                                    <datalist id="careerInterests" style="overflow-y: auto">
+                                        {% for cInt in careerInterests %}
+                                            <option value="{{cInt.title}}">
+                                        {% endfor %}
+                                    </datalist>
+                                    <input type="button" class="btn" name="addCareerInterest" id="addCareerInterest" value="Add interest" onclick="add_career_interest()">
+                                    <input type="hidden" id="num_career_interests" name="num_career_interests" value="{{careerInterestList|length}}">
+                                    
+                                    <table class="center" id="careerInterestTable">
+                                    </table>
+                                    {% with messages = get_flashed_messages(with_categories=true) %}
+                                        {% if messages %}
+                                            <ul class=flashes>
+                                            {% for category, message in messages %}
+                                                {% if category == 'careerInterestError' %}
+                                                    <span style="color: red;">[{{ message }}]</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+    
+                            <div class="single">
+                                <div class="label">
+                                    Interests:
+                                </div>
+        
+                                <div class="answer">
+                                    <input list="interestTags" name="tagField" id="tagField">
+                                    <datalist id="interestTags" style="overflow-y: auto">
+                                        {% for tag in interestTags %}
+                                            <option value="{{tag.title}}">
+                                        {% endfor %}
+                                    </datalist>
+                                    <input type="button" class="btn" name="addTag" id="addTag" value="Add interest" onclick="add_tag()">
+                                    <input type="hidden" id="num_tags" name="num_tags" value="{{interestList|length}}">
+                                    
+                                    <table class="center" id="tagTable">
+                                    </table>
+                                    {% with messages = get_flashed_messages(with_categories=true) %}
+                                        {% if messages %}
+                                            <ul class=flashes>
+                                            {% for category, message in messages %}
+                                                {% if category == 'interestError' %}
+                                                    <span style="color: red;">[{{ message }}]</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endwith %}
+                            </div>
+    
+                            <div class="single">
+                                <div class="label">
+                                    Education:
+                                </div>
+        
+                                <div class="answer">
+                                    <input list="schools" name="educationField" id="educationField">
+                                    <datalist id="schools" style="overflow-y: auto">
+                                        {% for school in schools %}
+                                            <option value="{{school.title}}">
+                                        {% endfor %}
+                                    </datalist>
+                                    <input type="button" class="btn" name="addEducation" id="addEducation" value="Add school" onclick="add_education()">
+                                    <input type="hidden" id="num_education_listings" name="num_education_listings" value="{{educationList|length}}">
+                                    
+                                    <table class="center" id="educationTable">
+                                    </table>
+                                    {% with messages = get_flashed_messages(with_categories=true) %}
+                                        {% if messages %}
+                                            <ul class=flashes>
+                                            {% for category, message in messages %}
+                                                {% if category == 'educationError' %}
+                                                    <span style="color: red;">[{{ message }}]</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+
+
+                            <div class="single">
+                                <div class="label">
+                                    Personality - 3 words/phrases:
+                                </div>
+        
+                                <div class="answer">
+                                    <input type="text" id="personality1" name="personality1" maxlength="50" value="{{user.personality_1}}"><br/>
+                                    <input type="text" id="personality2" name="personality2" maxlength="50" value="{{user.personality_2}}"><br/>
+                                    <input type="text" id="personality3" name="personality3" maxlength="50" value="{{user.personality_3}}"><br/>
+                                </div>
+                            </div>
+
+                            <!--
+                            <div class="single">
+                                <div class="label">
+                                    Structure Preference:
+                                </div>
+        
+                                <div class="answer">
+                                    Lorem
+                                </div>
+                            </div> 
+                            -->
+
+                            <div class="Mentor">
+                                {% if user.is_student %}
+                                    <label>Mentor gender preference:</label>
+                                    <div class="input-container">
+                                        {% if mentorGenderPreference is not defined or mentorGenderPreference == none or mentorGenderPreference == "Male mentor" %}
+                                            <label class="regtext">Male
+                                                <input type="radio" id="choiceMale" name="radio_gender_preference" value="male" checked="checked">
+                                                <span class="checkmark"></span>
+                                            </label>    
+                                        {% else %}
+                                            <label class="regtext">Male
+                                                <input type="radio" id="choiceMale" name="radio_gender_preference" value="male">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        {% endif %}
+                                        
+                                        {% if mentorGenderPreference is defined and mentorGenderPreference == "Female mentor" %}
+                                            <label class="regtext">Female
+                                                <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female" checked="checked">
+                                                <span class="checkmark"></span>
+                                            </label>   
+                                        {% else %}
+                                            <label class="regtext">Female
+                                                <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female">
+                                                <span class="checkmark"></span>
+                                            </label> 
+                                        {% endif %}
+
+                                        {% if mentorGenderPreference is defined and mentorGenderPreference == "No preference" %}
+                                            <label class="regtext">No preferece
+                                                <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference" checked="checked">
+                                                <span class="checkmark"></span>
+                                            </label> 
+                                        {% else %}
+                                        <label class="regtext">No preferece
+                                            <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference">
+                                            <span class="checkmark"></span>
+                                        </label> 
+                                        {% endif %}
+
+                                        {% with messages = get_flashed_messages(with_categories=true) %}
+                                            {% if messages %}
+                                                <ul class=flashes>
+                                                {% for category, message in messages %}
+                                                    {% if category == 'mentor_preference_error' %}
+                                                    <span style="color: red;">[{{ message }}]</span>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+
+                                {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="Mentor">
+                                <label>
+                                    {% if user.is_student %}
+                                        Mentor division preference:<br/>
+                                    {% else %}
+                                        Mentee division preference:<br/>
+                                    {% endif %}
+                                </label>
+                                <div class="input-container">
+                                    {% if divisionPreference is not defined or divisionPreference == none or divisionPreference == "Same division" %}
+                                        <label class="regtext">Your division
+                                            <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="same" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% else %}
+                                        <label class="regtext">Your division
+                                            <input type="radio" id="yourDivisionChoice" name="divisionPreference" value="same">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+
+                                    {% if divisionPreference is defined and divisionPreference == "Different division" %}
+                                        <label class="regtext">Different division
+                                            <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="different" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% else %}
+                                        <label class="regtext">Different division
+                                            <input type="radio" id="differentDivisionChoice" name="divisionPreference" value="different">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+
+                                    {% if divisionPreference is defined and divisionPreference == "No preference" %}
+                                        <label class="regtext">No preference
+                                            <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="noPreference" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% else %}
+                                        <label class="regtext">No preference
+                                            <input type="radio" id="noPrefDivisionChoice" name="divisionPreference" value="noPreference">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if genderIdentity is not none and not user.is_student  %}
+                            <div class="Mentor">
+                            
+                                <label>Gender identity:</label>
+                                <div class="input-container">
+                                    {% if genderIdentity is not defined or genderIdentity == none or genderIdentity == "Male" %}
+                                        <label class="regtext">Male
+                                            <input type="radio" id="choiceMale" name="radio_gender_identity" value="male" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>    
+                                    {% else %}
+                                        <label class="regtext">Male
+                                            <input type="radio" id="choiceMale" name="radio_gender_identity" value="male">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+                        
+                                    {% if genderIdentity is defined and genderIdentity == "Female" %}
+                                        <label class="regtext">Female
+                                            <input type="radio" id="choiceFemale" name="radio_gender_identity" value="female" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% else %}
+                                        <label class="regtext">Female
+                                            <input type="radio" id="choiceFemale" name="radio_gender_identity" value="female">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+                        
+                                    {% if genderIdentity is defined and genderIdentity == "Non-binary/non-conforming" %}
+                                        <label class="regtext">Non-binary/non-conforming
+                                            <input type="radio" id="choiceOther" name="radio_gender_identity" value="nonbinaryNonconforming" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% else %}
+                                        <label class="regtext">Non-binary/non-conforming
+                                            <input type="radio" id="choiceOther" name="radio_gender_identity" value="nonbinaryNonconforming">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+                        
+                                    {% if genderIdentity is defined and genderIdentity == "Prefer not to respond" %}
+                                        <label class="regtext">Prefer not to respond
+                                            <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="noResponse" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% else %}
+                                        <label class="regtext">Prefer not to respond
+                                            <input type="radio" id="choiceNoResponse" name="radio_gender_identity" value="noResponse">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    {% endif %}
+                        
+                                    {% with messages = get_flashed_messages(with_categories=true) %}
+                                        {% if messages %}
+                                            <ul class=flashes>
+                                            {% for category, message in messages %}
+                                                {% if category == 'gender_identity_error' %}
+                                                <span style="color: red;">[{{ message }}]</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                        </div>
+
+                        <button>
+                            Change Profile
+                        </button>
+                    </form>
+
+                    <form action="/edit-profile-password" method="POST">
+                        <div class="single">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
+                            <div class="label">
+                                {{ formPwd.password.label }}
+                            </div>
+                            <div class="answer">
+                                {{ formPwd.password }}
+                            </div>
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    <ul class=flashes>
+                                    {% for category, message in messages %}
+                                        {% if category == 'requestError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            {% endwith %}
+                            <div class="label">
+                                {{ formPwd.password2.label }}
+                            </div>
+                            <div class="answer">
+                                {{ formPwd.password2 }}
+                            </div>
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    <ul class=flashes>
+                                    {% for category, message in messages %}
+                                        {% if category == 'password2Error' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            {% endwith %}
+                        
+                            <input type="submit" id="passwordBtn" value="Change password"/>
+                        </div>
+                    </form>
+
+                    <div id="edit-file-stuff" class="answer">
+                        <form action="/edit-profile-picture" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="picture">
+                                <div class="circle-border">
+                                    {% if profile_picture is none %}
+                                        <img class="profile_picture" src="{{url_for('static', filename='blank-profile-picture.png')}}" alt="profile_picture"><br/>
+                                        <br/>
+                                    {% else %}
+                                        <img class="profile_picture" src="{{profile_picture}}" alt="profile_picture"><br/><br/>
+                                        <br/>
+                                    {% endif %}
+                                </div>
+                                {% if profile_picture is none %}
+                                    Add picture
+                                {% else %}
+                                    Change picture
+                                {% endif %}
+                                <input type="file" name="file" value="file" id="inputFile" accept="image/x-png,image/png,image/jpeg">
+                                <label for="inputFile">
+                                    Choose file (Max size = 5MB)
+                                </label>
+
+                                <button>
+                                    Edit Picture
+                                </button>
+
+                            </div>
+                        </form>
+                        {% if profile_picture is not none %}
+                            <form action="/delete-profile-picture" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <p>
+                                    <button>Delete profile picture</button>
+                                </p>
+                            </form>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="single">
+                        {% if resumeUrl is none %}
+                            <div class="label">
+                                Add resume<br/>
+                            </div>
+                        {% else %}
+                            <a class="label" target="_blank" href="{{resumeUrl}}">
+                                Resume link
+                            </a>
+                            <br/>
+                            <div class="label">
+                                Change resume<br/>
+                            </div>
+                        {% endif %}
+            
+                        <form action="/edit-profile-resume" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <label for="inputFileResume">
+                                Choose file (Max size = 5MB)
+                            </label>
+                            <input type="file" name="resume" value="resume" id="inputFileResume" accept="application/pdf"/>
+                            <!--<br/><span id="resumeFilename"></span><br/>-->
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    <ul class=flashes>
+                                    {% for category, message in messages %}
+                                        {% if category == 'resumeError' %}
+                                        <span style="color: red;">[{{ message }}]</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            {% endwith %}
+                            <input class="add_something_btn buttonEditProf centerDiv" type="submit" value="Edit resume"/>
+                        </form>
+            
+                        {% if resumeUrl is not none %}
+                            <form action="/delete-resume" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <p>
+                                    <input class="add_something_btn buttonEditProf centerDiv" type="submit" value="Delete resume"/>
+                                </p>
+                            </form>
+                            <br/><br/>
+                        {% endif %}
+                    </div>
+                </div>
+                
+
+                <div class="single">
+                    <button name="delete-profile" value="delete_profile_btn" id="deleteProfileBtn">Delete Account</button>
+                    <form id="deletionForm" action="{{ url_for('deleteProfile', id=userID) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div id="inDeleteForm" class=""></div>
+                    </form>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <ul class=flashes>
+                            {% for category, message in messages %}
+                                {% if category == 'deletionError' %}
+                                    <span style="color: red;">[{{ message }}]</span>
+                                {% endif %}
+                            {% endfor %}
+                            </ul>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+            </section>
+            
+            </div>
+        </div>
+
+    </body>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js_files/edit_profile.js')}}"></script>
+    <script type="text/javascript">
+        init("{{contact_method}}");
+        setPreexistingAttributes({{interestList|tojson}}, {{careerInterestList|tojson}}, {{educationList|tojson}});
+    </script>
+</html>
