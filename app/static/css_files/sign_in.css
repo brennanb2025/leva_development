@@ -49,3 +49,9 @@
 .register_link:hover{
     cursor: pointer;
 }
+
+.launch-box{
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+}

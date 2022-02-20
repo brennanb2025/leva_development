@@ -707,9 +707,15 @@
                                     Previous
                                 </button>
 
-                                <button class="register" type="button" id="register" onclick="register_next()">
-                                    Next
-                                </button>
+                                <div class="changing-button-container">
+                                    <button class="register" type="button" id="next" onclick="register_next()">
+                                        Next
+                                    </button>
+
+                                    <button class="register" type="button" id="register" onclick="">
+                                        Register
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -736,7 +742,8 @@
                 personal2 = document.getElementById("personal2")
                 uploading = document.getElementById("uploading")
                 matching = document.getElementById("matching")
-                button = document.getElementById("register")
+                button_next = document.getElementById("next")
+                button_reg = document.getElementById("register")
 
                 general1.style.display = "none"
                 personal1.style.display = "none"
@@ -761,10 +768,12 @@
                 }
 
                 if (count == 5){
-                    button.innerHTML = "Register"
+                    button_reg.style.display = 'flex'
+                    button_next.style.display = 'none'
                 }
                 else{
-                    button.innerHTML = "Next"
+                    button_reg.style.display = 'none'
+                    button_next.style.display = 'flex'
                 }
             }
 

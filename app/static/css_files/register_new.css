@@ -73,6 +73,10 @@ input{
     padding: 3%;
 }
 
+#register{
+    display: none;
+}
+
 .general1{
     display: block;
 }
@@ -93,20 +97,7 @@ input{
     display: none;
 }
 
-.uploading button{
-    border: none;
-    outline: none;
-    background-color: rgb(158, 63, 253);
-    color: white;
-    height: 40px;
-    width: 150px;
-    margin-top: 30px;
-    transition-duration: 0.3s;
-}
 
-.uploading button:hover{
-    background-color: rgb(33, 48, 74);
-}
 
 /* Source: W3Schools */
 

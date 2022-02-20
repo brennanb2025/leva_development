@@ -129,6 +129,7 @@ body, html{
     border: none;
     outline: none;
     text-decoration: none;
+    min-width: 100px;
     background-color: rgb(33, 48, 74);
     color: white;
     padding: 2%;
