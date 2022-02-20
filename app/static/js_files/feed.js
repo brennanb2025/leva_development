@@ -225,6 +225,18 @@ function ready_document() { //will check if userArr length == 0 (no matches) and
             userID.type = "hidden";
             surroundingForm.appendChild(userID); //to get back in flask
 
+            userScore = document.createElement("input");
+            userScore.setAttribute("name", "userScore");
+            userScore.value = userDictUsefulInfo[userArr[i]]['score'];
+            userScore.type = "hidden";
+            surroundingForm.appendChild(userScore); //to get back in flask
+
+            userIdx = document.createElement("input");
+            userIdx.setAttribute("name", "userIdx");
+            userIdx.value = i;
+            userIdx.type = "hidden";
+            surroundingForm.appendChild(userIdx); //to get back in flask
+
             chooseMentorContainer = document.createElement("div");
             chooseMentorContainer.className = "rounded-button button1";
             chooseBtn = document.createElement("button");

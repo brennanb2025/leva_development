@@ -4,9 +4,12 @@ from app.input_sets.models import Business
 def register_new_business():
     name = input("Business name: ")
     name = str(name)
-    num_employees_max = input("Number of employees maximum: ")
-    num_employees_max = int(num_employees_max)
-    register_business_from_inputs(name=name,number_employees_maximum=num_employees_max)
+    if Business.query.filter_by(name=name).first() != None:
+        print("Failure - business with that name already exists.")
+    else:
+        num_employees_max = input("Number of employees maximum: ")
+        num_employees_max = int(num_employees_max)
+        register_business_from_inputs(name=name,number_employees_maximum=num_employees_max)
 
 def register_business_from_inputs(name, number_employees_maximum):
     b = Business(name=name, number_employees_maximum=number_employees_maximum, number_employees_currently_registered=0)

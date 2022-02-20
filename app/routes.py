@@ -3,9 +3,9 @@
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
-from app.input_sets.forms import EditCityForm, EditCurrentOccupationForm, LoginForm, EditPasswordForm, EditFirstNameForm, EditLastNameForm, EmptyForm, RegistrationForm, EditCityForm, EditCurrentOccupationForm, EditPersonalityForm, EditDivisionForm
+from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm
 from uuid import uuid4
-from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Select, Business
+from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Select, Business, Event
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import datetime
@@ -50,6 +50,8 @@ def make_session_permanent():
 
 #different urls that application implements
 #@'s are decorators, modifies function that follows it. Creates association between URL and function.
+
+
 
 #index page GET.
 @app.route('/', methods=['GET'])
@@ -107,6 +109,8 @@ def progress():
         #1 month, 2 months, 3 months, each quarter (6, 9, 12, 15) - JUST DO EVERY 30 DAYS
         #accumulative - show current month, then click button to see past months.
     
+    logData(15,"")
+    
     return render_template('progress.html', selectEntry=selectEntry, progressCompletedList=progressCompletedList, isMentee=isMentee, selectMentorMentee=select_mentor_mentee, userID=user.id, reminderList=reminderList)
 
 #sign-in page GET.
@@ -118,6 +122,7 @@ def sign_in():
 
     form = LoginForm()
     title="Sign in"
+
     return render_template('sign_in.html', form=form, title=title)
 
 #sign-in page POST. Checks each input from the form. 
@@ -150,9 +155,10 @@ def sign_inPost():
         session["userID"] = id
         #newToken = SessionTokens(sessionID=sessionToken) #make a new token
         #db.session.add(newToken) #add to database
-        
+        logData(4,"") #log in post success
         return resp
     else:
+        logData(3,"") #log in post failure
         return redirect(url_for('sign_in')) #failure
 
 
@@ -169,6 +175,8 @@ def validate_image(stream):
 @app.route('/register', methods=['GET'])
 def register():
 
+    #publicVisitorIP = request.remote_addr #no host proxy
+
     # Attempts to register an email/password pair.
     form = RegistrationForm()
 
@@ -176,10 +184,16 @@ def register():
         return redirect(url_for('view', id=session.get('userID')))
 
     interestTags, careerInterests, schools = get_popular_tags()
-    
-    return render_template('register1.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
-    interestList=list(), educationList=list(), careerInterestList=list(), form=form)
+
+    resp = make_response(render_template('register1.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
+            interestList=list(), educationList=list(), careerInterestList=list(), form=form))
     #return render_template('register_first_access.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=form)
+
+    resp.set_cookie('initialTimestampGET', str(datetime.datetime.utcnow())) #record the current time as a string
+
+    logData(0,"") #log data: register get
+
+    return resp #return the template with the cookie
 
 #returns (tags, careerInterests, schools) - the 500 most used tags from each category.
 def get_popular_tags(): 
@@ -454,13 +468,23 @@ def registerPost():
 
         db.session.commit()
 
-        return redirect(url_for('sign_in')) #success: get request to sign_in page
+        timeDiff = str(datetime.datetime.utcnow() - datetime.datetime.strptime(request.cookies.get('initialTimestampGET'), "%Y-%m-%d %H:%M:%S.%f"))
+        dataDict = {}
+        dataDict["registerTimeDiff"] = timeDiff
+        logData(2, json.dumps(dataDict))
+
+        resp = make_response(redirect(url_for('sign_in'))) #success: get request to sign_in page
+
+        resp.set_cookie('initialTimestampGET', '', expires=0) #delete cookie
+
+        return resp
     else:
-        return registerPreviouslyFilledOut(form1, errors)
+
+        return registerPreviouslyFilledOut(form1, errors, request)
 
 
 #gets all the values from the form that was previously filled out, so that they can be sent back and autofilled into a new form.
-def registerPreviouslyFilledOut(form, errors):
+def registerPreviouslyFilledOut(form, errors, request):
 
     email = form.get("email")
     first_name = form.get("first_name")
@@ -533,13 +557,24 @@ def registerPreviouslyFilledOut(form, errors):
     """
     interestTags, careerInterests, schools = get_popular_tags()
 
-    return render_template('register.html', email=email, first_name=first_name, last_name=last_name, first_last_error=first_last_error,
+    resp = make_response(render_template('register1.html', email=email, first_name=first_name, last_name=last_name, first_last_error=first_last_error,
                 bio=bio, email_or_phone=email_or_phone, city_name=city_name, current_occupation=current_occupation,
                 division=division, phone_num=phone_num, register_type=register_type,
                 interestList=interestInputs, educationList=eduInputs, careerInterestList=carIntInputs,
                 interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=formNew,
                 mentorGenderIdentity=mentorGenderIdentity, menteeGenderPreference=menteeGenderPreference, textPersonality1=textPersonality1,
-                textPersonality2=textPersonality2, textPersonality3=textPersonality3, divisionPreference=divisionPreference)
+                textPersonality2=textPersonality2, textPersonality3=textPersonality3, divisionPreference=divisionPreference))
+    
+    resp.set_cookie('initialTimestampGET', request.cookies.get('initialTimestampGET')) #return with the initial time
+
+    timeDiff = str(datetime.datetime.utcnow() - datetime.datetime.strptime(request.cookies.get('initialTimestampGET'), "%Y-%m-%d %H:%M:%S.%f"))
+    dataDict = {}
+    dataDict["registerTimeDiff"] = timeDiff
+    dataDict["errors"] = errors
+    logData(1, json.dumps(dataDict)) #log data: register post error
+    
+
+    return resp
     
 
 #checks the basic registration information.
@@ -597,7 +632,6 @@ def checkBasicInfo(form1):
 
 
 
-#NOTE: perhaps combine all these edit profiles into one and determine type of edit made based on input in html form
 # edit-profile GET. Readies edit profile forms and user information.
 @app.route('/edit-profile', methods = ['GET'])
 def editProfile():
@@ -670,6 +704,8 @@ def editProfile():
 
     resumeUrl = create_resume_link(user)
 
+    logData(5,"") #log data edit profile get
+
     title="Edit profile Page"
     #return render_template('edit_profile.html', intro_video=intro_video_link, 
     return render_template('editProfileNew.html', intro_video=intro_video_link, 
@@ -685,10 +721,11 @@ def editProfile():
 
 @app.route('/edit-profile', methods = ['POST'])
 def editProfilePost():
-    form = request.form
-    print(form)
+
     if not userLoggedIn():
         return redirect(url_for('sign_in'))
+
+    form = request.form
 
     success = True
     u = User.query.filter_by(id=session['userID']).first()
@@ -768,9 +805,6 @@ def editProfilePost():
         changedContactMethodSuccess=checkContactPreference(form)
         if not changedContactMethodSuccess: #change unsuccessful.
             success = False
-    
-    #TODO: more here
-
 
     if success:
         #set here
@@ -803,8 +837,39 @@ def editProfilePost():
                 u.set_phone(form.get('phoneNumber'))
         
         db.session.commit()
+
+        dataChangedDict = {}
+        dataChangedDict["fn"] = changedFnSuccess
+        dataChangedDict["ln"] = changedLnSuccess
+        dataChangedDict["city"] = changedCitySuccess
+        dataChangedDict["occupation"] = changedOccupationSuccess
+        dataChangedDict["bio"] = changedBioSuccess
+        dataChangedDict["mentorGender"] = changedMentorGenderSuccess
+        dataChangedDict["genderIdentity"] = changedGenderIdentitySuccess
+        dataChangedDict["attributes"] = changedInputsSuccess
+        dataChangedDict["personality"] = changedPersonalitySuccess
+        dataChangedDict["division"] = changedDivisionSuccess
+        dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess
+        dataChangedDict["contact"] = changedContactMethodSuccess
+        
+        logData(7,json.dumps(dataChangedDict)) #log data edit profile success
+
         return redirect(url_for('view', id=session.get('userID')))
     else: 
+        dataChangedDict = {}
+        dataChangedDict["fn"] = changedFnSuccess
+        dataChangedDict["ln"] = changedLnSuccess
+        dataChangedDict["city"] = changedCitySuccess
+        dataChangedDict["occupation"] = changedOccupationSuccess
+        dataChangedDict["bio"] = changedBioSuccess
+        dataChangedDict["mentorGender"] = changedMentorGenderSuccess
+        dataChangedDict["genderIdentity"] = changedGenderIdentitySuccess
+        dataChangedDict["attributes"] = changedInputsSuccess
+        dataChangedDict["personality"] = changedPersonalitySuccess
+        dataChangedDict["division"] = changedDivisionSuccess
+        dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess
+        dataChangedDict["contact"] = changedContactMethodSuccess
+        logData(6,json.dumps(dataChangedDict)) #log data edit profile error
         return redirect(url_for('editProfile'))
 
 def checkFirstName(form):
@@ -980,311 +1045,6 @@ def editProfilePassword():
         return redirect(url_for('view', id=session.get('userID')))
     else: 
         return redirect(url_for('editProfile'))
-
-"""
-#edit-profile-first-name GET. 
-#changes the user's first name if it is input correctly. Then sends the user back to view.
-@app.route('/edit-profile-first-name', methods = ['POST'])
-def editProfileFirstName():
-
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-
-    success = True
-
-    form = request.form
-
-    if form.get('first_name') == '':
-        success = False
-        flash(u'Please enter a new first name.', 'firstNameError')
-    if success: #did enter everything
-        if form.get('first_name') == User.query.filter_by(id=session['userID']).first().first_name: #this is already the name
-            success = False
-            flash(u'That is already your first name.', 'firstNameError')
-
-    if success:
-        User.query.filter_by(id=session['userID']).first().set_first_name(form.get('first_name'))
-        db.session.commit()
-        return redirect(url_for('view', id=session.get('userID')))
-    else: 
-        return redirect(url_for('editProfile'))
-
-@app.route('/edit-profile-last-name', methods = ['POST'])
-def editProfileLastName():
-
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-
-    success = True
-
-    form = request.form
-
-    if form.get('last_name') == '':
-        success = False
-        flash(u'Please enter a new last name.', 'lastNameError')
-    if success: #did enter everything
-        if form.get('last_name') == User.query.filter_by(id=session['userID']).first().last_name: #this is already the name
-            success = False
-            flash(u'That is already your last name.', 'lastNameError')
-
-    if success:
-        User.query.filter_by(id=session['userID']).first().set_last_name(form.get('last_name'))
-        db.session.commit()
-        return redirect(url_for('view', id=session.get('userID')))
-    else: 
-        return redirect(url_for('editProfile'))
-
-
-@app.route('/edit-profile-city', methods = ['POST'])
-def editProfileCityName():
-
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-
-    success = True
-
-    form = request.form
-
-    if form.get('city_name') == '':
-        success = False
-        flash(u'Please enter a city name.', 'cityNameError')
-    if success: #did enter everything
-        if form.get('city_name') == User.query.filter_by(id=session['userID']).first().city_name: #this is already the name
-            success = False
-            flash(u'You already listed that as your current city.', 'cityNameError')
-
-    if success:
-        User.query.filter_by(id=session['userID']).first().set_city_name(form.get('city_name'))
-        db.session.commit()
-        return redirect(url_for('view', id=session.get('userID')))
-    else: 
-        return redirect(url_for('editProfile'))
-
-
-@app.route('/edit-profile-current-occupation', methods = ['POST'])
-def editProfileCurrentOccupation():
-
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-
-    success = True
-
-    form = request.form
-
-    if form.get('current_occupation') == '':
-        success = False
-        flash(u'Please enter the name of your current occupation.', 'currentOccupationError')
-    if success: #did enter everything
-        if form.get('current_occupation') == User.query.filter_by(id=session['userID']).first().current_occupation: #this is already the name
-            success = False
-            flash(u'You already listed that as your current occupation.', 'currentOccupationError')
-
-    if success:
-        User.query.filter_by(id=session['userID']).first().set_current_occupation(form.get('current_occupation'))
-        db.session.commit()
-        return redirect(url_for('view', id=session.get('userID')))
-    else: 
-        return redirect(url_for('editProfile'))
-
-@app.route('/edit-profile-mentor-gender-preference', methods = ['POST'])
-def editProfileGenderPreference():
-
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-
-    user = User.query.filter_by(id=session['userID']).first()
-    if not user.is_student: #user must be a mentor
-        return redirect(url_for('editProfile'))
-
-    form = request.form
-
-    if form.get("radio_gender_preference") == None: #mentee and mentor preference empty
-        flash(u"Please enter a preference for your mentor's gender.", 'mentor_preference_error')
-        return redirect(url_for('editProfile'))
-    
-    user.set_mentor_gender_preference(form.get("radio_gender_preference"))
-    db.session.commit()
-    return redirect(url_for('editProfile'))
-
-
-@app.route('/edit-profile-gender-identity', methods = ['POST'])
-def editProfileGenderIdentity():
-
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-
-    user = User.query.filter_by(id=session['userID']).first()
-
-    if user.is_student: #user must be a mentor
-        return redirect(url_for('editProfile'))
-
-    form = request.form
-    if form.get("radio_gender_identity") == None: #mentor and gender identity not entered
-        flash(u"Please enter your gender identity.", 'gender_identity_error')
-        return redirect(url_for('editProfile'))
-    
-    user.set_gender_identity(form.get("radio_gender_identity"))
-    db.session.commit()
-    return redirect(url_for('editProfile'))
-
-
-@app.route('/edit-profile-attributes', methods = ['POST'])
-def editProfileAttributes():
-
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-
-    user = User.query.filter_by(id=session.get('userID')).first()
-
-    form1 = request.form
-    
-    success = True
-
-    if int(form1.get('num_tags')) == 0:
-        success = False
-        flash(u'Please enter at least one interest.', 'interestError')
-
-    if int(form1.get('num_education_listings')) == 0:
-        success = False
-        flash(u'Please enter at least one school.', 'educationError')
-
-    if int(form1.get('num_career_interests')) == 0:
-        success = False
-        if user.is_student:
-            flash(u'Please enter at least one career interest.', 'careerInterestError')
-        else:
-            flash(u'Please enter at least one career experience.', 'careerInterestError')
-    
-
-    if success: #success, changing user's attributes
-        
-        #I want to register the new attributes - delete the old ones.
-        delete_user_attributes(user.id)
-
-        #get interests
-        #I don't actually need num_tags since I can iterate thru getlist, 
-        # but I can see it being useful/efficient for future features.
-        #ok I'm just going to iterate through the list to protect against index out of bounds exceptions
-        interestArr = form1.getlist("tagName")
-        #for i in range(int(form1.get('num_tags'))):
-        for i in range(len(interestArr)):
-            interestTag = InterestTag(
-                user_id=user.id,
-                entered_name=interestArr[i]
-            )
-            db.session.add(interestTag)
-            db.session.commit() #I have to do this before I set the resource so the id will be set.
-            interestTag.set_interestID(interestArr[i], db.session)
-
-        #get education
-        eduArr = form1.getlist("educationName")
-        #for i in range(int(form1.get('num_education_listings'))):
-        for i in range(len(eduArr)):
-            educationTag = EducationTag(
-                user_id=user.id,
-                entered_name=eduArr[i]
-            )
-            db.session.add(educationTag)
-            db.session.commit() #I have to do this before I set the resource so the id will be set.
-            educationTag.set_educationID(eduArr[i], db.session)
-
-        #get career interests
-        cintArr = form1.getlist("careerInterestName")
-        #for i in range(int(form1.get('num_career_interests'))):
-        for i in range(len(cintArr)):
-            cintTag = CareerInterestTag(
-                user_id=user.id,
-                entered_name=cintArr[i]
-            )
-            db.session.add(cintTag)
-            db.session.commit() #I have to do this before I set the resource so the id will be set.
-            cintTag.set_careerInterestID(cintArr[i], db.session)
-
-        db.session.commit()
-
-    return redirect(url_for('editProfile')) #go back on either success or fail
-
-@app.route('/edit-profile-bio', methods = ['POST'])
-def editProfileBio():
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-    user = User.query.filter_by(id=session.get('userID')).first()
-    form = request.form
-    if form.get('bio') == "":
-        flash(u'Your bio cannot be empty.', 'bioError')
-        return redirect(url_for('editProfile'))
-
-    user.set_bio(form.get('bio'))
-    db.session.commit()
-    return redirect(url_for('editProfile'))
-
-@app.route('/edit-profile-personality', methods = ['POST'])
-def editProfilePersonality():
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-    user = User.query.filter_by(id=session.get('userID')).first()
-    form = request.form
-    if form.get('personality_1') == "" or form.get('personality_2') == "" or form.get('personality_3') == "":
-        flash(u'You must input 3 personality traits/phrases.', 'personalityError')
-        return redirect(url_for('editProfile'))
-
-    user.set_personality(form.get('personality_1'), form.get('personality_2'), form.get('personality_3'))
-    db.session.commit()
-    return redirect(url_for('editProfile'))
-
-
-@app.route('/edit-profile-division', methods = ['POST'])
-def editProfileDivision():
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-    user = User.query.filter_by(id=session.get('userID')).first()
-    form = request.form
-    if form.get('division') == "":
-        flash(u'You must input what division you are in.', 'divisionError')
-        return redirect(url_for('editProfile'))
-
-    user.set_division(form.get('division'))
-    db.session.commit()
-    return redirect(url_for('editProfile'))
-
-@app.route('/edit-profile-division-preference', methods = ['POST'])
-def editProfileDivisionPreference():
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-    user = User.query.filter_by(id=session.get('userID')).first()
-    form = request.form
-    if form.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
-        if user.is_student:
-            flash(u"Please enter a preference for your mentor's division.", 'divisionPreferenceError')
-        else:
-            flash(u"Please enter a preference for your mentee's division.", 'divisionPreferenceError')
-        return redirect(url_for('editProfile'))
-
-    user.set_division_preference(form.get("divisionPreference"))
-    db.session.commit()
-    return redirect(url_for('editProfile'))
-
-@app.route('/edit-profile-contact', methods = ['POST'])
-def editProfileContact():
-    if not userLoggedIn():
-        return redirect(url_for('sign_in'))
-    user = User.query.filter_by(id=session.get('userID')).first()
-    form = request.form
-    
-    if form.get('radio_contact') == 'Phone number' and form.get('phoneNumber') == "": #user chose to be contacted by phone
-        flash(u'Your phone number cannot be empty.', 'phoneError')
-        return redirect(url_for('editProfile'))
-
-    if form.get('radio_contact') == 'Email': #checked the email box
-        user.remove_phone()
-    
-    if form.get('radio_contact') == 'Phone number':
-        user.set_phone(form.get('phoneNumber'))
-
-    db.session.commit()
-    return redirect(url_for('editProfile'))
-
-"""
 
 @app.route('/edit-profile-picture', methods=['POST'])
 def editProfPic():
@@ -1523,10 +1283,6 @@ def view():
     resumeUrl = create_resume_link(user)
 
     this_user_is_logged_in = (user.id == session.get('userID'))
-    in_network = False
-    if Select.query.filter_by(mentee_id=user.id, mentor_id=session.get('userID')).first() != None or \
-        Select.query.filter_by(mentee_id=session.get('userID'), mentor_id=user.id).first() != None:
-        in_network = True
 
     mentorGenderPreference = user.mentor_gender_preference
     if mentorGenderPreference != None:
@@ -1560,8 +1316,14 @@ def view():
     #^if the user looking at this person's profile page is the one who is currently logged in, 
     # let them logout from or delete their account.
     title="Profile Page"
+
+    if this_user_is_logged_in:
+        logData(9,"")
+    else:
+        logData(10,"")
+
     return render_template('profile.html', title=title, profile_picture=prof_pic_link, intro_video=intro_vid_link,
-                bio=bio, in_network=in_network, logged_in=this_user_is_logged_in, resumeUrl=resumeUrl,
+                bio=bio, logged_in=this_user_is_logged_in, resumeUrl=resumeUrl,
                 interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
                 genderIdentity=genderIdentity, divisionPreference=divisionPreference,
                 isStudent=isStudent, mentorGenderPreference=mentorGenderPreference, user=user, userID=session.get('userID'))
@@ -1601,6 +1363,8 @@ def logout():
         session.pop('userID', None)
         #db.session.commit() #remove this user's session token from the dict
 
+    logData(11,"")
+
     return redirect(url_for('index'))
 
 @app.route('/deleteProfile', methods=['POST']) #need to check security
@@ -1635,6 +1399,8 @@ def deleteProfile():
         User.query.filter_by(id=userID).delete()
         db.session.commit()
 
+        logData(12,"")
+
         return render_template('delete-profile-success.html')
     else:
         flash(u'Incorrect first name.', 'deletionError')
@@ -1650,12 +1416,19 @@ def upload_media_file_to_s3(file_upload, user):
         Bucket = str(app.config['BUCKET_NAME']),
         Key = filename,
         Body=file_upload,
-        ACL=str(app.config['ACL']),
+        #ACL=str(app.config['ACL']),
         ContentType = file_upload.content_type
     )
-    output = 'https://s3-{}.amazonaws.com/{}/{}'.format(app.config['S3_REGION'], app.config['BUCKET_NAME'], filename)
+    #output = 'https://s3-{}.amazonaws.com/{}/{}'.format(app.config['S3_REGION'], app.config['BUCKET_NAME'], filename)
+    output = 'https://{}.s3.amazonaws.com/{}'.format(app.config['BUCKET_NAME'], filename)
     print(filename, output, file_upload.content_type)
     db.session.commit() #just in case
+
+    dictFile = {}
+    dictFile["type"] = "profilePicture"
+    dictFile["fileInfo"] = [filename, file_upload.content_type]
+    logData(8,json.dumps(dictFile))
+
     return (output, filename)
 
 def upload_resume_file_to_s3(file_upload, user):
@@ -1672,6 +1445,12 @@ def upload_resume_file_to_s3(file_upload, user):
     output = 'https://s3-{}.amazonaws.com/{}/{}'.format(app.config['S3_REGION'], app.config['BUCKET_NAME_RESUME'], filename)
     print(filename, output, file_upload.content_type)
     db.session.commit() #just in case
+
+    dictFile = {}
+    dictFile["type"] = "resume"
+    dictFile["fileInfo"] = [filename, file_upload.content_type]
+    logData(8,json.dumps(dictFile))
+
     return (output, filename)
     
 
@@ -1758,6 +1537,12 @@ def feedMentee(user):
     """
 
     userDict = {} #user : number match.
+    matches = {} #for data logging
+    matches["division_pref"] = 0
+    matches["personality"] = 0
+    matches["education"] = 0
+    matches["career"] = 0
+    matches["interest"] = 0
 
     #get all mentors in the same business as the user. is_student should remove the user themself from the query.
     users = User.query.filter_by(business_id=user.business_id).filter_by(is_student=False).all()
@@ -1776,25 +1561,33 @@ def feedMentee(user):
         if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
             #other user division preference
             userDict[u] += heuristicVals["division_pref"]
+            matches["division_pref"] += 1
         if (user.division_preference == "same" and user.division == u.division) or user.division_preference == "noPreference":
             #this user division preference
             userDict[u] += heuristicVals["division_pref"]
+            matches["division_pref"] += 1
 
     #personality
     for u in users:
         #match in any personality trait - separate to add to the value per each match.
         if u.personality_1 == user.personality_1:
             userDict[u] += heuristicVals["personality"]
+            matches["personality"] += 1
         if u.personality_1 == user.personality_2:
             userDict[u] += heuristicVals["personality"]
+            matches["personality"] += 1
         if u.personality_1 == user.personality_3:
             userDict[u] += heuristicVals["personality"]
+            matches["personality"] += 1
         if u.personality_2 == user.personality_2:
             userDict[u] += heuristicVals["personality"]
+            matches["personality"] += 1
         if u.personality_2 == user.personality_3:
             userDict[u] += heuristicVals["personality"]
+            matches["personality"] += 1
         if u.personality_3 == user.personality_3:
             userDict[u] += heuristicVals["personality"]
+            matches["personality"] += 1
     
 
     schoolDict = {} #contains all the matching schools for each user (user : [school])
@@ -1814,6 +1607,7 @@ def feedMentee(user):
 
                     #now update match amount in user dict
                     userDict[u] = userDict[u]+heuristicVals["education"]
+                    matches["education"] += 1
 
 
     interestTitleDict = {} #contains all the matching tags for each user (user : [interest tag titles])
@@ -1833,6 +1627,7 @@ def feedMentee(user):
 
                     #now update match amount in user dict
                     userDict[u] = userDict[u]+heuristicVals["interest"]
+                    matches["interest"] += 1
 
 
     careerDict = {} #contains all the matching career tags for each user (user : [career experience/interest title])
@@ -1852,6 +1647,7 @@ def feedMentee(user):
 
                     #now update match amount in user dict
                     userDict[u] = userDict[u]+heuristicVals["career"]
+                    matches["career"] += 1
 
 
     sortedDict = sorted(userDict.items(), key=lambda item: item[1], reverse=True) #is now a list of tuples
@@ -1869,6 +1665,7 @@ def feedMentee(user):
         usefulInfo['userCurrentOccupation'] = u.current_occupation
         usefulInfo['userIsStudent'] = u.is_student
         usefulInfo['resumeURL'] = create_resume_link(u)
+        usefulInfo['score'] = userDict[u]
 
         
         #so there is probably a better way of doing this without making two dicts but I'll implement that later
@@ -1896,6 +1693,14 @@ def feedMentee(user):
     dictItems = {}
     dictItems['userDictUsefulInfo'] = userDictUsefulInfo
     dictItems['userArr'] = rtnUserArr
+    
+    dictLog = {}
+    dictLog["numMatches"] = len(userDict.keys())
+    dictLog["sortedWeights"] = [tup[1] for tup in sortedDict]
+    dictLog["sortedUserIDs"] = [tup[0].id for tup in sortedDict]
+    dictLog["matches"] = matches #nested json object
+
+    logData(13,json.dumps(dictLog)) #log feed get
 
     return jsonify(dictItems)
 
@@ -1935,6 +1740,12 @@ def feedPost():
     db.session.commit()"""
     print("successfully made new selection with", User.query.filter_by(id=userMatchID).first())
     
+    dictLog = {}
+    dictLog["userID"] = userMatchID
+    dictLog["score"] = form.get('score')
+    dictLog["index"] = form.get('userIdx')
+    logData(14,json.dumps(dictLog))
+
     return redirect(url_for("progress"))
 
 """ NO LONGER IN USE
@@ -2002,14 +1813,21 @@ def userLoggedIn():
 
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
+    dictLog = {}
+    dictLog['desc'] = e.description
+    logData(17,json.dumps(dictLog))
     return render_template('csrf_error.html', reason=e.description), 400
 
 @app.errorhandler(404)
 # inbuilt function which takes error as parameter
 def not_found(e):
     # defining function
+    dictLog = {}
+    dictLog['code'] = e.code
+    dictLog['desc'] = e.description
+    logData(16,json.dumps(dictLog))
     return render_template("404_error.html")
-"""
+
 @app.errorhandler(Exception)
 # inbuilt function which takes error as parameter
 def error_handler(e):
@@ -2020,5 +1838,17 @@ def error_handler(e):
         return render_template("404_error.html")
     if code == 500:
         db.session.rollback()
+
+    dictLog = {}
+    dictLog['code'] = e.code
+    dictLog['desc'] = e.description
+    logData(16,json.dumps(dictLog))
     
-    return render_template("general_error.html", code=code)"""
+    return render_template("general_error.html", code=code)
+
+
+def logData(num, msg):
+    if str(app.config['LOG_DATA']) == "True":
+        newEvent = Event(userID=session.get('userID'), action=num, message=msg)
+        db.session.add(newEvent)
+        db.session.commit()

@@ -125,13 +125,15 @@
                         </div>
 
                         <div class="single">
-                            <div class="label">
-                                Resume:
-                            </div>
-    
-                            <div class="answer">
-                                {{ resumeUrl }}
-                            </div>
+                            {% if resumeUrl is none %}
+                                <div class="label">
+                                    No resume entered
+                                </div>
+                            {% else %}
+                                <a class="label" target="_blank" href="{{resumeUrl}}">
+                                    Resume link
+                                </a>
+                            {% endif %}
                         </div>
 
                         <div class="single">
@@ -268,9 +270,13 @@
                             {% endif %}
                         </div>
 
-                        <button>
-                            Edit Picture
-                        </button>
+                        {% if logged_in is defined and logged_in %}
+                            <a href="{{ url_for('editProfile') }}">
+                                <button class="register">
+                                    Edit Profile
+                                </button>
+                            </a>
+                        {% endif %}
                     </div>
 
                 </div>

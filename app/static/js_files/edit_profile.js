@@ -47,7 +47,7 @@ function init(contact_method) {
                         */
                     });
                     document.getElementById("image_container_div").appendChild(newImg);
-                    document.getElementById("scrollAdvice").style.display = "block"; //show advice
+                    //document.getElementById("scrollAdvice").style.display = "block"; //show advice
                     //comment out cropping
                     //document.getElementById("crop-btn").style.display = "block"; //show advice
                     //document.getElementById("imgStuff").style.display = "block"; //show all image back

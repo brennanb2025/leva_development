@@ -22,10 +22,6 @@ button:hover{
     cursor:pointer;
 }
 
-.info{
-    padding: 5%;
-}
-
 .info .label{
     color: rgb(33, 48, 74);
     font-size: 20px;
@@ -42,6 +38,17 @@ button:hover{
     justify-content: center;
     align-items: center;
     width: 100%;
+    padding: 5%;
+}
+
+.info2{
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    align-items: start;
+    width: 100%;
+    padding: 0%;
+    margin-top: 50px;
 }
 
 .list{
@@ -60,6 +67,7 @@ button:hover{
     width: 205px;
     height: 205px;
     border-radius: 102.5px;
+    object-fit: cover;
 }
 
 .head{

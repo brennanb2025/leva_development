@@ -348,3 +348,37 @@ class Business(db.Model, Base):
     
     def dec_number_employees_currently_registered(self):
         self.number_employees_currently_registered = self.number_employees_currently_registered-1
+
+
+
+class Event(db.Model, Base):
+    __tablename__ = "Event"
+
+    id = db.Column(db.Integer, primary_key=True)
+    userID = db.Column(db.Integer)
+    action = db.Column(db.Integer)
+    # 0: register page get
+    # 1: error on register page post --> redirected back to register page
+    # 2: register page post success
+    # 3: log in post failure
+    # 4: log in post success
+    # 5: edit profile get
+    # 6: edit profile post error
+    # 7: edit profile post success
+    # 8: upload file to s3
+    # 9: view own profile
+    # 10: view other profile
+    # 11: logout
+    # 12: delete profile
+    # 13: get feed (# of matches sent over, 3 highest matches)
+    # 14: post feed (rank of mentor match, number value of match)
+    # 15: progress view
+    # 16: error (message)
+    # 17: CSRF error (message)
+
+    message = db.Column(db.String(1024)) #json - use y = json.loads(message) to get it back.
+
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Event {}>'.format(str(self.userID) + " " + str(self.action) + " " + self.message) #how to print database

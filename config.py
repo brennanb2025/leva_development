@@ -31,3 +31,4 @@ class Config(object):
     ACL = os.environ.get('ACL')
     UPLOAD_EXTENSIONS = os.environ.get('UPLOAD_EXTENSIONS')
     UPLOAD_EXTENSIONS_RESUME = os.environ.get('UPLOAD_EXTENSIONS_RESUME')
+    LOG_DATA = os.environ.get('LOG_DATA')
