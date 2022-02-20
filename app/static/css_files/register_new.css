@@ -30,7 +30,7 @@ body, html{
 
 .registration-container .content{
     padding: 0%;
-    width: 50%;
+    width: 60%;
 }
 
 .shading{
@@ -39,7 +39,7 @@ body, html{
     background-color: rgba(158, 63, 253, 0.301);
 }
 
-.content{
+.decoration-container .content{
     padding: 5% 10% 5% 10%;
 }
 
@@ -53,6 +53,7 @@ body, html{
 
 .info-container{
     margin-top: 30px;
+    width: 100%;
 }
 
 input{
