@@ -41,13 +41,17 @@
     margin-top: 20px;
 }
 
-.register{
+.register_link{
     color: rgb(158, 63, 253);
     text-decoration: underline;
 }
 
-.register:hover{
-    background-color: none;
-    background: none;
+.register_link:hover{
     cursor: pointer;
+}
+
+.launch-box{
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
 }
