@@ -4,7 +4,6 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/main.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/portal.css')}}">
-        <link rel="stylesheet" href="../static/css_files/register_new.css">
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
         <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,11 +57,11 @@
             </div>
 
             <div class="register-box">
-                <a href="{{ url_for('logout') }}">
-                    <button class="register">
+                <button class="register">
+                    <a href="{{ url_for('register') }}">
                         Log Out
-                    </button>
-                </a>
+                    </a>
+                </button>
             </div>
         </div>
 

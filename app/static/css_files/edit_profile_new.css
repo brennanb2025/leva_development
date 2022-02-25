@@ -1,106 +1,42 @@
-body, html{
-    height: 100%;
-    overflow: hidden;
-}
-
-.container{
+#inputFile{
+    height: fit-content;
+    width: 50%;
     display: flex;
-    height: 100%;
-    width: 100%;
     flex-direction: row;
-    align-items: stretch;
+    justify-content: center;
+    padding: 0%;
+    margin-top: 2%;
 }
 
-.decoration-container{
-    background-image: url('../background2.png');
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    flex-basis: 40%;
+.list{
+    padding: 0%;
+    flex: none;
+    display: flex;
+    flex-direction: row;
 }
 
-.registration-container{
-    flex-basis: 60%;
+.half{
+    flex: 1;
     display: flex;
     flex-direction: column;
-    padding-top: 5%;
-    padding-bottom: 5%;
     align-items: center;
-    overflow: scroll;
 }
 
-.registration-container .content{
-    padding: 0%;
-    width: 60%;
+.picture{
+    margin-top: 2%;
 }
 
-.shading{
-    height: 100%;
-    width: 100%;
-    background-color: rgba(158, 63, 253, 0.301);
+.edit-information{
+    width: 80%;
 }
 
-.decoration-container .content{
-    padding: 5% 10% 5% 10%;
+.label{
+    font-size: 16px;
 }
 
-.text{
-    margin-top: 20%;
-}
-
-.text .head2{
-    color: white;
-}
-
-.info-container{
-    margin-top: 30px;
+.form-expand{
     width: 100%;
 }
-
-input{
-    height: 30px;
-    width: 100%;
-}
-
-.register-box{
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-}
-
-.register-box .register{
-    min-width: 150px;
-    height: 50px;
-    padding: 3%;
-}
-
-#register{
-    display: none;
-}
-
-.general1{
-    display: block;
-}
-
-.personal1{
-    display: none;
-}
-
-.personal2{
-    display: none;
-}
-
-.uploading{
-    display: none;
-}
-
-.matching{
-    display: none;
-}
-
-
-
-/* Source: W3Schools */
 
 .regtext {
     display: block;
@@ -113,6 +49,14 @@ input{
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.answer button{
+    background-color: rgb(33, 48, 74);
+}
+
+.answer button:hover{
+    background-color: rgba(33, 48, 74, 0.692);
 }
   
   /* Hide the browser's default radio button */

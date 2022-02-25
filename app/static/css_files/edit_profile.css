@@ -1,3 +1,7 @@
+body, html{
+    overflow: scroll;
+}
+
 .purple_container_edit {
     background-color: #e8ccfc;
     padding-top: 20px;
