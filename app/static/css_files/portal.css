@@ -99,6 +99,8 @@ button:hover{
     display: flex;
     flex-direction: row;
     margin-bottom: 10%;
+    align-items: center;
+    justify-content: center;
 }
 
 .picture-card{
