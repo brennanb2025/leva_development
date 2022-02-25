@@ -1,5 +1,6 @@
 #This file is the python flask backend
 
+from crypt import methods
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
@@ -727,6 +728,89 @@ def editProfile():
             formPwd=formPwd, 
             user=user, userID=session.get('userID'))
 
+@app.route('/edit-profile-test', methods=['GET'])
+def editProfileTest():
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+
+    user = User.query.filter_by(id=session.get('userID')).first() #get the correct profile by inputting user id
+
+    formPwd = EditPasswordForm()
+
+    interestList = []
+    for interest in user.rtn_interests():
+        #interestList.append(Tag.query.filter_by(tagID=interest.interestID).first().title)
+        interest = Tag.query.filter_by(id=interest.interestID).first()
+        if interest != None:
+            interestList.append(interest.title)
+    careerInterestList = []
+    for cint in user.rtn_career_interests():
+        #careerInterestList.append(CareerInterest.query.filter_by(careerInterestID=cint.careerInterestID).first().title)
+        cint = CareerInterest.query.filter_by(id=cint.careerInterestID).first()
+        if cint != None:
+            careerInterestList.append(cint.title)
+    educationList = []
+    for school in user.rtn_education():
+        #educationList.append(School.query.filter_by(schoolID=school.educationID).first().title)
+        edu = School.query.filter_by(id=school.educationID).first()
+        if edu != None:
+            educationList.append(edu.title)
+    bio = user.bio
+
+    prof_pic_link = user.profile_picture
+    intro_video_link = user.intro_video
+    contact_method = user.email_contact
+    phone_num = user.phone_number
+    personality_1 = user.personality_1
+    personality_2 = user.personality_2
+    personality_3 = user.personality_3
+
+    mentorGenderPreference = user.mentor_gender_preference
+    if mentorGenderPreference != None:
+        if mentorGenderPreference == "male":
+            mentorGenderPreference = "Male mentor"
+        elif mentorGenderPreference == "female":
+            mentorGenderPreference = "Female mentor"
+        else:
+            mentorGenderPreference = "No preference"
+
+    divisionPreference = user.division_preference
+    if divisionPreference != None:
+        if divisionPreference == "same":
+            divisionPreference = "Same division"
+        elif divisionPreference == "different":
+            divisionPreference = "Different division"
+        else:
+            divisionPreference = "No preference"
+
+    genderIdentity = user.gender_identity
+    if genderIdentity != None:
+        if genderIdentity == "male":
+            genderIdentity = "Male"
+        elif genderIdentity == "female":
+            genderIdentity = "Female"
+        elif genderIdentity == "nonbinaryNonconforming":
+            genderIdentity = "Non-binary/non-conforming"
+        else:
+            genderIdentity = "Prefer not to respond"
+
+    interestTags, careerInterests, schools = get_popular_tags()
+
+    resumeUrl = create_resume_link(user)
+
+    logData(5,"") #log data edit profile get
+
+    title="Edit profile Page"
+    #return render_template('edit_profile.html', intro_video=intro_video_link, 
+    return render_template('edit_profile_revised.html', intro_video=intro_video_link, 
+            contact_method=contact_method, phone_num=phone_num, profile_picture=prof_pic_link, 
+            interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
+            title=title, bio=bio, interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
+            personality_1=personality_1, personality_2=personality_2, personality_3=personality_3, division=user.division,
+            resumeUrl=resumeUrl, divisionPreference=divisionPreference,
+            mentorGenderPreference=mentorGenderPreference, genderIdentity=genderIdentity,
+            formPwd=formPwd, 
+            user=user, userID=session.get('userID'))
 
 @app.route('/edit-profile', methods = ['POST'])
 def editProfilePost():

@@ -1,0 +1,111 @@
+#inputFile{
+    height: fit-content;
+    width: 50%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 0%;
+    margin-top: 2%;
+}
+
+.list{
+    padding: 0%;
+    flex: none;
+    display: flex;
+    flex-direction: row;
+}
+
+.half{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.picture{
+    margin-top: 2%;
+}
+
+.edit-information{
+    width: 80%;
+}
+
+.label{
+    font-size: 16px;
+}
+
+.form-expand{
+    width: 100%;
+}
+
+.regtext {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    font-size: 15px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.answer button{
+    background-color: rgb(33, 48, 74);
+}
+
+.answer button:hover{
+    background-color: rgba(33, 48, 74, 0.692);
+}
+  
+  /* Hide the browser's default radio button */
+  .regtext input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* Create a custom radio button */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: #eee;
+  border-radius: 50%;
+}
+
+/* On mouse-over, add a grey background color */
+.regtext:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the radio button is checked, add a blue background */
+.regtext input:checked ~ .checkmark {
+  background-color: rgb(158, 63, 253);
+}
+
+/* Create the indicator (the dot/circle - hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the indicator (dot/circle) when checked */
+.regtext input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the indicator (dot/circle) */
+.regtext .checkmark:after {
+ 	top: 5px;
+	left: 5px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: white;
+}
+  
