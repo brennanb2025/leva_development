@@ -75,7 +75,7 @@
                 <br/><br/><br/>
 
                 {% if selectEntry != none %}
-                <section class="mentor">
+                    Note: Center this
                     {% if isMentee %}
                         Your mentor:<br/>
                     {% else %}
@@ -106,27 +106,25 @@
                             </div>
                         </div>
                     </div>
-                    <br/><br/>
-                </section>
 
+                    <div class="head">
+                        <br/><br/>
+                        Meeting progress
+                    </div>
 
-                    Your progress<br/>
+                    <div class="info">
 
-                    Upcoming meeting: meeting #{{ reminderList[0]["num"] }}   ({{ reminderList[0]["date"] }})<br/>
-                    Description: {{ reminderList[0]["desc"] }}
+                        Upcoming meeting: meeting #{{ reminderList[0]["num"] }}   ({{ reminderList[0]["date"] }})<br/>
+                        Description: {{ reminderList[0]["desc"] }}<br/><br/>
 
-                    <br/><br/>
-
-                    Completed meetings: (should be a dropdown list)
-                    {{progressCompletedList}}
-                    <br/><br/>
-
-
-
-                    
-                    Pending meetings:
-                    {{reminderList}}<br/><br/>
-
+                        Column 1:
+                        Pending meetings:
+                        {{reminderList}}<br/><br/>
+                        
+                        Column 2:
+                        Completed meetings: (should be a dropdown list)
+                        {{progressCompletedList}}
+                    </div>
 
 
                 {% else %}
@@ -136,6 +134,10 @@
                         Please wait until you have been selected by a mentee!<br/>
                     {% endif %}
                 {% endif %}
+
+
+
+
 
             </section>
         </div>

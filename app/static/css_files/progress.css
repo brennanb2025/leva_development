@@ -1,0 +1,13 @@
+.half{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.list{
+    padding: 0%;
+    flex: none;
+    display: flex;
+    flex-direction: row;
+}

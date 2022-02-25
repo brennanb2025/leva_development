@@ -59,7 +59,7 @@
 
             <div class="register-box">
                 <button class="register">
-                    <a href="{{ url_for('register') }}">
+                    <a href="{{ url_for('logout') }}">
                         Log Out
                     </a>
                 </button>
@@ -72,24 +72,43 @@
                 <div class="head">
                     Edit My Profile
                 </div>
+                <form action="/edit-profile-picture" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div class="picture">
+                        <div class="circle-border">
+                            {% if profile_picture is none %}
+                                <img class="profile_picture" src="{{url_for('static', filename='blank-profile-picture.png')}}" alt="profile_picture"><br/>
+                                <br/>
+                            {% else %}
+                                <img class="profile_picture" src="{{profile_picture}}" alt="profile_picture"><br/><br/>
+                                <br/>
+                            {% endif %}
+                        </div>
+                        <div class="label">
+                            {% if profile_picture is none %}
+                                Add picture
+                            {% else %}
+                                Change picture
+                            {% endif %}
+                        </div>
 
-                <div class="picture">
-                    <div class="circle-border">
-                        
-                        <img class="profile_picture" src="{{url_for('static', filename='blank-profile-picture.png')}}" alt="profile_picture"><br/>
-                        
+                        <input type="file" name="file" value="file" id="inputFile" accept="image/x-png,image/png,image/jpeg">
+                        <label for="inputFile">
+                            (Max size = 5MB)
+                        </label>
+                        <div id="image_container_div"></div>
+
+                        <button>
+                            Edit Picture
+                        </button>
                     </div>
-
-                    <input type="file" name="file" value="file" id="inputFile" accept="image/x-png,image/png,image/jpeg">
-                    <label for="inputFile">
-                        Choose file (Max size = 5MB)
-                    </label>
-                    <div id="image_container_div"></div>
-
-                    <button>
-                        Edit Picture
-                    </button>
-                </div>
+                </form>
+                {% if profile_picture is not none %}
+                    <form action="/delete-profile-picture" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button>Delete profile picture</button>
+                    </form>
+                {% endif %}
 
                 <div class="edit-information">
                     <div class="info info2">
@@ -240,9 +259,9 @@
                                                     {% endfor %}
                                                 </datalist>
 
-                                                <button id="addCareerInterest" onclick="add_career_interest()">Add Interest</button>
-                                                <input type="hidden" id="num_career_interests" name="num_career_interests" value="{{careerInterestList|length}}">
-                                                
+                                                <button id="addCareerInterest" type="button" onclick="add_career_interest()">Add Interest</button>
+                                                <input type="hidden" id="num_career_interests" name="num_career_interests" value="0">
+                                                <br/><br/>
                                                 <table class="center" id="careerInterestTable">
                                                 </table>
                                                 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -271,9 +290,9 @@
                                                         <option value="{{tag.title}}">
                                                     {% endfor %}
                                                 </datalist>
-                                                <button id='addTag' onclick="add_tag()">Add Interest</button>
-                                                <input type="hidden" id="num_tags" name="num_tags" value="{{interestList|length}}">
-                                                
+                                                <button id='addTag' type="button" onclick="add_tag()">Add Interest</button>
+                                                <input type="hidden" id="num_tags" name="num_tags" value="0">
+                                                <br/><br/>
                                                 <table class="center" id="tagTable">
                                                 </table>
                                                 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -301,9 +320,9 @@
                                                         <option value="{{school.title}}">
                                                     {% endfor %}
                                                 </datalist>
-                                                <button id="addEducation" onclick="add_education()">Add School</button>
-                                                <input type="hidden" id="num_education_listings" name="num_education_listings" value="{{educationList|length}}">
-                                                
+                                                <button id="addEducation" type="button" onclick="add_education()">Add School</button>
+                                                <input type="hidden" id="num_education_listings" name="num_education_listings" value="0">
+                                                <br/><br/>
                                                 <table class="center" id="educationTable">
                                                 </table>
                                                 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -522,7 +541,7 @@
                             </div>
                             </div>
     
-                            <button>
+                            <button >
                                 Change Profile
                             </button>
                         </form>
@@ -552,3 +571,14 @@
 
             </section>
         </div>
+
+
+
+    </body>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js_files/edit_profile.js')}}"></script>
+    <script type="text/javascript">
+        init("{{contact_method}}");
+        setPreexistingAttributes({{interestList|tojson}}, {{careerInterestList|tojson}}, {{educationList|tojson}});
+    </script>
+</html>
