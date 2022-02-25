@@ -12,6 +12,8 @@ html, body{
     align-items: center;
     justify-content: center;
     padding: 4%;
+    margin-left: 7%;
+    margin-right: 7%;
 }
 
 .profile button, .mentor button{
@@ -119,6 +121,7 @@ button:hover{
     width: 205px;
     height: 205px;
     border-radius: 102.5px;
+    object-fit: cover;
 }
 
 .purple-line{
@@ -163,6 +166,15 @@ button:hover{
 }
 
 .button2 button:hover{
+    background-color: rgb(158, 63, 253);
+}
+
+.button2-push-left button{
+    background-color: rgb(26, 26, 63);
+    margin-left: 0%;
+}
+
+.button2-push-left button:hover{
     background-color: rgb(158, 63, 253);
 }
 

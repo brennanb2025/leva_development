@@ -73,7 +73,7 @@ def mentor():
 
     user = User.query.filter_by(id=session.get('userID')).first()
 
-    if Select.query.filter_by(mentee_id=user.id).first() != None: 
+    if Select.query.filter_by(mentee_id=user.id).first() != None or Select.query.filter_by(mentor_id=user.id).first() != None:
         #user already selected a mentor
         return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=False)
     
@@ -102,14 +102,21 @@ def progress():
 
     reminderList = [] #reminders for the future
     progressCompletedList = [] #reminders that have already passed
-    if selectEntry != None:
-        print("in progress - add this when reminder:time information is given.")
+    #if selectEntry != None:
+        #NOTE: "in progress - add this when reminder:time information is given.")
+        
         #timeDiff = GETCURRENTTIME - selectEntry.timestamp
         #populate reminderList by going thru remindersByTimeDiff: list of tuples (timeDiff, reminder)
         #1 month, 2 months, 3 months, each quarter (6, 9, 12, 15) - JUST DO EVERY 30 DAYS
         #accumulative - show current month, then click button to see past months.
     
     logData(15,"")
+
+    reminder0Info = {}
+    reminder0Info["num"] = 1
+    reminder0Info["desc"] = "first meeting"
+    reminder0Info["date"] = "meeting date here"
+    reminderList.append(reminder0Info)
     
     return render_template('progress.html', selectEntry=selectEntry, progressCompletedList=progressCompletedList, isMentee=isMentee, selectMentorMentee=select_mentor_mentee, userID=user.id, reminderList=reminderList)
 
@@ -349,15 +356,17 @@ def registerPost():
         success = False
         flash(u'Please select a file.', 'pictureError')"""
 
-    vid = None
+    """vid = None
     if "videoFile" in request.files:
-        vid = request.files["videoFile"]
+        vid = request.files["videoFile"]"""
     
     #video file optional
     """else:
         success=False
         flash(u'Please select a file.', 'videoError')"""
-    if vid:
+
+
+    """if vid:
         duration = request.form.get("videoDuration")
         if not duration:
             flash(u"Something went wrong, couldn't assess video duration. Try reuploading the video.", 'videoError')
@@ -371,7 +380,7 @@ def registerPost():
         
         if int((len(vid.read())/1024)/1024) > 40: #check size of file. Don't allow file sizes above 40MB.
             flash(u'Video is too big (max 40 MB).', 'videoError')
-            success = False
+            success = False"""
 
 
     if success: #success, registering new user
@@ -450,13 +459,13 @@ def registerPost():
                 user.set_profile_picture(output, filename) #set the user profile picture link
                 db.session.commit()
 
-        if "videoFile" in request.files:
+        """if "videoFile" in request.files:
             vid = request.files["videoFile"]
             if vid:
                 vid.seek(0) #I read the file before to check the length so I must put the cursor at the beginning in order to upload it.
                 output, filename = upload_media_file_to_s3(vid, user)
                 user.set_intro_video(output, filename) #set the user profile picture link
-                db.session.commit()
+                db.session.commit()"""
 
         if "resume" in request.files:
             resume = request.files["resume"]
@@ -1733,11 +1742,11 @@ def feedPost():
         return redirect(url_for('mentor'))
 
 
-    """newSelect = Select(mentee_id=session.get('userID'), mentor_id=userMatchID)
+    newSelect = Select(mentee_id=session.get('userID'), mentor_id=userMatchID)
     #selection will only be made by the user logged in - the mentee.
 
     db.session.add(newSelect)
-    db.session.commit()"""
+    db.session.commit()
     print("successfully made new selection with", User.query.filter_by(id=userMatchID).first())
     
     dictLog = {}

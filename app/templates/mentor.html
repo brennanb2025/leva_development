@@ -123,7 +123,11 @@
                 } else { //don't find a match
                     noFound = document.createElement("p");
                     noFound.setAttribute("id", "noFound");
-                    noFound.appendChild(document.createTextNode("You have already selected a mentor!"));
+                    if("{{isStudent}}" == "True") {
+                        noFound.appendChild(document.createTextNode("You have already selected a mentor!"));
+                    } else {
+                        noFound.appendChild(document.createTextNode("You have been selected by a mentee! Check the progress tab."));
+                    }
                     document.getElementById("noMatchDiv").appendChild(noFound);
                     remove_loading();
                 }

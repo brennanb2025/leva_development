@@ -75,20 +75,60 @@
                 <br/><br/><br/>
 
                 {% if selectEntry != none %}
+                <section class="mentor">
                     {% if isMentee %}
                         Your mentor:<br/>
                     {% else %}
                         Your mentee:<br/>
                     {% endif %}
-                    {{selectMentorMentee}}
+                    
+                    <!-- show mentor/mentee -->
+                    <div class="mentor-card">
+                        <div class="picture-card">
+                            <div class="circle-border">
+                                {% if selectMentorMentee.profile_picture is none %}
+                                    <img class="profile_picture_small" src="{{url_for('static', filename='blank-profile-picture.png')}}" alt="profile_picture"><br/>
+                                    <br/>
+                                {% else %}
+                                    <img class="profile_picture_small" src="{{selectMentorMentee.profile_picture}}" alt="profile_picture"><br/><br/>
+                                    <br/>
+                                {% endif %}
+                            </div>
+                            <div class="head2">
+                                {{ selectMentorMentee.first_name }}
+                            </div>
+                            <div class="head2">
+                                {{ selectMentorMentee.last_name }}
+                            </div>
+                            <div class="purple-line"></div>
+                            <div class="division">
+                                {{ selectMentorMentee.division }}
+                            </div>
+                        </div>
+                    </div>
+                    <br/><br/>
+                </section>
+
+
+                    Your progress<br/>
+
+                    Upcoming meeting: meeting #{{ reminderList[0]["num"] }}   ({{ reminderList[0]["date"] }})<br/>
+                    Description: {{ reminderList[0]["desc"] }}
+
                     <br/><br/>
 
-                    Reminders:
+                    Completed meetings: (should be a dropdown list)
+                    {{progressCompletedList}}
+                    <br/><br/>
+
+
+
+                    
+                    Pending meetings:
                     {{reminderList}}<br/><br/>
 
-                    Progress (completed stuff):
-                    {{progressCompletedList}}
-                    <br/>
+
+
                 {% else %}
                     {% if isMentee %}
                         Select a mentor in the Mentor Matches tab!<br/>

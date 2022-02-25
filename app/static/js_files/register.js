@@ -28,7 +28,7 @@ if(inputFile) { //ensure not null
                 }
                 newImg = document.createElement("img");
                 newImg.setAttribute("id", "image");
-                newImg.setAttribute("class", "image_container centerDiv");
+                newImg.setAttribute("class", "image_container picture");
                 newImg.setAttribute("src", e.target.result);
                 newImg.setAttribute("alt", "your image");
                 newImg.style.display = "none"; //hide image
@@ -61,6 +61,7 @@ if(inputFile) { //ensure not null
     console.log("Null");
 }
 
+/*
 //video stuff
 videoFile = document.getElementById("videoFile");
 if(videoFile) { //ensure not null
@@ -109,7 +110,7 @@ if(videoFile) { //ensure not null
     //won't proc because of defer
     console.log("Null");
 }
-
+*/
 //resume stuff
 inputFileResume = document.getElementById("inputFileResume");
 if(inputFileResume) { //ensure not null
@@ -141,7 +142,7 @@ if(inputFileResume) { //ensure not null
 document.getElementById("phoneNumber").style.display = "none"; //hide input for phone number
 document.getElementById("careerExp").style.display = "none"; //hide career experience - assume they are a mentee
 document.getElementById("genderMentor").style.display = "none"; //hide gender radio - assume they are a mentee
-document.getElementById("newVideo").style.display = "none"; //hide new video if user hasn't input anything yet
+//document.getElementById("newVideo").style.display = "none"; //hide new video if user hasn't input anything yet
 //document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
 document.getElementById("menteeDivisionPreference").style.display = "none"; //hide mentee preference - assume they are a mentee
 

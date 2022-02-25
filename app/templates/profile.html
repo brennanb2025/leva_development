@@ -72,7 +72,7 @@
                     {% if logged_in is defined and logged_in %}
                         My Leva Profile
                     {% else %}
-                        Leva Profile
+                        Leva Profile: {{ user.first_name }} {{ user.last_name }}
                     {% endif %}
                 </div>
 
