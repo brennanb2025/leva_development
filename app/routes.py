@@ -1,6 +1,5 @@
 #This file is the python flask backend
 
-from crypt import methods
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
@@ -718,7 +717,8 @@ def editProfile():
 
     title="Edit profile Page"
     #return render_template('edit_profile.html', intro_video=intro_video_link, 
-    return render_template('editProfileNew.html', intro_video=intro_video_link, 
+    #return render_template('editProfileNew.html', intro_video=intro_video_link, 
+    return render_template('edit_profile_revised.html', intro_video=intro_video_link, 
             contact_method=contact_method, phone_num=phone_num, profile_picture=prof_pic_link, 
             interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
             title=title, bio=bio, interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
@@ -728,7 +728,7 @@ def editProfile():
             formPwd=formPwd, 
             user=user, userID=session.get('userID'))
 
-@app.route('/edit-profile-test', methods=['GET'])
+"""@app.route('/edit-profile-test', methods=['GET'])
 def editProfileTest():
     if not userLoggedIn():
         return redirect(url_for('sign_in'))
@@ -810,7 +810,7 @@ def editProfileTest():
             resumeUrl=resumeUrl, divisionPreference=divisionPreference,
             mentorGenderPreference=mentorGenderPreference, genderIdentity=genderIdentity,
             formPwd=formPwd, 
-            user=user, userID=session.get('userID'))
+            user=user, userID=session.get('userID'))"""
 
 @app.route('/edit-profile', methods = ['POST'])
 def editProfilePost():
@@ -1933,8 +1933,8 @@ def error_handler(e):
         db.session.rollback()
 
     dictLog = {}
-    dictLog['code'] = e.code
-    dictLog['desc'] = e.description
+    dictLog['code'] = code
+    dictLog['desc'] = str(e)
     logData(16,json.dumps(dictLog))
     
     return render_template("general_error.html", code=code)

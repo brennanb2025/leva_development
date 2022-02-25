@@ -382,3 +382,5 @@ class Event(db.Model, Base):
 
     def __repr__(self):
         return '<Event {}>'.format(str(self.userID) + " " + str(self.action) + " " + self.message) #how to print database
+
+
