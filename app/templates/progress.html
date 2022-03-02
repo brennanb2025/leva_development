@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/main.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/portal.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css_files/progress.css')}}">
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
         <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,7 +113,7 @@
                         Meeting progress
                     </div>
 
-                    <div class="info">
+                    <div class="info meetings">
 
                         Upcoming meeting:<br/>
                         Meeting #{{ currMeetingInfo["num"] }}:  {{ currMeetingInfo["title"] }}   ({{ currMeetingInfo["date"] }})<br/>
