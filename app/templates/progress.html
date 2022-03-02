@@ -114,16 +114,31 @@
 
                     <div class="info">
 
-                        Upcoming meeting: meeting #{{ reminderList[0]["num"] }}   ({{ reminderList[0]["date"] }})<br/>
-                        Description: {{ reminderList[0]["desc"] }}<br/><br/>
+                        Upcoming meeting:<br/>
+                        Meeting #{{ currMeetingInfo["num"] }}:  {{ currMeetingInfo["title"] }}   ({{ currMeetingInfo["date"] }})<br/>
+                        Description: {{ currMeetingInfo["desc"] }}<br/>
 
-                        Column 1:
-                        Pending meetings:
-                        {{reminderList}}<br/><br/>
-                        
-                        Column 2:
-                        Completed meetings: (should be a dropdown list)
-                        {{progressCompletedList}}
+                        Content: {{ currMeetingInfo["content"] }}<br/><br/><br/><br/>
+
+                        Column 1:<br/>
+                        Pending meetings:<br/>
+                        {% for fm in futureMeetingInfo %}
+                            Meeting #{{ fm["num"] }}:  {{ fm["title"] }}   ({{ fm["date"] }})<br/>
+                            Description: {{ fm["desc"] }}<br/>
+
+                            Content: {{ fm["content"] }}<br/><br/><br/>
+                        {% endfor %}
+
+                        <br/><br/><br/>
+
+                        Column 2:<br/>
+                        Completed meetings: (should be a dropdown list)<br/>
+                        {% for pm in prevMeetingInfo %}
+                            Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})<br/>
+                            Description: {{ pm["desc"] }}<br/>
+
+                            Content: {{ pm["content"] }}<br/><br/><br/>
+                        {% endfor %}
                     </div>
 
 

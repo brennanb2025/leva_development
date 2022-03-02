@@ -329,8 +329,13 @@ class Select(db.Model, Base):
     id = db.Column(db.Integer, primary_key=True)
     mentor_id = db.Column(db.Integer)
     mentee_id = db.Column(db.Integer)
+    
+    current_meeting_ID = db.Column(db.Integer,default=1)
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def inc_current_meeting_ID(self):
+        self.current_meeting_ID = self.current_meeting_ID+1
 
 
 #Business stores information about each business that has registered users and how many users are currently registered under each one.
@@ -348,6 +353,11 @@ class Business(db.Model, Base):
     
     def dec_number_employees_currently_registered(self):
         self.number_employees_currently_registered = self.number_employees_currently_registered-1
+
+    def __repr__(self):
+        return '<Business {}>'.format(str(self.id) + " " + str(self.name) + ", Employees max: " + 
+                str(self.number_employees_maximum) + ", number currently registered: " + 
+                str(self.number_employees_currently_registered)) #how to print database
 
 
 
@@ -384,3 +394,21 @@ class Event(db.Model, Base):
         return '<Event {}>'.format(str(self.userID) + " " + str(self.action) + " " + self.message) #how to print database
 
 
+class ProgressMeeting(db.Model, Base):
+    __tablename__ = "ProgressMeeting"
+
+    id = db.Column(db.Integer, primary_key=True)
+    business_ID = db.Column(db.Integer) #the business that created this progress meeting
+    completion_date = db.Column(db.DateTime, index=True) #the date the meeting should be completed by
+    num_meeting = db.Column(db.Integer) #the number meeting this is
+    title = db.Column(db.String(64))
+    content_description = db.Column(db.String(256))
+    content = db.Column(db.Text)
+
+    def __repr__(self):
+        return '<ProgressMeeting {}>'.format(str(self.id) + ", businessID: " + str(self.business_ID) + 
+                ", completion_date: " + str(self.completion_date) +
+                ", num_meeting: " + str(self.num_meeting) +
+                ", title: " + self.title +
+                ", content_description: " + self.content_description + 
+                ", content: " + self.content) #how to print database

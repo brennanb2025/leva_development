@@ -5,7 +5,8 @@ from app import app, db, s3_client#, oauth
 #import lm as well?^
 from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm
 from uuid import uuid4
-from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Select, Business, Event
+from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
+        CareerInterestTag, Select, Business, Event, ProgressMeeting
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import datetime
@@ -98,27 +99,59 @@ def progress():
         selectEntry = Select.query.filter_by(mentor_id=user.id).first()
         if selectEntry != None:
             select_mentor_mentee = User.query.filter_by(id=selectEntry.mentee_id).first()
+
     #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
 
-    reminderList = [] #reminders for the future
-    progressCompletedList = [] #reminders that have already passed
-    #if selectEntry != None:
+    futureMeetingInfo = [] #future meeting list of info dicts
+    prevMeetingInfo = [] #previous meeting list of info dicts
+    currMeetingInfo = {} #current meeting info dict
+    if selectEntry != None:
         #NOTE: "in progress - add this when reminder:time information is given.")
-        
-        #timeDiff = GETCURRENTTIME - selectEntry.timestamp
-        #populate reminderList by going thru remindersByTimeDiff: list of tuples (timeDiff, reminder)
-        #1 month, 2 months, 3 months, each quarter (6, 9, 12, 15) - JUST DO EVERY 30 DAYS
-        #accumulative - show current month, then click button to see past months.
-    
-    logData(15,"")
+        currMeeting = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting==selectEntry.current_meeting_ID).first()
+        if currMeeting != None:
+            currMeetingInfo = getMeetingInfo(currMeeting)
 
-    reminder0Info = {}
-    reminder0Info["num"] = 1
-    reminder0Info["desc"] = "first meeting"
-    reminder0Info["date"] = "meeting date here"
-    reminderList.append(reminder0Info)
+        previousMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting < selectEntry.current_meeting_ID).all()
+        futureMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting > selectEntry.current_meeting_ID).all()
+        
+        for m in previousMeetings: #build the dicts of the info about each meeting
+            prevMeetingInfo.append(getMeetingInfo(m))
+        for m in futureMeetings:
+            futureMeetingInfo.append(getMeetingInfo(m))
+
+    logData(15,"")
     
-    return render_template('progress.html', selectEntry=selectEntry, progressCompletedList=progressCompletedList, isMentee=isMentee, selectMentorMentee=select_mentor_mentee, userID=user.id, reminderList=reminderList)
+    return render_template('progress.html', selectEntry=selectEntry, isMentee=isMentee, \
+            selectMentorMentee=select_mentor_mentee, userID=user.id, \
+            currMeetingInfo=currMeetingInfo, prevMeetingInfo=prevMeetingInfo, futureMeetingInfo=futureMeetingInfo)
+
+
+def getMeetingInfo(m):
+    mInfo = {}
+    mInfo["num"] = m.num_meeting
+    mInfo["date"] = m.completion_date.strftime("%B %d, %Y")
+    mInfo["title"] = m.title
+    mInfo["desc"] = m.content_description
+    mInfo["content"] = m.content
+    return mInfo
+
+
+def currentMeetingSetDone():
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+    
+    user = User.query.filter_by(id=session.get('userID')).first()
+
+    user.inc_current_meeting_ID()
+    db.session.commit()
+
+    return progress() #send to progress page
+
+
 
 #sign-in page GET.
 @app.route('/sign-in', methods=['GET'])
@@ -1866,33 +1899,6 @@ def my_connections():
     return render_template('my_network.html', isMentee=isMentee, selectUser=selectUser, userID=session.get('userID'))
 """
 
-@app.route('/reminders', methods=['GET'])
-def reminders():
-    if not(userLoggedIn()):
-        flash(u'You must log in.', 'loginRedirectError')
-        return redirect(url_for('sign_in'))
-
-    user = User.query.filter_by(id=session.get('userID')).first()
-    
-    isMentee = user.is_student #user.is_mentee
-
-    if isMentee: 
-        selectEntry = Select.query.filter_by(mentee_id=user.id).first()
-    else:
-        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
-    #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
-
-    reminderList = []
-    if selectEntry != None:
-        print("in progress - add this when reminder:time information is given.")
-        #timeDiff = selectEntry.timestamp - GETCURRENTTIME
-        #populate reminderList by going thru remindersByTimeDiff: list of tuples (timeDiff, reminder)
-        #1 month, 2 months, 3 months, each quarter (6, 9, 12, 15) - JUST DO EVERY 30 DAYS
-        #accumulative - show current month, then click button to see past months.
-    
-    return render_template('reminders.html', isMentee=isMentee, selectEntry=selectEntry, userID=user.id, reminderList=reminderList)
-
-
 def userLoggedIn():
     
     #Checks if the user is actually logged in -- commented out for easier testing
@@ -1911,17 +1917,21 @@ def handle_csrf_error(e):
     logData(17,json.dumps(dictLog))
     return render_template('csrf_error.html', reason=e.description), 400
 
+
+
+#NOTE: 404 and general error logging commented out for now.
+
 @app.errorhandler(404)
 # inbuilt function which takes error as parameter
 def not_found(e):
     # defining function
-    dictLog = {}
-    dictLog['code'] = e.code
-    dictLog['desc'] = e.description
-    logData(16,json.dumps(dictLog))
+    #dictLog = {}
+    #dictLog['code'] = e.code
+    #dictLog['desc'] = e.description
+    #logData(16,json.dumps(dictLog))
     return render_template("404_error.html")
 
-@app.errorhandler(Exception)
+"""@app.errorhandler(Exception)
 # inbuilt function which takes error as parameter
 def error_handler(e):
     code = 500 #problem with my code
@@ -1932,12 +1942,12 @@ def error_handler(e):
     if code == 500:
         db.session.rollback()
 
-    dictLog = {}
-    dictLog['code'] = code
-    dictLog['desc'] = str(e)
-    logData(16,json.dumps(dictLog))
+    #dictLog = {}
+    #dictLog['code'] = code
+    #dictLog['desc'] = str(e)
+    #logData(16,json.dumps(dictLog))
     
-    return render_template("general_error.html", code=code)
+    return render_template("general_error.html", code=code)"""
 
 
 def logData(num, msg):
