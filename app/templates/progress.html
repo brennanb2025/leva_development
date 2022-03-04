@@ -121,25 +121,31 @@
 
                         Content: {{ currMeetingInfo["content"] }}<br/><br/><br/><br/>
 
-                        Column 1:<br/>
-                        Pending meetings:<br/>
-                        {% for fm in futureMeetingInfo %}
-                            Meeting #{{ fm["num"] }}:  {{ fm["title"] }}   ({{ fm["date"] }})<br/>
-                            Description: {{ fm["desc"] }}<br/>
+                        <div class="meetings-container">
+                            <div class="half">
+                                Column 1:<br/>
+                                Pending meetings:<br/>
+                                {% for fm in futureMeetingInfo %}
+                                    Meeting #{{ fm["num"] }}:  {{ fm["title"] }}   ({{ fm["date"] }})<br/>
+                                    Description: {{ fm["desc"] }}<br/>
 
-                            Content: {{ fm["content"] }}<br/><br/><br/>
-                        {% endfor %}
+                                    Content: {{ fm["content"] }}<br/><br/><br/>
+                            {% endfor %}
+                            </div>
 
-                        <br/><br/><br/>
+                            <br/><br/><br/>
 
-                        Column 2:<br/>
-                        Completed meetings: (should be a dropdown list)<br/>
-                        {% for pm in prevMeetingInfo %}
-                            Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})<br/>
-                            Description: {{ pm["desc"] }}<br/>
+                            <div class="half">
+                                Column 2:<br/>
+                                Completed meetings: (should be a dropdown list)<br/>
+                                {% for pm in prevMeetingInfo %}
+                                    Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})<br/>
+                                    Description: {{ pm["desc"] }}<br/>
 
-                            Content: {{ pm["content"] }}<br/><br/><br/>
-                        {% endfor %}
+                                    Content: {{ pm["content"] }}<br/><br/><br/>
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
 
 
