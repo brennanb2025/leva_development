@@ -76,7 +76,6 @@
                 <br/><br/><br/>
 
                 {% if selectEntry != none %}
-                    Note: Center this
                     {% if isMentee %}
                         Your mentor:<br/>
                     {% else %}
@@ -109,38 +108,73 @@
                     </div>
 
                     <div class="head">
-                        <br/><br/>
                         Meeting progress
                     </div>
-
-                    <div class="info meetings">
-
-                        Upcoming meeting:<br/>
-                        Meeting #{{ currMeetingInfo["num"] }}:  {{ currMeetingInfo["title"] }}   ({{ currMeetingInfo["date"] }})<br/>
-                        Description: {{ currMeetingInfo["desc"] }}<br/>
-
-                        Content: {{ currMeetingInfo["content"] }}<br/><br/><br/><br/>
-
-                        Column 1:<br/>
-                        Pending meetings:<br/>
-                        {% for fm in futureMeetingInfo %}
-                            Meeting #{{ fm["num"] }}:  {{ fm["title"] }}   ({{ fm["date"] }})<br/>
-                            Description: {{ fm["desc"] }}<br/>
-
-                            Content: {{ fm["content"] }}<br/><br/><br/>
-                        {% endfor %}
-
-                        <br/><br/><br/>
-
-                        Column 2:<br/>
-                        Completed meetings: (should be a dropdown list)<br/>
+                    {% if progressDone %} <!--If the user has completely finished all the progress-->
+                    <br/><br/><br/>
+                        <div class="head">
+                            Congrats! You have completed every progress step!
+                        </div>
+                        <br/><br/>
+                        <div id="completedMeetings" onclick="openListCompletingMeetings()">Completed meetings:</div><br/>
+                        <ul id="completedMeetingList">
                         {% for pm in prevMeetingInfo %}
+                            <li>
                             Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})<br/>
                             Description: {{ pm["desc"] }}<br/>
 
                             Content: {{ pm["content"] }}<br/><br/><br/>
+                            </li>
                         {% endfor %}
+                        </ul>
+                    {% else %}
+                    <div class="info meetings">
+
+                        Upcoming meeting:<br/>
+                        Meeting #{{ currMeetingInfo["num"] }}:  {{ currMeetingInfo["title"] }}   ({{ currMeetingInfo["date"] }})
+                        <form id="meetingDoneButton" action="{{ url_for('progress') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button id="finishMeetingButton">Finished this meeting!</button>
+                        </form>
+
+                        <br/>
+                        Description: {{ currMeetingInfo["desc"] }}<br/>
+
+                        Content: {{ currMeetingInfo["content"] }}<br/><br/><br/><br/>
+
+                        <!--Column 1:<br/>-->
+                        <div id="pendingMeetings" onclick="openListPendingMeetings()">Pending meetings:</div><br/>
+                        <ul id="pendingMeetingList">
+                        {% if futureMeetingInfo|length == 0 %}
+                            No upcoming meetings!
+                        {% else %}
+                            {% for fm in futureMeetingInfo %}
+                                <li>
+                                    Meeting #{{ fm["num"] }}:  {{ fm["title"] }}   ({{ fm["date"] }})<br/>
+                                    Description: {{ fm["desc"] }}<br/>
+
+                                    Content: {{ fm["content"] }}<br/><br/><br/>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                        </ul>
+                        </div>
+
+
+                        <!--Column 2:<br/>-->
+                        <div id="completedMeetings" onclick="openListCompletingMeetings()">Completed meetings:</div><br/>
+                        <ul id="completedMeetingList">
+                        {% for pm in prevMeetingInfo %}
+                            <li>
+                            Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})<br/>
+                            Description: {{ pm["desc"] }}<br/>
+
+                            Content: {{ pm["content"] }}<br/><br/><br/>
+                            </li>
+                        {% endfor %}
+                        </ul>
                     </div>
+                    {% endif %}
 
 
                 {% else %}
@@ -159,4 +193,31 @@
         </div>
 
     </body>
+
+    <script>
+
+        openListCompletingMeetings();
+        openListPendingMeetings();
+        
+        function openListPendingMeetings() {
+            var list = document.getElementById("pendingMeetingList");
+        
+            if (list.style.display == "none"){
+                list.style.display = "block";
+            }else{
+                list.style.display = "none";
+            }
+        }
+
+        function openListCompletingMeetings() {
+            var list = document.getElementById("completedMeetingList");
+        
+            if (list.style.display == "none"){
+                list.style.display = "block";
+            }else{
+                list.style.display = "none";
+            }
+        }
+    </script>
+
 </html>

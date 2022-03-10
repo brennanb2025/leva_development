@@ -80,7 +80,7 @@ def mentor():
     
     return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=True)
 
-@app.route('/progress')
+@app.route('/progress', methods=['GET'])
 def progress():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
@@ -102,6 +102,8 @@ def progress():
 
     #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
 
+    progressDone = False
+
     futureMeetingInfo = [] #future meeting list of info dicts
     prevMeetingInfo = [] #previous meeting list of info dicts
     currMeetingInfo = {} #current meeting info dict
@@ -111,6 +113,8 @@ def progress():
                 ProgressMeeting.num_meeting==selectEntry.current_meeting_ID).first()
         if currMeeting != None:
             currMeetingInfo = getMeetingInfo(currMeeting)
+        else:
+            progressDone = True
 
         previousMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
                 ProgressMeeting.num_meeting < selectEntry.current_meeting_ID).all()
@@ -125,7 +129,7 @@ def progress():
     logData(15,"")
     
     return render_template('progress.html', selectEntry=selectEntry, isMentee=isMentee, \
-            selectMentorMentee=select_mentor_mentee, userID=user.id, \
+            selectMentorMentee=select_mentor_mentee, userID=user.id, progressDone=progressDone, \
             currMeetingInfo=currMeetingInfo, prevMeetingInfo=prevMeetingInfo, futureMeetingInfo=futureMeetingInfo)
 
 
@@ -138,15 +142,23 @@ def getMeetingInfo(m):
     mInfo["content"] = m.content
     return mInfo
 
-
+@app.route('/progress', methods=['POST'])
 def currentMeetingSetDone():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
     
     user = User.query.filter_by(id=session.get('userID')).first()
+    isMentee = user.is_student #user.is_mentee
 
-    user.inc_current_meeting_ID()
+    if isMentee: 
+        selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
+    else:
+        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+    
+    if selectEntry != None:
+        selectEntry.inc_current_meeting_ID() #increment the meeting number
+
     db.session.commit()
 
     return progress() #send to progress page
@@ -1696,22 +1708,22 @@ def feedMentee(user):
     #personality
     for u in users:
         #match in any personality trait - separate to add to the value per each match.
-        if u.personality_1 == user.personality_1:
+        if u.personality_1 in user.personality_1 or user.personality_1 in u.personality_1:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
-        if u.personality_1 == user.personality_2:
+        if u.personality_1 in user.personality_2 or user.personality_2 in u.personality_1:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
-        if u.personality_1 == user.personality_3:
+        if u.personality_1 in user.personality_3 or user.personality_3 in u.personality_1:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
-        if u.personality_2 == user.personality_2:
+        if u.personality_2 in user.personality_2 or user.personality_2 in u.personality_2:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
-        if u.personality_2 == user.personality_3:
+        if u.personality_2 in user.personality_3 or user.personality_3 in u.personality_2:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
-        if u.personality_3 == user.personality_3:
+        if u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
     
@@ -1919,19 +1931,19 @@ def handle_csrf_error(e):
 
 
 
-#NOTE: 404 and general error logging commented out for now.
+#NOTE: general error logging commented out for now.
 
 @app.errorhandler(404)
 # inbuilt function which takes error as parameter
 def not_found(e):
     # defining function
-    #dictLog = {}
-    #dictLog['code'] = e.code
-    #dictLog['desc'] = e.description
-    #logData(16,json.dumps(dictLog))
+    dictLog = {}
+    dictLog['code'] = 404
+    dictLog['desc'] = "404 error"
+    logData(16,json.dumps(dictLog))
     return render_template("404_error.html")
 
-"""@app.errorhandler(Exception)
+@app.errorhandler(Exception)
 # inbuilt function which takes error as parameter
 def error_handler(e):
     code = 500 #problem with my code
@@ -1941,13 +1953,13 @@ def error_handler(e):
         return render_template("404_error.html")
     if code == 500:
         db.session.rollback()
-
-    #dictLog = {}
-    #dictLog['code'] = code
-    #dictLog['desc'] = str(e)
-    #logData(16,json.dumps(dictLog))
+    if code != 200: #response OK
+        dictLog = {}
+        dictLog['code'] = code
+        dictLog['desc'] = str(e)
+        logData(16,json.dumps(dictLog))
     
-    return render_template("general_error.html", code=code)"""
+    return render_template("general_error.html", code=code)
 
 
 def logData(num, msg):
