@@ -108,7 +108,6 @@ def progress():
     prevMeetingInfo = [] #previous meeting list of info dicts
     currMeetingInfo = {} #current meeting info dict
     if selectEntry != None:
-        #NOTE: "in progress - add this when reminder:time information is given.")
         currMeeting = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
                 ProgressMeeting.num_meeting==selectEntry.current_meeting_ID).first()
         if currMeeting != None:

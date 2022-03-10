@@ -336,6 +336,8 @@ class Select(db.Model, Base):
 
     def inc_current_meeting_ID(self):
         self.current_meeting_ID = self.current_meeting_ID+1
+    def dec_current_meeting_ID(self):
+        self.current_meeting_ID = self.current_meeting_ID-1
 
 
 #Business stores information about each business that has registered users and how many users are currently registered under each one.

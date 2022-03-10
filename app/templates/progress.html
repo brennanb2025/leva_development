@@ -143,36 +143,42 @@
                         Content: {{ currMeetingInfo["content"] }}<br/><br/><br/><br/>
 
                         <!--Column 1:<br/>-->
-                        <div id="pendingMeetings" onclick="openListPendingMeetings()">Pending meetings:</div><br/>
-                        <ul id="pendingMeetingList">
-                        {% if futureMeetingInfo|length == 0 %}
-                            No upcoming meetings!
-                        {% else %}
-                            {% for fm in futureMeetingInfo %}
-                                <li>
-                                    Meeting #{{ fm["num"] }}:  {{ fm["title"] }}   ({{ fm["date"] }})<br/>
-                                    Description: {{ fm["desc"] }}<br/>
+                        
+                        <div class="meetings-container">
+                            <div class="half">
+                                <div id="pendingMeetings" onclick="openListPendingMeetings()">Pending meetings:</div><br/>
+                                <ul id="pendingMeetingList">
+                                {% if futureMeetingInfo|length == 0 %}
+                                    No upcoming meetings!
+                                {% else %}
+                                    {% for fm in futureMeetingInfo %}
+                                        <li>
+                                            Meeting #{{ fm["num"] }}:  {{ fm["title"] }}   ({{ fm["date"] }})<br/>
+                                            Description: {{ fm["desc"] }}<br/>
 
-                                    Content: {{ fm["content"] }}<br/><br/><br/>
-                                </li>
-                            {% endfor %}
-                        {% endif %}
-                        </ul>
+                                            Content: {{ fm["content"] }}<br/><br/>
+                                        </li>
+                                    {% endfor %}
+                                {% endif %}
+                                </ul>
+                            </div>
+
+                            <br/><br/><br/>
+
+                            <div class="half">
+                                <div id="completedMeetings" onclick="openListCompletingMeetings()">Completed meetings:</div><br/>
+                                <ul id="completedMeetingList">
+                                    {% for pm in prevMeetingInfo %}
+                                        <li>
+                                        Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})<br/>
+                                        Description: {{ pm["desc"] }}<br/>
+
+                                        Content: {{ pm["content"] }}<br/><br/><br/>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
-
-
-                        <!--Column 2:<br/>-->
-                        <div id="completedMeetings" onclick="openListCompletingMeetings()">Completed meetings:</div><br/>
-                        <ul id="completedMeetingList">
-                        {% for pm in prevMeetingInfo %}
-                            <li>
-                            Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})<br/>
-                            Description: {{ pm["desc"] }}<br/>
-
-                            Content: {{ pm["content"] }}<br/><br/><br/>
-                            </li>
-                        {% endfor %}
-                        </ul>
                     </div>
                     {% endif %}
 
