@@ -864,6 +864,11 @@ def editProfilePost():
 
     form = request.form
 
+    if form.get("submitBtn") == "editResume": #different types of submissions
+        editProfResume()
+    elif form.get("submitBtn") == "deleteResume":
+        deleteResume()
+
     success = True
     u = User.query.filter_by(id=session['userID']).first()
 
@@ -1271,7 +1276,7 @@ def deleteIntroVid():
     return redirect(url_for('editProfile'))
 """
 
-@app.route('/delete-resume', methods=['POST'])
+#@app.route('/delete-resume', methods=['POST'])
 def deleteResume():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
@@ -1327,7 +1332,7 @@ def editVideo():
     return redirect(url_for('editProfile'))
 """
 
-@app.route('/edit-profile-resume', methods=['POST'])
+#@app.route('/edit-profile-resume', methods=['POST'])
 def editProfResume():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')

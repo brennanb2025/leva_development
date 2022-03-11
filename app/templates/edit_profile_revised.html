@@ -113,8 +113,9 @@
                 <div class="edit-information">
                     <div class="info info2">
 
-                        <form action="/edit-profile" method="POST" enctype="multipart/form-data" class="form-expand">
+                        <form action="/edit-profile" id="editProfileForm" method="POST" enctype="multipart/form-data" class="form-expand">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input type="hidden" id="submitBtn" name="submitBtn" value=""/>
                             <div class="list">
                                 <div class="half">
                                     <div class="one-for-all">
@@ -234,6 +235,43 @@
                                                 <input id="city_name" name="city_name" value="{{ user.city_name }}">
                                             </div>
                                         </div>
+
+                                        <div class="single">
+                                            {% if resumeUrl is none %}
+                                                <div class="label">
+                                                    Add resume (Max size = 5MB)<br/>
+                                                </div>
+                                            {% else %}
+                                                <a class="label" target="_blank" href="{{resumeUrl}}">
+                                                    Resume link
+                                                </a>
+                                                <br/>
+                                                <div class="label">
+                                                    Change resume (Max size = 5MB)<br/>
+                                                </div>
+                                            {% endif %}
+                                
+                                        
+                                            <input type="file" name="resume" value="resume" id="inputFileResume" accept="application/pdf"/>
+                                            <!--<br/><span id="resumeFilename"></span><br/>-->
+                                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                                {% if messages %}
+                                                    <ul class=flashes>
+                                                    {% for category, message in messages %}
+                                                        {% if category == 'resumeError' %}
+                                                        <span style="color: red;">[{{ message }}]</span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                            {% endwith %}
+                                            <button type="submit" id="editResume">Edit resume</button>
+                                
+                                            {% if resumeUrl is not none %}
+                                                <button type="submit" id="deleteResume">Delete resume</button>
+                                            {% endif %}
+                                        </div>
+
                                     </div>
                                 </div>
                                     
@@ -541,7 +579,7 @@
                             </div>
                             </div>
     
-                            <button >
+                            <button id="changeProfile">
                                 Change Profile
                             </button>
                         </form>

@@ -173,6 +173,10 @@ function init(contact_method) {
     });
     */
 
+    document.getElementById("editProfileForm").onsubmit = function() {
+        document.getElementById("submitBtn").value = document.activeElement.id
+    }
+
 }
 
 //resume stuff
