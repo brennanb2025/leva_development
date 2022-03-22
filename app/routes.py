@@ -1690,7 +1690,7 @@ def feedMentee(user):
     potentialUsers = User.query.filter_by(business_id=user.business_id).filter_by(is_student=False).all()
 
     users = []
-    for u in users:
+    for u in potentialUsers:
         if not mentorSelected(u.id): #only select users that have not already been chosen.
             users.append(u)
 
