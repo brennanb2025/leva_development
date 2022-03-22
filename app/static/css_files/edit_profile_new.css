@@ -141,3 +141,7 @@
   width: 0px;
   background: transparent; /* make scrollbar transparent */
 }
+
+#changeProfile {
+  margin: auto;
+}

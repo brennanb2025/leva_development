@@ -532,7 +532,7 @@ def registerPost():
 
         return resp
     else:
-
+        flash(u'We encountered an error registering you. Please fix any errors in the following pages.', 'generalError')
         return registerPreviouslyFilledOut(form1, errors, request)
 
 
@@ -1687,7 +1687,12 @@ def feedMentee(user):
     matches["interest"] = 0
 
     #get all mentors in the same business as the user. is_student should remove the user themself from the query.
-    users = User.query.filter_by(business_id=user.business_id).filter_by(is_student=False).all()
+    potentialUsers = User.query.filter_by(business_id=user.business_id).filter_by(is_student=False).all()
+
+    users = []
+    for u in users:
+        if not mentorSelected(u.id): #only select users that have not already been chosen.
+            users.append(u)
 
     for u in users: #initialize user dictionary and check gender preference/identity
         userDict[u] = 0
