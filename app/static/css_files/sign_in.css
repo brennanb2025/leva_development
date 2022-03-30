@@ -1,7 +1,6 @@
 .login-container{
     margin-top: 130px;
-    width: 94%;
-    max-width: 100%;
+    width: 100%;
     height: auto;
     display: flex;
     justify-content: center;
@@ -12,11 +11,15 @@
     background-size: cover;
 }
 
+.launch-box .launch{
+    width: 9vw;
+}
+
 .detail-container{
     background-color: white;
     box-sizing: border-box;
     margin-top: 20px;
-    width: 30%;
+    width: 35%;
     padding: 3%;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.2);
     transition-duration: 0.75s;
@@ -25,7 +28,7 @@
 
 .head2{
     margin-top: 0%;
-    margin-bottom: 40px;
+    margin-bottom: 2.2vw;
     color: rgb(158, 63, 253);
 }
 
@@ -34,11 +37,13 @@
 }
 
 .input-container input{
-    height: 30px;
+    height: 2.2vw;
+    width: auto;
 }
 
 .register-container{
     margin-top: 20px;
+    font-size: 1.2vw;
 }
 
 .register_link{

@@ -14,22 +14,11 @@ body, html{
 }
 
 .header{
-    flex: 0;
-    background-color: white;
-    width: 96%;
-    height: 100px;
     padding: 15px 2% 15px 2%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly; 
-    align-items: center;
     border-bottom: 1px solid gray;
-    position: fixed;
-    z-index: 2;
 }
 
 .header .logo-box{
-    flex: 1;
     display: flex;
     background: transparent;
     justify-content: center;
@@ -38,7 +27,6 @@ body, html{
 
 .header .nav-box{
     display: flex;
-    flex: 1;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
@@ -46,32 +34,36 @@ body, html{
 
 .nav-box .nav-button{
     border: none;
-    flex: 1;
     outline: none;
-    font-size: medium;
+    font-size: 1.1vw;
     color: rgb(37, 37, 37);
-    background: white;
+    background: transparent;
     transition-duration: 0.4s;
     cursor: pointer;
-    height: 100%;
 }
 
 .nav-button:hover{
     color: rgb(152, 84, 201);
 }
 
+@media (max-width: 992px){
+    .navbar-collapse{
+        padding-top: 1.2vw;
+    }
+}
+
 .header .register-box{
     display: flex;
-    flex: 1;
     justify-content: right;
 }
 
 .register-box .register{
     border: none; 
     outline: none;
-    height: 100px;
+    height: 7vw;
     color: white;
-    min-width: 150px;
+    min-width: 11vw;
+    font-size: 1vw;
     text-decoration: none;
     text-align: center;
     display: flex;
@@ -88,7 +80,6 @@ body, html{
 }
 
 .background{
-    padding-top: 125px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -103,7 +94,7 @@ body, html{
 }
 
 .home .header-text{
-    font-size: 90px;
+    font-size: 6vw;
 }
 
 .home h1{
@@ -118,6 +109,7 @@ body, html{
 
 .home h3{
     font-weight: 100;
+    font-size: 1.3vw;
     color: gray;
 }
 
@@ -129,11 +121,12 @@ body, html{
     border: none;
     outline: none;
     text-decoration: none;
-    min-width: 100px;
+    width: 15vw;
     background-color: rgb(33, 48, 74);
     color: white;
     padding: 2%;
     transition-duration: 0.4s;
+    font-size: 1vw;
 }
 
 .launch:hover{
@@ -154,7 +147,7 @@ body, html{
 }
 
 .product .title{
-    font-size: 30px;
+    font-size: 2.2vw;
     padding-bottom: 4%;
 }
 
@@ -175,8 +168,8 @@ body, html{
 }
 
 .icon{
-    width: 150px;
-    height: 150px;
+    width: 11vw;
+    height: 11vw;
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
@@ -194,6 +187,10 @@ body, html{
     background-image: url("/static/focus.png");
 }
 
+label{
+    font-size: 1.2vw;
+}
+
 .label1, .label2{
     text-align: center;
 }
@@ -201,11 +198,13 @@ body, html{
 .label1{
     margin-top: 8%;
     font-weight: 500;
+    font-size: 1.3vw;
 }
 
 .label2{
     margin-top: 8%;
     font-weight: 100;
+    font-size: 1.3vw;
     color: gray;
 }
 
@@ -249,6 +248,7 @@ body, html{
 
 .head1{
     color: rgb(158, 63, 253);
+    font-size: 1.2vw;
     letter-spacing: 0.1em;
     font-weight: 600;
 }
@@ -256,7 +256,7 @@ body, html{
 .head2{
     color: black;
     font-weight: bold;
-    font-size: 30px;
+    font-size: 2.2vw;
     margin-top: 5%;
     line-height: 40px;
 }
@@ -264,9 +264,9 @@ body, html{
 .text1{
     color: gray;
     font-weight: lighter;
-    font-size: 17px;
+    font-size: 1.2vw;
     margin-top: 8%;
-    line-height: 30px;
+    line-height: 2.2vw;
 }
 
 .contact{
@@ -289,10 +289,11 @@ input{
     border-right: none;
     border-left: none;
     outline: none;
-    font-size: 17px;
+    font-size: 1.2vw;
     color: gray;
     font-family: 'Work Sans';
-    height: 50px;
+    height: 2.6vw;
+    width: 100%;
 }
 
 input:focus{
@@ -327,6 +328,7 @@ input:focus{
 .firstlast{
     display: flex;
     flex-direction: row;
+    width: 100%;
 }
 
 .testimonials{
@@ -354,16 +356,18 @@ input:focus{
     color: white;
     margin-top: 0%;
     margin-bottom: 3%;
-    font-size: 40px;
+    font-size: 2vw;
 }
 
 .sub1{
     color: white;
     font-weight: bold;
+    font-size: 1.2vw;
 }
 
 .sub2{
     color: white;
+    font-size: 1.2vw;
 }
 
 /* From W3Schools */
