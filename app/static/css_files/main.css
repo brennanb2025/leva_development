@@ -26,16 +26,33 @@ body, html{
 }
 
 .header .nav-box{
+    flex-basis: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
 }
 
+.navbar-collapse{
+    flex-grow: 0!important;
+}
+
+.nav-item{
+    border-right: 1px solid rgb(197, 197, 197);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-item:last-child{
+    border-right: none;
+}
+
 .nav-box .nav-button{
     border: none;
     outline: none;
-    font-size: 1.1vw;
+    width: 7vw;
+    font-size: 0.8vw;
     color: rgb(37, 37, 37);
     background: transparent;
     transition-duration: 0.4s;
@@ -46,12 +63,6 @@ body, html{
     color: rgb(152, 84, 201);
 }
 
-@media (max-width: 992px){
-    .navbar-collapse{
-        padding-top: 1.2vw;
-    }
-}
-
 .header .register-box{
     display: flex;
     justify-content: right;
@@ -60,11 +71,9 @@ body, html{
 .register-box .register{
     border: none; 
     outline: none;
-    height: 7vw;
-    color: white;
+    height: 6vw;
     min-width: 11vw;
-    font-size: 1vw;
-    text-decoration: none;
+    font-size: 15px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -73,6 +82,18 @@ body, html{
     background-color: rgb(33, 48, 74);
     padding: 5%;
     transition-duration: 0.4s;
+}
+
+.register-box .register a{
+    outline: none;
+    text-decoration: none;
+    color: white;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .register:hover{
@@ -94,7 +115,7 @@ body, html{
 }
 
 .home .header-text{
-    font-size: 6vw;
+    font-size: 90px;
 }
 
 .home h1{
@@ -109,7 +130,7 @@ body, html{
 
 .home h3{
     font-weight: 100;
-    font-size: 1.3vw;
+    font-size: 20px;
     color: gray;
 }
 
@@ -120,17 +141,62 @@ body, html{
 .launch-box .launch{
     border: none;
     outline: none;
-    text-decoration: none;
     width: 15vw;
     background-color: rgb(33, 48, 74);
     color: white;
     padding: 2%;
     transition-duration: 0.4s;
-    font-size: 1vw;
+    font-size: 15px;
+}
+
+.launch-box .launch a{
+    color: white;
+    text-decoration: none;
+    width: 100%;
+    height: 100%;
 }
 
 .launch:hover{
     background-color: rgb(152, 84, 201);
+}
+
+@media (max-width: 992px){
+    .navbar-collapse{
+        padding-top: 1.2vw;
+    }
+
+    .nav-item{
+        border-right: none;
+    }
+
+    .nav-box{
+        order: 4;
+    }
+
+    .register-box{
+        order: 3;
+    }
+
+    .nav-box .nav-button{
+        font-size: 1.1vw;
+        width: auto;
+    }
+
+    .register-box .register{
+        font-size: 1.1vw;
+    }
+
+    .home h3{
+        font-size: 1.3vw;
+    }
+
+    .home .header-text{
+        font-size: 5vw;
+    }
+
+    .launch-box .launch{
+        font-size: 1vw;
+    }
 }
 
 .space{
@@ -147,7 +213,7 @@ body, html{
 }
 
 .product .title{
-    font-size: 2.2vw;
+    font-size: 30px;
     padding-bottom: 4%;
 }
 
@@ -188,7 +254,7 @@ body, html{
 }
 
 label{
-    font-size: 1.2vw;
+    font-size: 17px;
 }
 
 .label1, .label2{
@@ -198,14 +264,32 @@ label{
 .label1{
     margin-top: 8%;
     font-weight: 500;
-    font-size: 1.3vw;
+    font-size: 15px;
 }
 
 .label2{
     margin-top: 8%;
     font-weight: 100;
-    font-size: 1.3vw;
+    font-size: 17px;
     color: gray;
+}
+
+@media (max-width: 992px){
+    .product .title{
+        font-size: 2.2vw;
+    }
+
+    label{
+        font-size: 1.2vw;
+    }
+
+    .label1{
+        font-size: 1.3vw;
+    }
+
+    .label2{
+        font-size: 1.3vw;
+    }
 }
 
 .steps{
@@ -243,12 +327,12 @@ label{
 
 .half .something{
     background-color: white;
-    padding: 20% 23% 20% 23%;
+    padding: 20% 25% 20% 25%;
 }
 
 .head1{
     color: rgb(158, 63, 253);
-    font-size: 1.2vw;
+    font-size: 17px;
     letter-spacing: 0.1em;
     font-weight: 600;
 }
@@ -256,7 +340,7 @@ label{
 .head2{
     color: black;
     font-weight: bold;
-    font-size: 2.2vw;
+    font-size: 30px;
     margin-top: 5%;
     line-height: 40px;
 }
@@ -264,9 +348,26 @@ label{
 .text1{
     color: gray;
     font-weight: lighter;
-    font-size: 1.2vw;
+    font-size: 17px;
     margin-top: 8%;
-    line-height: 2.2vw;
+    line-height: 30px;
+}
+
+@media (max-width: 992px){
+    .head1{
+        font-size: 1.2vw;
+        letter-spacing: 0.1em;
+    }
+
+    .head2{
+        font-size: 2.2vw;
+        line-height: 3.3vw;
+    }
+    
+    .text1{
+        font-size: 1.2vw;
+        line-height: 2.4vw;
+    }
 }
 
 .contact{

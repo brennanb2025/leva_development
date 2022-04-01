@@ -34,7 +34,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="navbar-collapse collapse ps-3 nav-box" id="navbarToggler">
+            <div class="nav-box navbar-collapse collapse" id="navbarToggler">
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a href="#home">
@@ -77,14 +77,14 @@
                     </li>
     
                 </ul>
+            </div>
 
-                <div class="register-box">
+            <div class="register-box">
+                <button class="register">
                     <a href="{{ url_for('sign_in') }}">
-                        <button class="register">
-                            Log In
-                        </button>
+                        Log In
                     </a>
-                </div>
+                </button>
             </div>
 
         </div>
