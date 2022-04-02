@@ -71,6 +71,7 @@ body, html{
 .register-box .register{
     border: none; 
     outline: none;
+    color: white;
     height: 6vw;
     min-width: 11vw;
     font-size: 15px;

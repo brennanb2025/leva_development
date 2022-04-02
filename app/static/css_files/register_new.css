@@ -69,7 +69,7 @@ input{
 }
 
 .register-box .register{
-    min-width: 150px;
+    width: 150px;
     height: 50px;
     padding: 3%;
 }
@@ -179,4 +179,40 @@ input{
     height: 205px;
     border-radius: 102.5px;
     object-fit: cover;
+}
+
+@media (max-width: 992px) {
+    .register-box .register{
+        width: 20vw;
+        height: 8vw;
+    }
+
+    .regtext{
+        padding-left: 2.5vw;
+        height: 1.5vw;
+        font-size: 1.2vw;
+    }
+
+    .decoration-container{
+        display: none;
+    }
+
+    .registration-container{
+        flex-basis: 100%;
+    }
+
+    .checkmark {
+
+        height: 1.5vw;
+        width: 1.5vw;
+      }
+
+    .regtext .checkmark:after {
+        top: 0.4vw;
+       left: 0.4vw;
+       width: 0.7vw;
+       height: 0.7vw;
+       border-radius: 50%;
+       background: white;
+   }
 }
