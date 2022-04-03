@@ -35,7 +35,7 @@ html, body{
 .info .label{
     color: rgb(33, 48, 74);
     font-size: 20px;
-    text-decoration: underline;
+    font-weight: bold;
 }
 
 .single{
@@ -89,7 +89,7 @@ html, body{
         order: 1;
     }
 
-    .list{
+    .display .list{
         order: 2;
         text-align: center;
         padding-left: 0;

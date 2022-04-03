@@ -425,6 +425,7 @@ input:focus{
     flex: 1;
     padding: 2%;
     margin-bottom: 5%;
+    box-sizing: border-box;
 }
 
 .firstlast{

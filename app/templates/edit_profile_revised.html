@@ -290,10 +290,8 @@
                                         </div>
 
                                     </div>
-                                </div>
-                                    
-                                <div class="half">
-        
+
+
                                     <div class="one-for-all">
                                         <div class="single">
                                             <input type="hidden" id="changedAttributes" name="changedAttributes" value="False">
@@ -592,13 +590,9 @@
                                         
                                     </div>
                                     </div>
+                                </div>
 
                             </div>
-                            </div>
-    
-                            <button name="changeProfile" id="changeProfile">
-                                Change Profile
-                            </button>
                         </form>
 
                     </div>
@@ -606,6 +600,9 @@
                 </div>
 
                 <div class="single">
+                    <button name="changeProfile" id="changeProfile">
+                        Change Profile
+                    </button>
                     <button name="delete-profile" value="delete_profile_btn" id="deleteProfileBtn">Delete Account</button>
                     <form id="deletionForm" action="{{ url_for('deleteProfile', id=userID) }}" method="POST">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
