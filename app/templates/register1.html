@@ -79,8 +79,8 @@
                                     <div class="input-container">
                                         <label for="first">{{ form.first_name.label }}</label>
                                         {{ form.first_name(value=first_name) }}<br/>
-                                    </div>
-                                    {% with messages = get_flashed_messages(with_categories=true) %}
+
+                                        {% with messages = get_flashed_messages(with_categories=true) %}
                                         {% if messages %}
                                             <ul class=flashes>
                                             {% for category, message in messages %}
@@ -91,12 +91,13 @@
                                             </ul>
                                         {% endif %}
                                     {% endwith %}
+                                    </div>
 
                                     <div class="input-container">
                                         <label for="last">{{ form.last_name.label }}</label>
                                         {{ form.last_name(value=last_name) }}<br/>
-                                    </div>
-                                    {% with messages = get_flashed_messages(with_categories=true) %}
+
+                                        {% with messages = get_flashed_messages(with_categories=true) %}
                                         {% if messages %}
                                             <ul class=flashes>
                                             {% for category, message in messages %}
@@ -107,6 +108,7 @@
                                             </ul>
                                         {% endif %}
                                     {% endwith %}
+                                    </div>
                                 </div>
 
                                 <div class="email">
@@ -464,7 +466,7 @@
                                     <label for="inputFileResume" class="choose_file_container add_something_btn">
                                         Choose file 
                                     </label>
-                                    (max size: 5MB)
+                                    <label>(max size: 5MB)</label>
                                     <input type="file" class="hide_this_input" name="resume" value="resume" id="inputFileResume" accept="application/pdf">
                                     <br/><span id="resumeFilename"></span><br/>
                         

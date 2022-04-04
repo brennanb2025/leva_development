@@ -3,6 +3,10 @@ body, html{
     overflow: hidden;
 }
 
+*, ::after, ::before {
+    box-sizing: border-box;
+  }
+
 .container{
     display: flex;
     height: 100%;
@@ -59,7 +63,7 @@ body, html{
 
 input{
     height: 30px;
-    width: 100%;
+    min-width: 0;
 }
 
 .register-box{
@@ -69,9 +73,13 @@ input{
 }
 
 .register-box .register{
-    min-width: 150px;
+    width: 150px;
     height: 50px;
     padding: 3%;
+}
+
+.flashes{
+    font-size: 1.3vw;
 }
 
 #register{
@@ -179,4 +187,52 @@ input{
     height: 205px;
     border-radius: 102.5px;
     object-fit: cover;
+}
+
+#char_count{
+    font-size: 1.2vw;
+}
+
+.hide_this_input{
+    height: auto;
+}
+
+@media (max-width: 992px) {
+    .register-box .register{
+        width: 20vw;
+        height: 8vw;
+    }
+
+    input{
+        height: 2.2vw;
+    }
+
+    .regtext{
+        padding-left: 2.5vw;
+        height: 1.5vw;
+        font-size: 1.2vw;
+    }
+
+    .decoration-container{
+        display: none;
+    }
+
+    .registration-container{
+        flex-basis: 100%;
+    }
+
+    .checkmark {
+
+        height: 1.5vw;
+        width: 1.5vw;
+      }
+
+    .regtext .checkmark:after {
+        top: 0.4vw;
+       left: 0.4vw;
+       width: 0.7vw;
+       height: 0.7vw;
+       border-radius: 50%;
+       background: white;
+   }
 }
