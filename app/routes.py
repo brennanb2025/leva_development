@@ -364,37 +364,35 @@ def registerPost():
                 success = False
     #else: didn't input a resume. That's ok, they're optional.
 
-
-    #remove cropping
-    #if "croppedImgFile" in request.files:
-        #img = request.files["croppedImgFile"]
-    if "file" in request.files and request.files["file"]:
-        img = request.files["file"]
-        #remove cropping
+    #if "file" in request.files and request.files["file"]:
+    if "croppedImgFile" in request.files:
+        img = request.files.get("croppedImgFile")
+        #from cropping
         #if img and int((img.getbuffer().nbytes/1024)/1024) > 5:
 
-        imgSize = -1
-        if img:
-            img.seek(0, os.SEEK_END)
-            imgSize = img.tell()
-            img.seek(0)
-        
-        if imgSize == -1:
-            flash(u"Couldn't read image.", 'imageError')
-            success = False
-        elif (imgSize/1024)/1024 > 5:
-            flash(u'Image is too big (max 5 MB).', 'imageError')
-            success = False
-        elif img.filename == '':
-            flash(u'Could not read image', 'imageError')
-            success = False
-        else:
-            imgType = validate_image(img.stream)
-            if imgType == None:
-                flash(u'Could not assess image size.', 'imageError')
-            elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
-                flash(u'Accepted file types: .png, .jpg. You uploaded a', imgType + ".", 'imageError')
+        if img != None:
+            imgSize = -1
+            if img:
+                img.seek(0, os.SEEK_END)
+                imgSize = img.tell()
+                img.seek(0)
+            
+            if imgSize == -1:
+                flash(u"Couldn't read image.", 'imageError')
                 success = False
+            elif (imgSize/1024)/1024 > 5:
+                flash(u'Image is too big (max 5 MB).', 'imageError')
+                success = False
+            elif img.filename == '':
+                flash(u'Could not read image', 'imageError')
+                success = False
+            else:
+                imgType = validate_image(img.stream)
+                if imgType == None:
+                    flash(u'Could not assess image size.', 'imageError')
+                elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
+                    flash(u'Accepted file types: .png, .jpg. You uploaded a', imgType + ".", 'imageError')
+                    success = False
     #image is optional
     """else:
         success = False
@@ -494,11 +492,9 @@ def registerPost():
             cintTag.set_careerInterestID(cintArr[i], db.session)
         
         #remove cropping
-        #if "croppedImgFile" in request.files:
-            #img = request.files["croppedImgFile"]
-        if "file" in request.files:
-            img = request.files["file"]
-            if img and request.files["file"]:
+        if "croppedImgFile" in request.files:
+            img = request.files.get("croppedImgFile")
+            if img:
                 output, filename = upload_media_file_to_s3(img, user)
                 user.set_profile_picture(output, filename) #set the user profile picture link
                 db.session.commit()
@@ -1196,14 +1192,14 @@ def editProfPic():
 
     img = None
     success = True
+    errorMsg = ""
 
-    #remove cropping
-    #if "croppedImgFile" in request.files:
-        #img = request.files["croppedImgFile"]
-    if "file" in request.files:
-        img = request.files["file"]
+    
+    if "croppedImgFile" in request.files:
+        img = request.files.get("croppedImgFile")
     else:
         success=False
+        errorMsg += "[Please select a file]"
         flash(u'Please select a file.', 'pictureError')
     
     if img:
@@ -1219,22 +1215,28 @@ def editProfPic():
         img.seek(0)
         
         if imgSize == -1:
+            errorMsg += "[Couldn't read image]"
             flash(u"Couldn't read image.", 'imageError')
             success = False
         elif (imgSize/1024)/1024 > 5:
+            errorMsg += "[Image is too big (max 5 MB)]"
             flash(u'Image is too big (max 5 MB).', 'imageError')
             success = False
         elif img.filename == '':
+            errorMsg += "[Could not read image]"
             flash(u'Could not read image', 'imageError')
             success = False
         else:
             imgType = validate_image(img.stream)
             if imgType == None:
+                errorMsg += "[Could not assess image size]"
                 flash(u'Could not assess image size.', 'imageError')
             elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
+                errorMsg += "[Wrong image type]"
                 flash(u'Accepted file types: .png, .jpg. You uploaded a ' + imgType + ".", 'imageError')
                 success = False
     else:
+        errorMsg += "[Image could not be found]"
         flash(u'Image could not be found.', 'imageError')
         success = False
     
@@ -1246,8 +1248,10 @@ def editProfPic():
             user.set_profile_picture(output, filename) #set the user profile picture link
             db.session.commit()
         else:
-            success=False
             flash(u'Please select a file.', 'pictureError')
+
+    if success:
+        logData(10,"")
 
     return redirect(url_for('editProfile'))
 

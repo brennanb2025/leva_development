@@ -5,6 +5,12 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/main.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/portal.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/edit_profile_new.css')}}">
+
+        <!-- image cropper stuff -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.js"></script>
+
+        
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
         <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -97,6 +103,9 @@
                             (Max size = 5MB)
                         </label>
                         <div id="image_container_div"></div>
+
+                        <p id="scrollAdvice">Scroll to resize image.</p>
+                        <input type="file" name="croppedImgFile" id="croppedImgFile">
 
                         <button>
                             Edit Picture
@@ -590,7 +599,7 @@
 
                 <div class="single">
                     <button name="delete-profile" value="delete_profile_btn" id="deleteProfileBtn">Delete Account</button>
-                    <form id="deletionForm" action="{{ url_for('deleteProfile', id=userID) }}" method="POST">
+                    <form id="deletionForm" action="{{ url_for('deleteProfile') }}" method="POST">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div id="inDeleteForm" class=""></div>
                     </form>

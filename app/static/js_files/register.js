@@ -3,8 +3,7 @@ const maxRows = 10;
 let rowArrTag = [];
 let rowArrCint = [];
 let rowArrEdu = [];
-//remove cropping
-//var cropper;
+let cropper;
 
 //image stuff
 inputFile = document.getElementById("inputFile");
@@ -22,8 +21,7 @@ if(inputFile) { //ensure not null
                 
                 img = document.getElementById("image");
                 if(img) {
-                    //remove cropping
-                    //cropper.destroy(); //destroy the cropper 
+                    cropper.destroy(); //destroy the cropper 
                     img.remove(); //delete the previous img if it exists
                 }
                 newImg = document.createElement("img");
@@ -34,27 +32,36 @@ if(inputFile) { //ensure not null
                 newImg.style.display = "none"; //hide image
                 newImg.addEventListener('load', function(event) {
                     newImg.style.display = "block"; //show image
-                    //remove cropping
-                    /*
                     cropper = new Cropper(newImg, {
                         aspectRatio: 1/1,
                         minCropBoxWidth: 100,
                         minCropBoxHeight: 100,
                     });
-                    */
+                    set_cropper_listener();
                 });
+
+
                 document.getElementById("image_container_div").appendChild(newImg);
                 document.getElementById("image_container_div").style.display = "block"; //show all image
                 //document.getElementById("imgStuff").style.display = "block"; //show all image stuff
-                //document.getElementById("scrollAdvice").style.display = "block"; //show advice
+                document.getElementById("scrollAdvice").style.display = "block"; //show advice
                 //remove cropping
                 //document.getElementById("crop-btn").style.display = "block"; //show advice
                 //delete old img thing if it exists, create new image and appendchild to image_container_div.
+
             };
 
-            reader.readAsDataURL(inputFile.files[0]);
+            reader.readAsDataURL(inputFile.files[0])
+        
+            //put it in the image as croppedImgFile right now
+            let file = new File([inputFile.files[0]], document.getElementById("inputFile").files[0].name,{type:"image/jpeg", lastModified:new Date().getTime()});  
+            // Create a new container
+            let container = new DataTransfer();
+            // Add the image file to the container
+            container.items.add(file);
+            document.getElementById("croppedImgFile").files = container.files;
 
-        }
+        }   
     }, false);
 } else {
     //won't proc because of defer
@@ -133,11 +140,11 @@ if(inputFileResume) { //ensure not null
 
 
 //document.getElementById("imgStuff").style.display = "none"; //hide all image back
-//document.getElementById("scrollAdvice").style.display = "none"; //hide advice
+document.getElementById("scrollAdvice").style.display = "none"; //hide advice
 //remove cropping
 //document.getElementById("cropPreview").style.display = "none"; //hide preview
 //document.getElementById("crop-btn").style.display = "none"; //hide crop btn
-//document.getElementById("croppedImgFile").style.display = "none"; //hide input for post form
+document.getElementById("croppedImgFile").style.display = "none"; //hide input for post form
 
 document.getElementById("phoneNumber").style.display = "none"; //hide input for phone number
 document.getElementById("careerExp").style.display = "none"; //hide career experience - assume they are a mentee
@@ -180,36 +187,45 @@ function radio_mentee() { //function for if user selected that they are a mentee
 }
 
 
-//remove cropping
-/*
-let cropBtn = document.getElementById('crop-btn');
-cropBtn.addEventListener('click', function(event) {
-    cropper.getCroppedCanvas().toBlob(function(blob) {  
-        let file = new File([blob], document.getElementById("inputFile").files[0].name,{type:"image/jpeg", lastModified:new Date().getTime()});  
-        // Create a new container
-        let container = new DataTransfer();
-        // Add the cropped image file to the container
-        container.items.add(file);
-        // Replace the original image file with the new cropped image file
-        document.getElementById("croppedImgFile").files = container.files;
-        var readerNew = new FileReader();
-        readerNew.onload = function (e) {  
-            imgCrop = document.getElementById("croppedImage");
-            if(imgCrop) {
-                imgCrop.remove(); //delete the previous img if it exists
-            }
-            croppedImgElem = document.createElement("img");
-            croppedImgElem.setAttribute("id", "croppedImage");
-            croppedImgElem.setAttribute("class", "image_container centerDiv");
-            croppedImgElem.setAttribute("src", e.target.result);
-            croppedImgElem.setAttribute("alt", "your image");
-            document.getElementById("cropPreview").style.display = "block"; //show advice
-            document.getElementById("cropped_image").appendChild(croppedImgElem);
-        }
-        readerNew.readAsDataURL(file);
-    }, "image/jpeg", 0.7); //function, type, quality
-});
-*/
+
+//let cropBtn = document.getElementById('crop-btn');
+//cropBtn.addEventListener('click', function(event) {
+function set_cropper_listener() {
+    image.addEventListener('ready', function () { //image ready --> add event listener
+        console.log("ready");
+        if(this.cropper === cropper) { //ensure ready
+            image.addEventListener('cropend', function () {
+                console.log("crop fired");
+                cropper.getCroppedCanvas().toBlob(function(blob) {  
+                    let file = new File([blob], document.getElementById("inputFile").files[0].name,{type:"image/jpeg", lastModified:new Date().getTime()});  
+                    // Create a new container
+                    let container = new DataTransfer();
+                    // Add the cropped image file to the container
+                    container.items.add(file);
+                    // Replace the original image file with the new cropped image file
+                    document.getElementById("croppedImgFile").files = container.files;
+                    
+                    /*var readerNew = new FileReader();
+                    readerNew.onload = function (e) {  
+                        imgCrop = document.getElementById("croppedImage");
+                        if(imgCrop) {
+                            imgCrop.remove(); //delete the previous img if it exists
+                        }
+                        croppedImgElem = document.createElement("img");
+                        croppedImgElem.setAttribute("id", "croppedImage");
+                        croppedImgElem.setAttribute("class", "image_container centerDiv");
+                        croppedImgElem.setAttribute("src", e.target.result);
+                        croppedImgElem.setAttribute("alt", "your image");
+                        document.getElementById("cropPreview").style.display = "block"; //show advice
+                        document.getElementById("cropped_image").appendChild(croppedImgElem);
+                    }
+                    readerNew.readAsDataURL(file);*/
+                }, "image/jpeg", 0.7); //function, type, quality
+            });
+        };
+    });
+}
+
 
 document.getElementById('bio').onkeyup = function () {
     document.getElementById('char_count').innerHTML = "Characters left: " + (500 - this.value.length);

@@ -7,6 +7,10 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/create_user_table.css')}}">
         <!--<link rel="stylesheet" href="{{ url_for('static', filename='css_files/register.css')}}">-->
 
+        <!-- image cropper stuff -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.js"></script>
+
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
         <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -438,6 +442,9 @@
                                     <input type="file" class="hide_this_input" name="file" value="file" id="inputFile" accept="image/x-png,image/png,image/jpeg">
 
                                     <div class="image_container picture" id="image_container_div"></div>
+                                    <p id="scrollAdvice">Scroll to resize image.</p>
+                                    <input type="file" name="croppedImgFile" id="croppedImgFile">
+
                                     {% with messages = get_flashed_messages(with_categories=true) %}
                                         {% if messages %}
                                             <ul class=flashes>
@@ -450,34 +457,6 @@
                                         {% endif %}
                                     {% endwith %}
                                 </div>
-                                
-                                <!--<div class="input-container">
-                                    <label>Introduction Video</label>
-                                    (Max size = 40MB, max duration = 30seconds)
-
-                                    <input type="hidden" name="videoDuration" id="videoDuration" value="">
-
-                                    <label for="videoFile" class="choose_file_container add_something_btn">
-                                        Choose file
-                                    </label>
-                                    <input type="file" class="hide_this_input" name="videoFile" value="videoFile" id="videoFile" accept="video/mp4">
-                                    
-                                    <video id="newVideo" class="video_container" controls>
-                                        
-                                        Your browser does not support the video tag.
-                                    </video>
-                                    {% with messages = get_flashed_messages(with_categories=true) %}
-                                        {% if messages %}
-                                            <ul class=flashes>
-                                            {% for category, message in messages %}
-                                                {% if category == 'videoError' %}
-                                                <span style="color: red;">[{{ message }}]</span>
-                                                {% endif %}
-                                            {% endfor %}
-                                            </ul>
-                                        {% endif %}
-                                    {% endwith %}
-                                </div>-->
 
                                 <div class="input-container">
                                     <label>Resume (Optional)</label>

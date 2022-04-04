@@ -202,8 +202,10 @@
 
     <script>
 
-        openListCompletingMeetings();
-        openListPendingMeetings();
+        if(document.getElementById("pendingMeetingList") != null) {
+            openListCompletingMeetings();
+            openListPendingMeetings();
+        }
         
         function openListPendingMeetings() {
             var list = document.getElementById("pendingMeetingList");
