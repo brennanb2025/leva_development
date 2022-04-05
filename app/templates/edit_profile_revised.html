@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.js"></script>
 
-        
+
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
         <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -610,25 +610,27 @@
 
                 <div class="single">
                     <button name="changeProfile" id="changeProfile">
-                        Change Profile
+                        Apply Changes
                     </button>
                     <button name="delete-profile" value="delete_profile_btn" id="deleteProfileBtn">Delete Account</button>
-                    <form id="deletionForm" action="{{ url_for('deleteProfile') }}" method="POST">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <div id="inDeleteForm" class=""></div>
-                    </form>
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            <ul class=flashes>
-                            {% for category, message in messages %}
-                                {% if category == 'deletionError' %}
-                                    <span style="color: red;">[{{ message }}]</span>
-                                {% endif %}
-                            {% endfor %}
-                            </ul>
-                        {% endif %}
-                    {% endwith %}
                 </div>
+
+                <form id="deletionForm" action="{{ url_for('deleteProfile') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <br/>
+                    <div id="inDeleteForm" class=""></div>
+                </form>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class=flashes>
+                        {% for category, message in messages %}
+                            {% if category == 'deletionError' %}
+                                <span style="color: red;">[{{ message }}]</span>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
 
             </section>
         </div>

@@ -1215,28 +1215,28 @@ def editProfPic():
         img.seek(0)
         
         if imgSize == -1:
-            errorMsg += "[Couldn't read image]"
+            errorMsg = errorMsg + "[Couldn't read image]"
             flash(u"Couldn't read image.", 'imageError')
             success = False
         elif (imgSize/1024)/1024 > 5:
-            errorMsg += "[Image is too big (max 5 MB)]"
+            errorMsg = errorMsg + "[Image is too big (max 5 MB)]"
             flash(u'Image is too big (max 5 MB).', 'imageError')
             success = False
         elif img.filename == '':
-            errorMsg += "[Could not read image]"
+            errorMsg = errorMsg + "[Could not read image]"
             flash(u'Could not read image', 'imageError')
             success = False
         else:
             imgType = validate_image(img.stream)
             if imgType == None:
-                errorMsg += "[Could not assess image size]"
+                errorMsg = errorMsg + "[Could not assess image size]"
                 flash(u'Could not assess image size.', 'imageError')
             elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
-                errorMsg += "[Wrong image type]"
+                errorMsg = errorMsg + "[Wrong image type]"
                 flash(u'Accepted file types: .png, .jpg. You uploaded a ' + imgType + ".", 'imageError')
                 success = False
     else:
-        errorMsg += "[Image could not be found]"
+        errorMsg = errorMsg + "[Image could not be found]"
         flash(u'Image could not be found.', 'imageError')
         success = False
     
@@ -1249,9 +1249,8 @@ def editProfPic():
             db.session.commit()
         else:
             flash(u'Please select a file.', 'pictureError')
-
-    if success:
-        logData(10,"")
+    else:
+        logData(18,errorMsg)
 
     return redirect(url_for('editProfile'))
 

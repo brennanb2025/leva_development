@@ -387,7 +387,7 @@ class Event(db.Model, Base):
     # 15: progress view
     # 16: error (message)
     # 17: CSRF error (message)
-    # 18: edit profile failure
+    # 18: edit profile picture failure
 
     message = db.Column(db.String(1024)) #json - use y = json.loads(message) to get it back.
 
