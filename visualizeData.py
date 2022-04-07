@@ -4,4 +4,5 @@ from app.input_sets.models import Event, Select
 Event.query.filter_by(action=16).delete()
 db.session.commit()
 
-print(str(len(Event.query.filter_by(action=16).all())))
+print(Event.query.filter_by(action=18).all())
+print(str(len(Event.query.all())))

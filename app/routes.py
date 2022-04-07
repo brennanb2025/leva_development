@@ -82,6 +82,7 @@ def mentor():
 
 @app.route('/progress', methods=['GET'])
 def progress():
+    
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
@@ -1207,14 +1208,14 @@ def editProfPic():
         """if int((img.getbuffer().nbytes/1024)/1024) > 5:
             flash(u'Image is too big (max 5 MB).', 'imageError')
             success = False"""
-        
 
-        imgSize = -1
-        img.seek(0, os.SEEK_END)
-        imgSize = img.tell()
-        img.seek(0)
+
+        #imgSize = -1
+        #img.seek(0, os.SEEK_END)
+        #imgSize = img.tell()
+        #img.seek(0)
         
-        if imgSize == -1:
+        """if imgSize == -1:
             errorMsg = errorMsg + "[Couldn't read image]"
             flash(u"Couldn't read image.", 'imageError')
             success = False
@@ -1222,8 +1223,9 @@ def editProfPic():
             errorMsg = errorMsg + "[Image is too big (max 5 MB)]"
             flash(u'Image is too big (max 5 MB).', 'imageError')
             success = False
-        elif img.filename == '':
-            errorMsg = errorMsg + "[Could not read image]"
+        el"""
+        if img.filename == '':
+            errorMsg = errorMsg + "[Could not read image filename]"
             flash(u'Could not read image', 'imageError')
             success = False
         else:
@@ -1942,8 +1944,21 @@ def handle_csrf_error(e):
     return render_template('csrf_error.html', reason=e.description), 400
 
 
+"""
+NOTE ABOUT THE HANDLER FOR 413:
+The config MAX_CONTENT_LENGTH is set, so the connection will close before the file can be sent.
+This means that it will immediately abort and not run the errorhandler.
+This might be fixed in the future? 
+This should be handled client-side, since there is already a bit of code in my js file to gaurd against big files.
+"""
 
-#NOTE: general error logging commented out for now.
+@app.errorhandler(413)
+def size_error(e):
+    print("logging error 413")
+    logData(18,"[Image is too big (max 5 MB)]")
+    flash(u'Image is too big (max 5 MB).', 'imageError')
+    return redirect(url_for('editProfile'))
+
 
 @app.errorhandler(404)
 # inbuilt function which takes error as parameter

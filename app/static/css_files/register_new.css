@@ -176,6 +176,10 @@ input{
 
 /* BRENNAN addition: style the sample profile picture */
 .picture{
+    width: 205px;
+    height: 205px;
+    max-width: 205px;
+    max-height: 205px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -183,8 +187,8 @@ input{
 }
 
 .picture img{
-    width: 205px;
-    height: 205px;
+    max-width: 205px;
+    max-height: 205px;
     border-radius: 102.5px;
     object-fit: cover;
 }
