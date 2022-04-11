@@ -81,7 +81,7 @@
 
             <div class="register-box">
                 <button class="register">
-                    <a href="{{ url_for('register') }}">
+                    <a href="{{ url_for('logout') }}">
                         Log Out
                     </a>
                 </button>
@@ -124,8 +124,8 @@
                         <p id="scrollAdvice">Scroll to resize image.</p>
                         <input type="file" name="croppedImgFile" id="croppedImgFile">
 
-                        <button>
-                            Edit Picture
+                        <button id="changePictureBtn">
+                            Change Picture
                         </button>
                     </div>
                 </form>

@@ -394,7 +394,7 @@ class Event(db.Model, Base):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def __repr__(self):
-        return '<Event {}>'.format(str(self.userID) + " " + str(self.action) + " " + self.message) #how to print database
+        return '<Event {}>'.format("id = " + str(self.id) + ", userID = " + str(self.userID) + ", action = " + str(self.action) + ", message = " + self.message) #how to print database
 
 
 class ProgressMeeting(db.Model, Base):

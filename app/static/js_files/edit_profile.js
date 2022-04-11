@@ -36,7 +36,6 @@ function init(contact_method) {
                     newImg.style.display = "none"; //hide image
                     newImg.addEventListener('load', function(event) {
                         newImg.style.display = "block"; //show image
-                        //comment out cropping
                         
                         cropper = new Cropper(newImg, {
                             aspectRatio: 1/1,
@@ -45,7 +44,7 @@ function init(contact_method) {
                         });
                         
                         set_cropper_listener();
-                        
+
                     });
                     
                     document.getElementById("image_container_div").appendChild(newImg);
@@ -59,13 +58,15 @@ function init(contact_method) {
 
                 reader.readAsDataURL(inputFile.files[0]);
 
-                //put it in the image as croppedImgFile right now
-                let file = new File([inputFile.files[0]], document.getElementById("inputFile").files[0].name,{type:"image/jpeg", lastModified:new Date().getTime()});  
-                // Create a new container
-                let container = new DataTransfer();
-                // Add the image file to the container
-                container.items.add(file);
-                document.getElementById("croppedImgFile").files = container.files;
+                if(check_image_size(inputFile.files[0], false)) {
+                    //put it in the image as croppedImgFile right now
+                    let file = new File([inputFile.files[0]], document.getElementById("inputFile").files[0].name,{type:"image/jpeg", lastModified:new Date().getTime()});  
+                    // Create a new container
+                    let container = new DataTransfer();
+                    // Add the image file to the container
+                    container.items.add(file);
+                    document.getElementById("croppedImgFile").files = container.files;
+                }
 
             }
         }, false);
@@ -125,6 +126,10 @@ function init(contact_method) {
     }
     */
 
+    document.getElementById("changePictureBtn").onclick = function() { //remove original file from request on form submit
+        document.getElementById("inputFile").value = "";
+    }
+
     //document.getElementById("scrollAdvice").style.display = "none"; //hide advice
     //comment out cropping
     //document.getElementById("cropPreview").style.display = "none"; //hide preview
@@ -160,6 +165,20 @@ function init(contact_method) {
 
 }
 
+
+function check_image_size(file, crop) {
+    if(((file.size/1024)/1024).toFixed(4) > 5) { // file size < 5 MB
+        if(crop) {
+            alert("Crop is too big (max size = 5 MB).");
+        } else {
+            alert("File too big (max file size = 5 MB).");
+        }
+        document.getElementById('inputFile').value = "";
+        return false;
+    }
+    return true;
+}
+
 function set_cropper_listener() {
     image.addEventListener('ready', function () { //image ready --> add event listener
         console.log("ready");
@@ -168,12 +187,15 @@ function set_cropper_listener() {
                 console.log("crop fired");
                 cropper.getCroppedCanvas().toBlob(function(blob) {  
                     let file = new File([blob], document.getElementById("inputFile").files[0].name,{type:"image/jpeg", lastModified:new Date().getTime()});  
-                    // Create a new container
-                    let container = new DataTransfer();
-                    // Add the cropped image file to the container
-                    container.items.add(file);
-                    // Replace the original image file with the new cropped image file
-                    document.getElementById("croppedImgFile").files = container.files;
+                    
+                    if(check_image_size(file, true)) {
+                        // Create a new container
+                        let container = new DataTransfer();
+                        // Add the cropped image file to the container
+                        container.items.add(file);
+                        // Replace the original image file with the new cropped image file
+                        document.getElementById("croppedImgFile").files = container.files;
+                    }
                     
                     /*var readerNew = new FileReader();
                     readerNew.onload = function (e) {  

@@ -772,7 +772,12 @@
                     button_next.innerHTML = "Register"
                     button_next.removeAttribute("onclick"); //remove the next onclick attribute
                     var form = document.getElementById("submitForm");
-                    button_next.onclick=function() {form.submit();}
+                    button_next.onclick=function() {
+                        
+                        //remove original file from request on form submit
+                        document.getElementById("inputFile").value = "";
+                        form.submit();
+                    }
                     //button_reg.style.display = 'flex'
                     //button_next.style.display = 'none'
                 }
