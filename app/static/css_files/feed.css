@@ -35,7 +35,13 @@
     color: navy;
     font-family: Helvetica, sans-serif;
     padding-bottom:10px;
+    padding-top: 10%;
 }
+
+.headerText:first-child{
+    padding-top: 0%;
+}
+
 .centerThin {
     margin:auto;
     width:100%;
@@ -170,3 +176,13 @@
     display:none;
     opacity:0.05;
 }*/
+
+@media (max-width: 992px){
+    .headerText{
+        font-size: 2vw;
+    }
+
+    .whiteContainer{
+        font-size: 1.6vw;
+    }
+}

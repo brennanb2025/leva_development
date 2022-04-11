@@ -166,9 +166,9 @@ function ready_document() { //will check if userArr length == 0 (no matches) and
             whiteContainer1.appendChild(regText1);
             matchesDiv.appendChild(whiteContainer1);
             //line break
-            matchesDiv.appendChild(document.createElement("br"));
-            matchesDiv.appendChild(document.createElement("br"));
-            matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
             //matching career interests
             matchingCareerInterests = document.createElement("div");
             matchingCareerInterests.appendChild(document.createTextNode("Matching career interests"));
@@ -191,9 +191,9 @@ function ready_document() { //will check if userArr length == 0 (no matches) and
             whiteContainer2.appendChild(regText2);
             matchesDiv.appendChild(whiteContainer2);
             //line break
-            matchesDiv.appendChild(document.createElement("br"));
-            matchesDiv.appendChild(document.createElement("br"));
-            matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
             //matching schools
             matchingEducation = document.createElement("div");
             matchingEducation.appendChild(document.createTextNode("Matching education"));
