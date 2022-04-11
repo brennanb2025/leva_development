@@ -22,3 +22,18 @@
     flex-direction: row;
     margin-top: 3%;
 }
+
+.stretch{
+    width: 100%;
+    text-decoration: none;
+    max-width: 400px;
+}
+
+#blockContainer {
+    display: flex;
+    justify-content: center;
+}
+
+#completedMeetings {
+    padding-right:5px;
+}

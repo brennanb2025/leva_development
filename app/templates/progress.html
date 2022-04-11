@@ -90,17 +90,20 @@
                     My Progress & Guidance
                 </div>
 
-                <br/><br/><br/>
+                <br/><br/>
 
                 {% if selectEntry != none %}
-                    {% if isMentee %}
-                        Your mentor:<br/>
-                    {% else %}
-                        Your mentee:<br/>
-                    {% endif %}
+                    <div class="head2">
+                        {% if isMentee %}
+                            Your mentor
+                        {% else %}
+                            Your mentee
+                        {% endif %}
+                    </div>
                     
                     <!-- show mentor/mentee -->
                     <div class="mentor-card">
+                        <a class="stretch" href="{{ url_for('view', id=selectMentorMentee.id) }}">
                         <div class="picture-card">
                             <div class="circle-border">
                                 {% if selectMentorMentee.profile_picture is none %}
@@ -122,15 +125,16 @@
                                 {{ selectMentorMentee.division }}
                             </div>
                         </div>
+                        </a>
                     </div>
 
-                    <div class="head">
-                        Meeting progress
+                    <div class="head2">
+                        Meeting Progress
                     </div>
                     {% if progressDone %} <!--If the user has completely finished all the progress-->
                     <br/><br/><br/>
-                        <div class="head">
-                            Congrats! You have completed every progress step!
+                        <div class="head2">
+                            Congratulations! You have completed every progress step!
                         </div>
                         <br/><br/>
                         <div id="completedMeetings" onclick="openListCompletingMeetings()">Completed meetings:</div><br/>
@@ -147,7 +151,8 @@
                     {% else %}
                     <div class="info meetings">
 
-                        Upcoming meeting:<br/>
+                        <div class="head2">Upcoming meeting:</div>
+                        <br/>
                         Meeting #{{ currMeetingInfo["num"] }}:  {{ currMeetingInfo["title"] }}   ({{ currMeetingInfo["date"] }})
                         <form id="meetingDoneButton" action="{{ url_for('progress') }}" method="POST">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -157,12 +162,12 @@
                         <br/>
                         Description: {{ currMeetingInfo["desc"] }}<br/>
 
-                        Content: {{ currMeetingInfo["content"] }}<br/><br/><br/><br/>
+                        Content: {{ currMeetingInfo["content"] }}<br/><br/>
 
                         <!--Column 1:<br/>-->
                         
                         <div class="meetings-container">
-                            <div class="half">
+                            <!--<div class="half">
                                 <div id="pendingMeetings" onclick="openListPendingMeetings()">Pending meetings:</div><br/>
                                 <ul id="pendingMeetingList">
                                 {% if futureMeetingInfo|length == 0 %}
@@ -180,10 +185,14 @@
                                 </ul>
                             </div>
 
-                            <br/><br/><br/>
+                            <br/><br/><br/>-->
 
                             <div class="half">
-                                <div id="completedMeetings" onclick="openListCompletingMeetings()">Completed meetings:</div><br/>
+                                <div id="blockContainer" class="head2">
+                                    <div id="completedMeetings">Completed meetings </div>
+                                    <div id="dropdownButtonDown" onclick="openListCompletingMeetings()">▼</div>
+                                    <div id="dropdownButtonUp" onclick="closeListCompletingMeetings()">▲</div>
+                                </div>
                                 <ul id="completedMeetingList">
                                     {% for pm in prevMeetingInfo %}
                                         <li>
@@ -225,10 +234,13 @@
 
         if(document.getElementById("pendingMeetingList") != null) {
             openListCompletingMeetings();
-            openListPendingMeetings();
+            //openListPendingMeetings();
         }
+
+        document.getElementById("dropdownButtonDown").style.display = "none";
+        let list = document.getElementById("completedMeetingList");
         
-        function openListPendingMeetings() {
+        /*function openListPendingMeetings() {
             var list = document.getElementById("pendingMeetingList");
         
             if (list.style.display == "none"){
@@ -236,16 +248,29 @@
             }else{
                 list.style.display = "none";
             }
-        }
+        }*/
 
         function openListCompletingMeetings() {
-            var list = document.getElementById("completedMeetingList");
+            document.getElementById("dropdownButtonDown").style.display = "none";
+            document.getElementById("dropdownButtonUp").style.display = "block";
         
             if (list.style.display == "none"){
                 list.style.display = "block";
-            }else{
+            } else {
                 list.style.display = "none";
             }
+        }
+            
+        function closeListCompletingMeetings() {
+            if (list.style.display == "none"){
+                list.style.display = "block";
+            } else {
+                list.style.display = "none";
+            }
+
+            document.getElementById("dropdownButtonDown").style.display = "block";
+            document.getElementById("dropdownButtonUp").style.display = "none";
+
         }
     </script>
 
