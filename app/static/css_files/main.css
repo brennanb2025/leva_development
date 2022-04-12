@@ -172,6 +172,7 @@ body, html{
 
     .nav-box{
         order: 4;
+        justify-content: center !important;
     }
 
     .register-box{
@@ -179,7 +180,7 @@ body, html{
     }
 
     .nav-box .nav-button{
-        font-size: 1.1vw;
+        font-size: 2.2vw;
         width: auto;
     }
 

@@ -1,5 +1,5 @@
 html, body{
-    height: 100%;
+
 }
 
 .background{
@@ -87,6 +87,7 @@ html, body{
 @media (max-width: 992px){
     .info{
         flex-direction: column;
+        font-size: 2.2vw;
     }
 
     .picture{
@@ -131,6 +132,7 @@ html, body{
     align-items: center;
     color: white;
     padding: 3% 3% 20% 3%;
+    width: auto;
     max-width: 400px;
 }
 
@@ -180,7 +182,6 @@ html, body{
     }
 
     .picture-card{
-        width: 80%;
         padding-top: 15%;
     }
 
@@ -204,6 +205,10 @@ html, body{
         min-height: 4vw;
         font-size: 2vw;
         margin-top: 10%;
+    }
+
+    #noFound{
+        font-size: 2vw;
     }
 }
 
@@ -265,4 +270,15 @@ html, body{
 
 .text-container:last-child{
     margin-bottom: 0%;
+}
+
+.progress-section{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.progress-navbar{
+    position: sticky;
 }
