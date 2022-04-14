@@ -48,12 +48,31 @@
 
 .progress-navigation{
     flex: 1;
-    background-color: gray;
+    background-color: rgb(33, 48, 74);
     height: 40px;
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
+    border-right: 1px solid white;
+}
+
+.progress-navigation:last-child{
+    border-right: 0;
+}
+
+.progress-navigation button{
+    background-color: transparent;
+    color: white;
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    transition-duration: 0.3s;
+}
+
+.progress-navigation button:hover{
+    background-color: rgb(152, 84, 201);
 }
 
 #upcoming{
@@ -66,4 +85,20 @@
 
 #dropdownButtonUp, #dropdownButtonDown{
     cursor: pointer;
+}
+
+@media (max-width: 992px){
+    .navbar-bottom{
+        flex-direction: column;
+    }
+
+    .progress-navigation{
+        width: 100%;
+        border-right: 0px;
+        border-bottom: 1px solid white;
+    }
+
+    .progress-navigation:last-child{
+        border-bottom: 0;
+    }
 }
