@@ -771,13 +771,13 @@
                 if (count == 5){ //NOTE: CHANGED
                     button_next.innerHTML = "Register"
                     button_next.removeAttribute("onclick"); //remove the next onclick attribute
-                    var form = document.getElementById("submitForm");
                     button_next.onclick=function() {
-                        
-                        //remove original file from request on form submit
-                        document.getElementById("inputFile").value = "";
-                        form.submit();
+                        var form = document.getElementById("submitForm");
+
+                        submitForm(() => form.submit());
+                        // Do this after result completes
                     }
+                            
                     //button_reg.style.display = 'flex'
                     //button_next.style.display = 'none'
                 }
@@ -798,6 +798,13 @@
                 console.log(count)
                 update_page()
             }
+
+            function submitForm(_callback) {
+                //remove original file from request on form submit
+                document.getElementById("inputFile").remove();
+                _callback();
+            }
+
         </script>
     </body>
 

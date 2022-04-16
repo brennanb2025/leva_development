@@ -4,8 +4,46 @@ let rowArrCint = [];
 let rowArrEdu = [];
 let rowArrTag = [];
 
-//comment out cropping
 let cropper;
+
+var csrftoken = $('meta[name=csrf-token]').attr('content');
+
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken)
+        }
+    }
+});
+
+function post_image() {
+    originalPicture = document.getElementById("inputFile");
+    croppedImg = document.getElementById("croppedImgFile");
+    if(originalPicture.value === "") {
+        errorNoPictureSelected();
+    } else {
+        let formData = new FormData();
+        if(croppedImg.value === "") {
+            alert("No new image found. Please click on the cropped image before applying changes.");
+        } else {
+            formData.append('croppedImgFile', croppedImg.files[0]);
+            $.ajax({
+                type: 'POST',
+                url: Flask.url_for("editProfPic"), 
+                data : formData,
+                processData: false,  // tell jQuery not to process the data
+                contentType: false,  // tell jQuery not to set contentType
+                success : function(data) {
+                    window.location.reload();
+                }
+            });
+        }
+    }
+}
+
+function errorNoPictureSelected() {
+    alert("No picture selected");
+}
 
 
 function init(contact_method) {
@@ -125,10 +163,6 @@ function init(contact_method) {
         console.log("Null");
     }
     */
-
-    document.getElementById("changePictureBtn").onclick = function() { //remove original file from request on form submit
-        document.getElementById("inputFile").value = "";
-    }
 
     //document.getElementById("scrollAdvice").style.display = "none"; //hide advice
     //comment out cropping

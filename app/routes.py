@@ -366,34 +366,45 @@ def registerPost():
     #else: didn't input a resume. That's ok, they're optional.
 
     #if "file" in request.files and request.files["file"]:
+    img = None
+    errorMsg = ""
+    
     if "croppedImgFile" in request.files:
         img = request.files.get("croppedImgFile")
-        #from cropping
-        #if img and int((img.getbuffer().nbytes/1024)/1024) > 5:
+    
+        #remove cropping
+        """if int((img.getbuffer().nbytes/1024)/1024) > 5:
+            flash(u'Image is too big (max 5 MB).', 'imageError')
+            success = False"""
 
-        if img != None:
-            imgSize = -1
-            if img:
-                img.seek(0, os.SEEK_END)
-                imgSize = img.tell()
-                img.seek(0)
-            
-            if imgSize == -1:
-                flash(u"Couldn't read image.", 'imageError')
+
+        #imgSize = -1
+        #img.seek(0, os.SEEK_END)
+        #imgSize = img.tell()
+        #img.seek(0)
+        
+        """if imgSize == -1:
+            errorMsg = errorMsg + "[Couldn't read image]"
+            flash(u"Couldn't read image.", 'imageError')
+            success = False
+        elif (imgSize/1024)/1024 > 5:
+            errorMsg = errorMsg + "[Image is too big (max 5 MB)]"
+            flash(u'Image is too big (max 5 MB).', 'imageError')
+            success = False
+        el"""
+        if img.filename == '':
+            errorMsg = errorMsg + "[Could not read image filename]"
+            flash(u'Could not read image', 'imageError')
+            success = False
+        else:
+            imgType = validate_image(img.stream)
+            if imgType == None:
+                errorMsg = errorMsg + "[Could not assess image size]"
+                flash(u'Could not assess image size.', 'imageError')
+            elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
+                errorMsg = errorMsg + "[Wrong image type]"
+                flash(u'Accepted file types: .png, .jpg. You uploaded a ' + imgType + ".", 'imageError')
                 success = False
-            elif (imgSize/1024)/1024 > 5:
-                flash(u'Image is too big (max 5 MB).', 'imageError')
-                success = False
-            elif img.filename == '':
-                flash(u'Could not read image', 'imageError')
-                success = False
-            else:
-                imgType = validate_image(img.stream)
-                if imgType == None:
-                    flash(u'Could not assess image size.', 'imageError')
-                elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
-                    flash(u'Accepted file types: .png, .jpg. You uploaded a', imgType + ".", 'imageError')
-                    success = False
     #image is optional
     """else:
         success = False
@@ -1194,7 +1205,6 @@ def editProfPic():
     img = None
     success = True
     errorMsg = ""
-
     
     if "croppedImgFile" in request.files:
         img = request.files.get("croppedImgFile")

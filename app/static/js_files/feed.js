@@ -1,6 +1,6 @@
 var userArr = [];
 var userDictUsefulInfo = [];
-var csrftoken = $('meta[name=csrf-token]').attr('content')
+var csrftoken = $('meta[name=csrf-token]').attr('content');
 var isStudent;
 
 
@@ -14,7 +14,7 @@ $.ajaxSetup({
             xhr.setRequestHeader("X-CSRFToken", csrftoken)
         }
     }
-})
+});
 
 function remove_loading() {
     document.getElementById("loadingText").style.display = "none"; //hide loading message
