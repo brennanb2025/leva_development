@@ -85,19 +85,19 @@
 
         {% if selectEntry != none %}
         <div class="navbar-bottom navbar navbar-expand-lg navbar-light bg-white justify-content-between sticky-top">
-            <div class="progress-navigation">
+            <div class="progress-navigation" id="progressNav1">
                 <button onclick="progressNavbar('mentor')">
-                    Your Match
+                    Mentor
                 </button>
             </div>
 
-            <div class="progress-navigation">
+            <div class="progress-navigation" id="progressNav2">
                 <button onclick="progressNavbar('upcoming')">
                     Upcoming Meetings
                 </button>
             </div>
 
-            <div class="progress-navigation">
+            <div class="progress-navigation" id="progressNav3">
                 <button onclick="progressNavbar('completed')">
                     Completed Meetings
                 </button>
@@ -258,6 +258,8 @@
 
     <script>
 
+        document.getElementById("progressNav1").style.backgroundColor = "rgb(152, 84, 201)";
+
         if(document.getElementById("pendingMeetingList") != null) {
             openListCompletingMeetings();
             //openListPendingMeetings();
@@ -300,13 +302,20 @@
         }
 
         function progressNavbar(id){
-            var all_section = document.querySelectorAll('.progress-section')
-            console.log(all_section)
+            var all_section = document.querySelectorAll('.progress-section');
+            var all_navbar = document.querySelectorAll('.progress-navigation');
+            console.log(all_section);
             for (var i = 0; i < all_section.length; i++){
-                all_section[i].style.display = 'none'
+                all_section[i].style.display = 'none';
+                if(all_section[i].id == id) {
+                    //all_navbar[i].classList.add('selected');
+                    all_navbar[i].style.backgroundColor = "rgb(152, 84, 201)";
+                } else {
+                    all_navbar[i].style.backgroundColor = "rgb(33, 48, 74)";
+                }
             }
 
-            document.getElementById(id).style.display = 'flex'
+            document.getElementById(id).style.display = 'flex';
         }
     </script>
 
