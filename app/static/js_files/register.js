@@ -197,7 +197,7 @@ function radio_mentee() { //function for if user selected that they are a mentee
     document.getElementById("careerExp").style.display = "none"; //hide
     document.getElementById("genderMentor").style.display = "none";
     document.getElementById("mentorPreference").style.display = "block"; //show mentor preference
-    document.getElementById("addCareerInterest").value = "Add interest"; //button change
+    document.getElementById("addCareerInterest").value = "Add career interest"; //button change
     //document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
 }
 

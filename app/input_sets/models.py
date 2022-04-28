@@ -155,7 +155,7 @@ class User(UserMixin, db.Model, Base): #inherits from db.Model, base for flask-S
         return check_password_hash(self.password_hash, password) #<^=pwd hashing logic
     
     def __repr__(self):
-        return '<User {}>'.format(self.email + " " + self.first_name + " " + self.last_name) #how to print database
+        return '<User {}>'.format(str(self.id) + " " + self.email + " " + self.first_name + " " + self.last_name) #how to print database
 
 
 class InterestTag(db.Model, Base):
@@ -198,6 +198,9 @@ class InterestTag(db.Model, Base):
             searchTag.inc_num_use()
             session.commit()
 
+    def __repr__(self):
+        return '<InterestTag {}>'.format(str(self.id) + " " + str(self.entered_name) + " " + str(self.interestID))
+
 class Tag(db.Model, Base):
 
     __tablename__ = "Tag"
@@ -216,6 +219,9 @@ class Tag(db.Model, Base):
     
     def dec_num_use(self):
         self.num_use = self.num_use-1
+
+    def __repr__(self):
+        return '<Tag {}>'.format(str(self.id) + " " + str(self.title))
 
 
 class EducationTag(db.Model, Base):
@@ -249,6 +255,9 @@ class EducationTag(db.Model, Base):
             self.educationID = searchSchool.id
             searchSchool.inc_num_use()
             session.commit()
+
+    def __repr__(self):
+        return '<EducationTag {}>'.format(str(self.id) + " " + str(self.entered_name) + " " + str(self.educationID))
         
 class School(db.Model, Base):
 
@@ -268,6 +277,9 @@ class School(db.Model, Base):
     
     def dec_num_use(self):
         self.num_use = self.num_use-1
+
+    def __repr__(self):
+        return '<School {}>'.format(str(self.id) + " " + str(self.title))
 
 
 class CareerInterestTag(db.Model, Base):
@@ -301,6 +313,9 @@ class CareerInterestTag(db.Model, Base):
             self.careerInterestID = searchCInts.id
             searchCInts.inc_num_use()
             session.commit()
+
+    def __repr__(self):
+        return '<CareerInterestTag {}>'.format(str(self.id) + " " + self.entered_name + " " + str(self.careerInterestID))
         
 
 class CareerInterest(db.Model, Base):
@@ -321,6 +336,9 @@ class CareerInterest(db.Model, Base):
     
     def dec_num_use(self):
         self.num_use = self.num_use-1
+
+    def __repr__(self):
+        return '<CareerInterest {}>'.format(str(self.id) + " " + str(self.title))
 
 
 class Select(db.Model, Base):

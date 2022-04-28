@@ -419,6 +419,17 @@
                                                 <input type="text" id="personality2" name="personality2" maxlength="50" value="{{user.personality_2}}"><br/>
                                                 <input type="text" id="personality3" name="personality3" maxlength="50" value="{{user.personality_3}}"><br/>
                                             </div>
+                                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                                {% if messages %}
+                                                    <ul class=flashes>
+                                                    {% for category, message in messages %}
+                                                        {% if category == 'personalityError' %}
+                                                            <span style="color: red;">[{{ message }}]</span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                            {% endwith %}
                                         </div>
             
                                         <!--
@@ -609,6 +620,9 @@
                                 </div>
 
                             </div>
+                            <button name="changeProfile" id="changeProfile">
+                                Apply Changes
+                            </button>
                         </form>
 
                     </div>
@@ -616,9 +630,6 @@
                 </div>
 
                 <div class="single">
-                    <button name="changeProfile" id="changeProfile">
-                        Apply Changes
-                    </button>
                     <button name="delete-profile" value="delete_profile_btn" id="deleteProfileBtn">Delete Account</button>
                 </div>
 

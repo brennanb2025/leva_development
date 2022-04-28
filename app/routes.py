@@ -305,16 +305,19 @@ def registerPost():
         success = False
     
     if form1.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
-        flash(u"Please enter a preference for your mentor/mentee's division.", 'division_preference_error')
+        flash(u"Please enter a preference for your division.", 'division_preference_error')
         success = False
 
-    if (form1.get("personality1") == None or form1.get("personality1") == ''
-                or form1.get("personality2") == None or form1.get("personality2") == ''
-                or form1.get("personality3") == None or form1.get("personality3") == ''):
+    if form1.get('personality1') != None and form1.get('personality2') != None and form1.get('personality3') != None:
+        if form1.get('personality1').strip() == "" or form1.get('personality2').strip() == "" or form1.get('personality3').strip() == "":
+            flash(u"Please enter three words or phrases that describe you.", 'personality_error')
+            success = False
+    else:
         flash(u"Please enter three words or phrases that describe you.", 'personality_error')
         success = False
 
-    if not isMentee and form1.get('current_occupation') == '': #ok if blank if they're a student
+
+    if form1.get('current_occupation') == '':
         success = False
         flash(u'Please enter your current occupation.', 'currentOccupationError')
         errors.append("current_occupation")
@@ -368,8 +371,8 @@ def registerPost():
     #if "file" in request.files and request.files["file"]:
     img = None
     errorMsg = ""
-    
-    if "croppedImgFile" in request.files:
+
+    if "croppedImgFile" in request.files and request.files.get("croppedImgFile").filename != '':
         img = request.files.get("croppedImgFile")
     
         #remove cropping
@@ -392,19 +395,19 @@ def registerPost():
             flash(u'Image is too big (max 5 MB).', 'imageError')
             success = False
         el"""
-        if img.filename == '':
+        """if img.filename == '':
             errorMsg = errorMsg + "[Could not read image filename]"
-            flash(u'Could not read image', 'imageError')
+            flash(u'Could not read image filename', 'imageError')
             success = False
-        else:
-            imgType = validate_image(img.stream)
-            if imgType == None:
-                errorMsg = errorMsg + "[Could not assess image size]"
-                flash(u'Could not assess image size.', 'imageError')
-            elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
-                errorMsg = errorMsg + "[Wrong image type]"
-                flash(u'Accepted file types: .png, .jpg. You uploaded a ' + imgType + ".", 'imageError')
-                success = False
+        else:"""
+        imgType = validate_image(img.stream)
+        if imgType == None:
+            errorMsg = errorMsg + "[Could not assess image size]"
+            flash(u'Could not assess image size.', 'imageError')
+        elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
+            errorMsg = errorMsg + "[Wrong image type]"
+            flash(u'Accepted file types: .png, .jpg. You uploaded a ' + imgType + ".", 'imageError')
+            success = False
     #image is optional
     """else:
         success = False
@@ -457,9 +460,9 @@ def registerPost():
                     business_id=businessRegisteredUnder.id, 
                     mentor_gender_preference=mentor_gender_preferenceForm,
                     gender_identity=gender_identityForm,
-                    division_preference=form1.get("divisionPreference"), division=form1.get('division'),
-                    personality_1=form1.get("personality1"), personality_2=form1.get("personality2"), 
-                    personality_3=form1.get("personality3"))
+                    division_preference=form1.get("divisionPreference"), division=form1.get('division').strip(),
+                    personality_1=form1.get("personality1").strip(), personality_2=form1.get("personality2").strip(), 
+                    personality_3=form1.get("personality3").strip())
         
         db.session.add(user) #add to database
         user.set_password(form1.get('password')) #must set pwd w/ hashing method
@@ -473,35 +476,41 @@ def registerPost():
         # but I can see it being useful/efficient for future features.
         interestArr = form1.getlist("tagName")
         for i in range(int(form1.get('num_tags'))):
-            interestTag = InterestTag(
-                user_id=user.id,
-                entered_name=interestArr[i]
-            )
-            db.session.add(interestTag)
-            db.session.commit() #I have to do this before I set the resource so the id will be set.
-            interestTag.set_interestID(interestArr[i], db.session)
+            name = interestArr[i].strip()
+            if name != "":
+                interestTag = InterestTag(
+                    user_id=user.id,
+                    entered_name=name
+                )
+                db.session.add(interestTag)
+                db.session.commit() #I have to do this before I set the resource so the id will be set.
+                interestTag.set_interestID(name, db.session)
 
         #get education
         eduArr = form1.getlist("educationName")
         for i in range(int(form1.get('num_education_listings'))):
-            educationTag = EducationTag(
-                user_id=user.id,
-                entered_name=eduArr[i]
-            )
-            db.session.add(educationTag)
-            db.session.commit() #I have to do this before I set the resource so the id will be set.
-            educationTag.set_educationID(eduArr[i], db.session)
+            name = eduArr[i].strip()
+            if name != "":
+                educationTag = EducationTag(
+                    user_id=user.id,
+                    entered_name=name
+                )
+                db.session.add(educationTag)
+                db.session.commit() #I have to do this before I set the resource so the id will be set.
+                educationTag.set_educationID(name, db.session)
 
         #get career interests
         cintArr = form1.getlist("careerInterestName")
         for i in range(int(form1.get('num_career_interests'))):
-            cintTag = CareerInterestTag(
-                user_id=user.id,
-                entered_name=cintArr[i]
-            )
-            db.session.add(cintTag)
-            db.session.commit() #I have to do this before I set the resource so the id will be set.
-            cintTag.set_careerInterestID(cintArr[i], db.session)
+            name = cintArr[i].strip()
+            if name != "":
+                cintTag = CareerInterestTag(
+                    user_id=user.id,
+                    entered_name=name
+                )
+                db.session.add(cintTag)
+                db.session.commit() #I have to do this before I set the resource so the id will be set.
+                cintTag.set_careerInterestID(name, db.session)
         
         #remove cropping
         if "croppedImgFile" in request.files:
@@ -650,12 +659,12 @@ def checkBasicInfo(form1):
         success = False
         flash(u'Please enter an email.', 'emailError')
         errors.append("email")
-    else:
+    """else:
         regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$' #if it isn't a valid email address
         if(not(re.search(regex,form1.get('email')))):
             flash('Invalid email address', 'emailError')
             success = False
-            errors.append("email")
+            errors.append("email")"""
     if form1.get('first_name') == '':
         success = False
         flash(u'Please enter a first name.', 'first_nameError')
@@ -975,9 +984,9 @@ def editProfilePost():
         if changedInputsSuccess:
             changeAttributes(form,u)
         if changedPersonalitySuccess:
-            u.set_personality(form.get('personality1'), form.get('personality2'), form.get('personality3'))
+            u.set_personality(form.get('personality1').strip(), form.get('personality2').strip(), form.get('personality3').strip())
         if changedDivisionSuccess:
-            u.set_division(form.get("division"))
+            u.set_division(form.get("division").strip())
         if changedDivisionPreferenceSuccess:
             u.set_division_preference(form.get("divisionPreference"))
         if changedContactMethodSuccess:
@@ -1098,48 +1107,59 @@ def changeAttributes(form, user):
     interestArr = form.getlist("tagName")
     #for i in range(int(form1.get('num_tags'))):
     for i in range(len(interestArr)):
-        interestTag = InterestTag(
-            user_id=user.id,
-            entered_name=interestArr[i]
-        )
-        db.session.add(interestTag)
-        db.session.commit() #I have to do this before I set the resource so the id will be set.
-        interestTag.set_interestID(interestArr[i], db.session)
+        name = interestArr[i].strip()
+        if name != "":
+            interestTag = InterestTag(
+                user_id=user.id,
+                entered_name=name
+            )
+            db.session.add(interestTag)
+            db.session.commit() #I have to do this before I set the resource so the id will be set.
+            interestTag.set_interestID(name, db.session)
 
     #get education
     eduArr = form.getlist("educationName")
     #for i in range(int(form1.get('num_education_listings'))):
     for i in range(len(eduArr)):
-        educationTag = EducationTag(
-            user_id=user.id,
-            entered_name=eduArr[i]
-        )
-        db.session.add(educationTag)
-        db.session.commit() #I have to do this before I set the resource so the id will be set.
-        educationTag.set_educationID(eduArr[i], db.session)
+        name = eduArr[i].strip()
+        if name != "":
+            educationTag = EducationTag(
+                user_id=user.id,
+                entered_name=name
+            )
+            db.session.add(educationTag)
+            db.session.commit() #I have to do this before I set the resource so the id will be set.
+            educationTag.set_educationID(name, db.session)
 
     #get career interests
     cintArr = form.getlist("careerInterestName")
     #for i in range(int(form1.get('num_career_interests'))):
     for i in range(len(cintArr)):
-        cintTag = CareerInterestTag(
-            user_id=user.id,
-            entered_name=cintArr[i]
-        )
-        db.session.add(cintTag)
-        db.session.commit() #I have to do this before I set the resource so the id will be set.
-        cintTag.set_careerInterestID(cintArr[i], db.session)
+        name = cintArr[i].strip()
+        if name != "":
+            cintTag = CareerInterestTag(
+                user_id=user.id,
+                entered_name=name
+            )
+            db.session.add(cintTag)
+            db.session.commit() #I have to do this before I set the resource so the id will be set.
+            cintTag.set_careerInterestID(name, db.session)
 
     db.session.commit()
 
 def checkPersonality(form):
-    if form.get('personality1') == "" or form.get('personality2') == "" or form.get('personality3') == "":
+    if form.get('personality1') != None and form.get('personality2') != None and form.get('personality3') != None:
+        if form.get('personality1').strip() == "" or form.get('personality2').strip() == "" or form.get('personality3').strip() == "":
+            flash(u'You must input 3 personality traits/phrases.', 'personalityError')
+            return False
+    else:
         flash(u'You must input 3 personality traits/phrases.', 'personalityError')
         return False
+
     return True
 
 def checkDivision(form):
-    if form.get('division') == "":
+    if form.get('division').strip() == "":
         flash(u'You must input what division you are in.', 'divisionError')
         return False
     return True
