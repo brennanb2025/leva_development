@@ -2,8 +2,17 @@ body, html{
     padding: 0%;
     margin: 0%;
     scroll-behavior: smooth;
+    height: 100%;
     display: flex;
     flex-direction: column;
+}
+
+html{
+    overflow: hidden;
+}
+
+body{
+    overflow: scroll;
 }
 
 .anchor {
@@ -132,7 +141,7 @@ body, html{
 .home h3{
     font-weight: 100;
     font-size: 20px;
-    color: gray;
+    color: rgb(85, 85, 85);
 }
 
 .launch-box{
@@ -180,12 +189,16 @@ body, html{
     }
 
     .nav-box .nav-button{
-        font-size: 2.2vw;
+        font-size: 1.1vw;
         width: auto;
     }
 
     .register-box .register{
         font-size: 1.1vw;
+    }
+
+    .background{
+        display: inline-block;
     }
 
     .home h3{
@@ -511,4 +524,113 @@ input:focus{
   a {
       color: white;
       text-decoration: none;
+  }
+
+  .first{
+      background-color: white;
+      background-image: none !important;
+  }
+
+  @media (max-width: 425px){
+    section{
+        min-height: 100%;
+    }
+
+    .home{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 0;
+    }
+
+    .nav-box .nav-button{
+        font-size: 3.3vw;
+        width: auto;
+    }
+
+    .register-box .register{
+        font-size: 3.3vw;
+    }
+
+    .background{
+        display: inline-block;
+    }
+
+    .home h3{
+        font-size: 3.9vw;
+    }
+
+    .home .header-text{
+        font-size: 10vw;
+    }
+
+    .launch-box .launch{
+        font-size: 3vw;
+        width: 45vw;
+        padding-top: 10%;
+        padding-bottom: 10%;
+    }
+
+    .product .split{
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .product .title{
+        font-size: 6.6vw;
+        text-align: center;
+    }
+
+    .split .card{
+        width: 75%;
+    }
+
+    .label1{
+        font-size: 3.9vw;
+    }
+
+    .label2{
+        font-size: 3.9vw;
+    }
+
+    .about{
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .about .half{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .about .half .something{
+        height: auto;
+        padding: 0%;
+        width: 75%;
+    }
+
+    .steps{
+        min-height: auto;
+    }
+
+    .head1{
+        font-size: 2.4vw;
+    }
+
+    .head2{
+        font-size: 3.3vw;
+    }
+
+    .text1{
+        font-size: 2.4vw;
+    }
+
+    .register-box .register{
+        height: 10vw;
+        min-width: 11vw;
+    }
   }
