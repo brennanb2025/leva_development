@@ -7,11 +7,14 @@ import datetime
 
 for m in ProgressMeeting.query.all():
     print(m)
+    print(Business.query.filter_by(id=m.business_ID).first())
 
+#ProgressMeeting.query.delete()
 
 #businessID = Business.query.filter_by(name="<businessName>").first().id
-print(Business.query.filter_by(name="businessProgressTest").first())
-businessID = Business.query.filter_by(name="businessProgressTest").first().id
+#print(Business.query.filter_by(name="leva_test_business_00").first())
+"""
+businessID = Business.query.filter_by(name="leva_test_business_00").first().id
 
 titles = []
 titles.append("title1")
@@ -47,3 +50,4 @@ for i in range(numMeetings):
     db.session.add(newMeeting)
 
 db.session.commit()
+"""
