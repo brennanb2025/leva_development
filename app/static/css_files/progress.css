@@ -1,17 +1,17 @@
 
 
-.half{
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
 .list{
     padding: 0%;
     flex: none;
     display: flex;
     flex-direction: row;
+}
+
+.note-box{
+    background-color: rgb(213, 207, 207);
+    padding: 1%;
+    width: 100%;
+    font-weight: 500;
 }
 
 .meetings{
@@ -83,6 +83,10 @@
     display: none;
 }
 
+#completedMeetingList{
+    font-weight: bold;
+}
+
 #dropdownButtonUp, #dropdownButtonDown{
     cursor: pointer;
 }
@@ -102,3 +106,4 @@
         border-bottom: 0;
     }
 }
+
