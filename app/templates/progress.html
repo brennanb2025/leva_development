@@ -147,7 +147,7 @@
 
                 <div class="info meetings">
 
-                    <div class="progress-section" id="upcoming">
+                    <div class="progress-section" id="upcoming" style="text-align: center;">
 
                         {% if progressDone %} 
                             <div class="head2">
@@ -167,6 +167,8 @@
                             Description: {{ currMeetingInfo["desc"] }}<br/>
 
                             Content: {{ currMeetingInfo["content"] }}<br/><br/>
+
+                            <textarea placeholder="Meeting notes here..."></textarea>
 
                         {% endif %}
                     </div>

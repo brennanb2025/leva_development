@@ -91,6 +91,11 @@
     cursor: pointer;
 }
 
+textarea{
+    resize: none;
+    width: 40%;
+}
+
 @media (max-width: 992px){
     .navbar-bottom{
         flex-direction: column;
