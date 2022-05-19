@@ -147,7 +147,7 @@
 
                 <div class="info meetings">
 
-                    <div class="progress-section" id="upcoming">
+                    <div class="progress-section" id="upcoming" style="text-align: center;">
 
                         {% if progressDone %} 
                             <div class="head2">
@@ -176,6 +176,8 @@
                             {% endfor %}
                             <br/>
 
+                            <textarea placeholder="Meeting notes here..."></textarea>
+
                         {% endif %}
                     </div>
 
@@ -184,12 +186,6 @@
                     <div class="meetings-container progress-section" id="completed">
                         
                         <div class="half">
-                            <div id="blockContainer" class="head2">
-                                <div id="completedMeetings">Completed meetings </div>
-                                <div id="dropdownButtonDown" onclick="openListCompletingMeetings()">▼</div>
-                                <div id="dropdownButtonUp" onclick="closeListCompletingMeetings()">▲</div>
-                            </div>  
-                                    
                             <ul id="completedMeetingList">
                                 {% for pm in prevMeetingInfo %}
                                     <li>
@@ -206,6 +202,10 @@
                                     {% endfor %}
                                     <br/><br/>
                                     </li>
+
+                                    <div class="note-box">
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra, odio eu sodales egestas, justo urna blandit orci, nec hendrerit dui nulla a felis. Sed sit amet metus sit amet ligula mollis eleifend vel et nibh. Phasellus purus lectus, ullamcorper in commodo dignissim, imperdiet eget est. Donec hendrerit, ante vel lacinia consequat, sapien mauris congue nibh, sed venenatis tellus odio vel velit. Donec varius ipsum nisl, eget iaculis erat tristique sit amet. In vel tristique lorem. Suspendisse maximus pulvinar bibendum. Cras sem turpis, cursus quis porttitor at, blandit in augue. Aliquam malesuada bibendum molestie. Integer tincidunt congue pulvinar. Vivamus eget diam vulputate, tempus augue nec, mollis enim. Sed sit amet nisi eleifend, tincidunt leo in, gravida turpis. Donec laoreet diam at bibendum mattis.
+                                    </div>
                                 {% endfor %}
                             </ul>
                         </div>
