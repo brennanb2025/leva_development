@@ -349,6 +349,7 @@ class Select(db.Model, Base):
     mentee_id = db.Column(db.Integer)
     
     current_meeting_ID = db.Column(db.Integer,default=1)
+    #this is actually the number meeting the user is on (within all the meetings the business has set up).
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 

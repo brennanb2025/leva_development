@@ -164,9 +164,17 @@
                             </form>
 
                             <br/>
-                            Description: {{ currMeetingInfo["desc"] }}<br/>
+                            Description:<br/>
+                            {% for para in currMeetingInfo["desc"] %}
+                                <p>{{para}}</p>
+                            {% endfor %}
+                            <br/>
 
-                            Content: {{ currMeetingInfo["content"] }}<br/><br/>
+                            Content:<br/>
+                            {% for para in currMeetingInfo["content"] %}
+                                <p>{{para}}</p>
+                            {% endfor %}
+                            <br/>
 
                         {% endif %}
                     </div>
@@ -186,9 +194,17 @@
                                 {% for pm in prevMeetingInfo %}
                                     <li>
                                     Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})<br/>
-                                    Description: {{ pm["desc"] }}<br/>
+                                    Description:<br/> 
+                                    {% for para in pm["desc"] %}
+                                        <p>{{para}}</p>
+                                    {% endfor %}
+                                    <br/>
 
-                                    Content: {{ pm["content"] }}<br/><br/><br/>
+                                    Content:<br/>
+                                    {% for para in pm["content"] %}
+                                        <p>{{para}}</p>
+                                    {% endfor %}
+                                    <br/><br/>
                                     </li>
                                 {% endfor %}
                             </ul>

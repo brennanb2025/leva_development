@@ -133,13 +133,16 @@ def progress():
             currMeetingInfo=currMeetingInfo, prevMeetingInfo=prevMeetingInfo, futureMeetingInfo=futureMeetingInfo)
 
 
-def getMeetingInfo(m):
+#Returns a dict of all the necessary meeting information to show. 
+#This will change the text in the content description and the content into an array of the different paragraphs
+#(It splits around \n.)
+def getMeetingInfo(m): 
     mInfo = {}
     mInfo["num"] = m.num_meeting
     mInfo["date"] = m.completion_date.strftime("%B %d, %Y")
     mInfo["title"] = m.title
-    mInfo["desc"] = m.content_description
-    mInfo["content"] = m.content
+    mInfo["desc"] = m.content_description.split('\n')
+    mInfo["content"] = m.content.split('\n')
     return mInfo
 
 @app.route('/progress', methods=['POST'])
