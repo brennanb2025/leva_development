@@ -1,12 +1,13 @@
 #This file is the python flask backend
 
+from select import select
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
 from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm
 from uuid import uuid4
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
-        CareerInterestTag, Select, Business, Event, ProgressMeeting
+        CareerInterestTag, Select, Business, Event, ProgressMeeting, MeetingNotes
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import datetime
@@ -90,16 +91,19 @@ def progress():
     user = User.query.filter_by(id=session.get('userID')).first()
     
     isMentee = user.is_student #user.is_mentee
+    currentMeetingNumber = -1 #current meeting number
 
     select_mentor_mentee = None #the mentor or mentee that the user logged in has selected, or None
     if isMentee: 
         selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
         if selectEntry != None:
             select_mentor_mentee = User.query.filter_by(id=selectEntry.mentor_id).first()
+            currentMeetingNumber = selectEntry.current_meeting_number_mentee
     else:
         selectEntry = Select.query.filter_by(mentor_id=user.id).first()
         if selectEntry != None:
             select_mentor_mentee = User.query.filter_by(id=selectEntry.mentee_id).first()
+            currentMeetingNumber = selectEntry.current_meeting_number_mentor
 
     #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
 
@@ -108,18 +112,18 @@ def progress():
     futureMeetingInfo = [] #future meeting list of info dicts
     prevMeetingInfo = [] #previous meeting list of info dicts
     currMeetingInfo = {} #current meeting info dict
-    if selectEntry != None:
+    if selectEntry != None and currentMeetingNumber != -1:
         currMeeting = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                ProgressMeeting.num_meeting==selectEntry.current_meeting_ID).first()
+                ProgressMeeting.num_meeting==currentMeetingNumber).first()
         if currMeeting != None:
             currMeetingInfo = getMeetingInfo(currMeeting)
         else:
             progressDone = True
 
         previousMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                ProgressMeeting.num_meeting < selectEntry.current_meeting_ID).all()
+                ProgressMeeting.num_meeting < currentMeetingNumber).all()
         futureMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                ProgressMeeting.num_meeting > selectEntry.current_meeting_ID).all()
+                ProgressMeeting.num_meeting > currentMeetingNumber).all()
         
         for m in previousMeetings: #build the dicts of the info about each meeting
             prevMeetingInfo.append(getMeetingInfo(m))
@@ -127,6 +131,7 @@ def progress():
             futureMeetingInfo.append(getMeetingInfo(m))
 
     logData(15,"")
+
     
     return render_template('progress.html', selectEntry=selectEntry, isMentee=isMentee, \
             selectMentorMentee=select_mentor_mentee, userID=user.id, progressDone=progressDone, \
@@ -154,15 +159,57 @@ def currentMeetingSetDone():
     user = User.query.filter_by(id=session.get('userID')).first()
     isMentee = user.is_student #user.is_mentee
 
+    form = request.form
+
     if isMentee: 
         selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        if selectEntry != None:
+            meetingNotesMentee = MeetingNotes.query.filter(
+                MeetingNotes.num_progress_meeting == selectEntry.current_meeting_number_mentee,
+                MeetingNotes.select_id == selectEntry.id
+            ).first()
+            if meetingNotesMentee == None: 
+                #if there is no existing meeting notes for this meeting
+                meetingNotes = MeetingNotes(
+                    num_progress_meeting = selectEntry.current_meeting_number_mentee,
+                    select_id = selectEntry.id,
+                    mentee_meeting_notes = form.get("meetingNotes")
+                )
+                db.session.add(meetingNotes)
+                print("no meeting notes for this one, creating them for the mentee")
+            else:
+                #update meeting notes
+                print("meeting notes already exist, setting mentee notes here")
+                meetingNotesMentee.set_meeting_notes(form.get("meetingNotes"), "mentee")
+
+            selectEntry.inc_current_meeting_ID("mentee") #increment the meeting number
+            db.session.commit()
+
     else:
         selectEntry = Select.query.filter_by(mentor_id=user.id).first()
-    
-    if selectEntry != None:
-        selectEntry.inc_current_meeting_ID() #increment the meeting number
+        if selectEntry != None:
+            meetingNotesMentor = MeetingNotes.query.filter(
+                MeetingNotes.num_progress_meeting == selectEntry.current_meeting_number_mentee,
+                MeetingNotes.select_id == selectEntry.id
+            ).first()
+            if meetingNotesMentor == None: 
+                #if there is no existing meeting notes for this meeting
+                meetingNotes = MeetingNotes(
+                    num_progress_meeting = selectEntry.current_meeting_number_mentor,
+                    select_id = selectEntry.id,
+                    mentor_meeting_notes = form.get("meetingNotes")
+                )
+                db.session.add(meetingNotes)
+                print("no meeting notes for this one, creating them for the mentor")
+            else:
+                #if there are existing meeting notes, update meeting notes
+                print("meeting notes already exist, setting mentor notes here")
+                meetingNotesMentor.set_meeting_notes(form.get("meetingNotes"), "mentor")
 
-    db.session.commit()
+            selectEntry.inc_current_meeting_ID("mentor") #increment the meeting number
+            db.session.commit()
+    
+    #TODO: test this
 
     return progress() #send to progress page
 

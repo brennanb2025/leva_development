@@ -158,10 +158,6 @@
                         
                             <br/>
                             Meeting #{{ currMeetingInfo["num"] }}:  {{ currMeetingInfo["title"] }}   ({{ currMeetingInfo["date"] }})
-                            <form id="meetingDoneButton" action="{{ url_for('progress') }}" method="POST">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                <button id="finishMeetingButton">Finished this meeting!</button>
-                            </form>
 
                             <br/>
                             Description:<br/>
@@ -176,7 +172,13 @@
                             {% endfor %}
                             <br/>
 
-                            <textarea placeholder="Meeting notes here..."></textarea>
+                            <form id="meetingDoneButton" action="{{ url_for('progress') }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                                <textarea id="meetingNotes" placeholder="Meeting notes here..."></textarea>
+                                <br/>
+                                <button id="finishMeetingButton">Move to the next meeting and save meeting notes</button>
+                            </form>
 
                         {% endif %}
                     </div>

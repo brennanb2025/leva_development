@@ -26,11 +26,11 @@ business_id = Business.query.filter_by(name=business_name).first().id
 
 progressMeetings = get_progress_meetings(business_id)
 
-"""
+
 print("\nProgress meetings in this business (" + business_name + "):")
 for pm in progressMeetings:
     print(pm.ProgressMeeting)
-"""
+
 
 
 
@@ -101,8 +101,8 @@ for i in range(numMeetings):
             title=titles[i],
             content_description=content_descriptions[i],
             content=contentList[i])
-    db.session.add(newMeeting)
-"""
+    db.session.add(newMeeting)"""
+
 
 
 print("\n\nProgress meetings in this business (" + business_name + ") - after adding:")
@@ -110,5 +110,19 @@ for pm in get_progress_meetings(business_id):
     print(pm.ProgressMeeting)
 
 
+#setting selects
+"""for u in User.query.all():
+    select = Select.query.filter_by(mentee_id=u.id).first()
+    if select != None:
+        select.set_current_meeting_ID("mentee", 1)
+    select = Select.query.filter_by(mentor_id=u.id).first()
+    if select != None:
+        select.set_current_meeting_ID("mentor", 1)
+
+for s in Select.query.all():
+    print(s.current_meeting_number_mentor)
+    print(s.current_meeting_number_mentee)
+"""
+
 #Only uncomment this when the changes are final.
-db.session.commit()
+#db.session.commit()
