@@ -467,3 +467,9 @@ class MeetingNotes(db.Model, Base):
             self.mentee_meeting_notes = notes
         else:
             self.mentor_meeting_notes = notes
+
+    def __repr__(self):
+        return '<MeetingNotes {}>'.format(str(self.id) + ", num progress meeting: " + str(self.num_progress_meeting) + 
+                ", select id: " + str(self.select_id) +
+                ", mentor notes: " + str(self.mentor_meeting_notes) +
+                ", mentee notes: " + str(self.mentee_meeting_notes)) #how to print

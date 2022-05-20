@@ -126,7 +126,7 @@ def progress():
                 ProgressMeeting.num_meeting > currentMeetingNumber).all()
         
         for m in previousMeetings: #build the dicts of the info about each meeting
-            prevMeetingInfo.append(getMeetingInfo(m))
+            prevMeetingInfo.append(getCompletedMeetingInfo(m, isMentee, selectEntry.id, m.num_meeting))
         for m in futureMeetings:
             futureMeetingInfo.append(getMeetingInfo(m))
 
@@ -148,6 +148,29 @@ def getMeetingInfo(m):
     mInfo["title"] = m.title
     mInfo["desc"] = m.content_description.split('\n')
     mInfo["content"] = m.content.split('\n')
+    return mInfo
+
+#Returns a dict of all the necessary meeting information to show, but for the completed meetings. 
+#Specifically, gets the meeting notes for the specified user.
+def getCompletedMeetingInfo(m, isMentee, selectId, currentMeetingNum): 
+    mInfo = {}
+    mInfo["num"] = m.num_meeting
+    mInfo["date"] = m.completion_date.strftime("%B %d, %Y")
+    mInfo["title"] = m.title
+    mInfo["desc"] = m.content_description.split('\n')
+    mInfo["content"] = m.content.split('\n')
+    
+    if isMentee:
+        mInfo["meetingNotes"] = MeetingNotes.query.filter(
+            MeetingNotes.num_progress_meeting == currentMeetingNum,
+            MeetingNotes.select_id == selectId
+        ).first().mentee_meeting_notes
+    else:
+        mInfo["meetingNotes"] = MeetingNotes.query.filter(
+            MeetingNotes.num_progress_meeting == currentMeetingNum,
+            MeetingNotes.select_id == selectId
+        ).first().mentor_meeting_notes
+        
     return mInfo
 
 @app.route('/progress', methods=['POST'])
@@ -189,7 +212,7 @@ def currentMeetingSetDone():
         selectEntry = Select.query.filter_by(mentor_id=user.id).first()
         if selectEntry != None:
             meetingNotesMentor = MeetingNotes.query.filter(
-                MeetingNotes.num_progress_meeting == selectEntry.current_meeting_number_mentee,
+                MeetingNotes.num_progress_meeting == selectEntry.current_meeting_number_mentor,
                 MeetingNotes.select_id == selectEntry.id
             ).first()
             if meetingNotesMentor == None: 
@@ -2050,6 +2073,7 @@ def not_found(e):
     logData(16,json.dumps(dictLog))
     return render_template("404_error.html")
 
+"""
 @app.errorhandler(Exception)
 # inbuilt function which takes error as parameter
 def error_handler(e):
@@ -2066,7 +2090,7 @@ def error_handler(e):
         dictLog['desc'] = str(e)
         logData(16,json.dumps(dictLog))
     
-    return render_template("general_error.html", code=code)
+    return render_template("general_error.html", code=code)"""
 
 
 def logData(num, msg):
