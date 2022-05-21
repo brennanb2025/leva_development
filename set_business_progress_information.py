@@ -1,5 +1,5 @@
 from app import db
-from app.input_sets.models import ProgressMeeting, Business, Select, User, MeetingNotes
+from app.input_sets.models import ProgressMeeting, Business, Select, User, ProgressMeetingCompletionInformation
 import datetime
 from sqlalchemy import desc
 
@@ -26,11 +26,11 @@ business_id = Business.query.filter_by(name=business_name).first().id
 
 progressMeetings = get_progress_meetings(business_id)
 
-
+"""
 print("\nProgress meetings in this business (" + business_name + "):")
 for pm in progressMeetings:
     print(pm.ProgressMeeting)
-
+"""
 
 
 
@@ -67,7 +67,7 @@ contentList.append("content3")
 contentList.append("content4")"""
 
 #Create the meetings:
-
+"""
 first_meeting_date = datetime.datetime(2022, 6, 13) #6/13/22
 numMeetings = 2
 timeBetweenMeeting = 10 #days
@@ -76,17 +76,18 @@ for i in range(numMeetings):
     # set meeting, num meeting as i
     newMeeting = ProgressMeeting(business_ID=businessID,
             completion_date=(first_meeting_date + datetime.timedelta(days=i*timeBetweenMeeting)),
-            num_meeting = (i+2), 
+            num_meeting = (i+1), 
             title=titles[i],
             content_description=content_descriptions[i],
             content=contentList[i])
-    db.session.add(newMeeting)
+    db.session.add(newMeeting)"""
 
 
 
-print("\n\nProgress meetings in this business (" + business_name + ") - after adding:")
+"""print("\n\nProgress meetings in this business (" + business_name + ") - after adding:")
 for pm in get_progress_meetings(business_id):
-    print(pm.ProgressMeeting)
+    print(pm.ProgressMeeting)"""
+
 
 
 #setting selects
@@ -104,8 +105,14 @@ for s in Select.query.all():
     print(s.current_meeting_number_mentee)
 """
 
+#ProgressMeetingCompletionInformation.query.filter_by(id=5).delete()
+#Select.query.filter_by(id=7).first().set_current_meeting_ID("mentee",2)
+#Select.query.filter_by(id=7).first().set_current_meeting_ID("mentor",2)
+
+print(ProgressMeetingCompletionInformation.query.all())
+
 #delete meeting notes
-#MeetingNotes.query.delete()
+#ProgressMeetingCompletionInformation.query.delete()
 
 #Only uncomment this when the changes are final.
 #db.session.commit()

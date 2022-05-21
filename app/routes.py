@@ -7,7 +7,7 @@ from app import app, db, s3_client#, oauth
 from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm
 from uuid import uuid4
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
-        CareerInterestTag, Select, Business, Event, ProgressMeeting, MeetingNotes
+        CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import datetime
@@ -161,14 +161,14 @@ def getCompletedMeetingInfo(m, isMentee, selectId, currentMeetingNum):
     mInfo["content"] = m.content.split('\n')
     
     if isMentee:
-        mInfo["meetingNotes"] = MeetingNotes.query.filter(
-            MeetingNotes.num_progress_meeting == currentMeetingNum,
-            MeetingNotes.select_id == selectId
+        mInfo["meetingNotes"] = ProgressMeetingCompletionInformation.query.filter(
+            ProgressMeetingCompletionInformation.num_progress_meeting == currentMeetingNum,
+            ProgressMeetingCompletionInformation.select_id == selectId
         ).first().mentee_meeting_notes
     else:
-        mInfo["meetingNotes"] = MeetingNotes.query.filter(
-            MeetingNotes.num_progress_meeting == currentMeetingNum,
-            MeetingNotes.select_id == selectId
+        mInfo["meetingNotes"] = ProgressMeetingCompletionInformation.query.filter(
+            ProgressMeetingCompletionInformation.num_progress_meeting == currentMeetingNum,
+            ProgressMeetingCompletionInformation.select_id == selectId
         ).first().mentor_meeting_notes
         
     return mInfo
@@ -187,23 +187,24 @@ def currentMeetingSetDone():
     if isMentee: 
         selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
         if selectEntry != None:
-            meetingNotesMentee = MeetingNotes.query.filter(
-                MeetingNotes.num_progress_meeting == selectEntry.current_meeting_number_mentee,
-                MeetingNotes.select_id == selectEntry.id
+            completionInfoMentee = ProgressMeetingCompletionInformation.query.filter(
+                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
             ).first()
-            if meetingNotesMentee == None: 
+            if completionInfoMentee == None: 
                 #if there is no existing meeting notes for this meeting
-                meetingNotes = MeetingNotes(
+                completionInfo = ProgressMeetingCompletionInformation(
                     num_progress_meeting = selectEntry.current_meeting_number_mentee,
                     select_id = selectEntry.id,
                     mentee_meeting_notes = form.get("meetingNotes")
                 )
-                db.session.add(meetingNotes)
+                db.session.add(completionInfo)
                 print("no meeting notes for this one, creating them for the mentee")
             else:
                 #update meeting notes
                 print("meeting notes already exist, setting mentee notes here")
-                meetingNotesMentee.set_meeting_notes(form.get("meetingNotes"), "mentee")
+                completionInfoMentee.set_meeting_notes(form.get("meetingNotes"), "mentee")
+                completionInfoMentee.set_completion_timestamp("mentee") #update timestamp
 
             selectEntry.inc_current_meeting_ID("mentee") #increment the meeting number
             db.session.commit()
@@ -211,23 +212,24 @@ def currentMeetingSetDone():
     else:
         selectEntry = Select.query.filter_by(mentor_id=user.id).first()
         if selectEntry != None:
-            meetingNotesMentor = MeetingNotes.query.filter(
-                MeetingNotes.num_progress_meeting == selectEntry.current_meeting_number_mentor,
-                MeetingNotes.select_id == selectEntry.id
+            completionInfoMentor = ProgressMeetingCompletionInformation.query.filter(
+                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
             ).first()
-            if meetingNotesMentor == None: 
+            if completionInfoMentor == None: 
                 #if there is no existing meeting notes for this meeting
-                meetingNotes = MeetingNotes(
+                completionInfo = ProgressMeetingCompletionInformation(
                     num_progress_meeting = selectEntry.current_meeting_number_mentor,
                     select_id = selectEntry.id,
                     mentor_meeting_notes = form.get("meetingNotes")
                 )
-                db.session.add(meetingNotes)
+                db.session.add(completionInfo)
                 print("no meeting notes for this one, creating them for the mentor")
             else:
                 #if there are existing meeting notes, update meeting notes
                 print("meeting notes already exist, setting mentor notes here")
-                meetingNotesMentor.set_meeting_notes(form.get("meetingNotes"), "mentor")
+                completionInfoMentor.set_meeting_notes(form.get("meetingNotes"), "mentor")
+                completionInfoMentor.set_completion_timestamp("mentor") #update timestamp
 
             selectEntry.inc_current_meeting_ID("mentor") #increment the meeting number
             db.session.commit()

@@ -450,8 +450,8 @@ class ProgressMeeting(db.Model, Base):
                 ", content: " + self.content) #how to print database
 
 
-class MeetingNotes(db.Model, Base):
-    __tablename__ = "MeetingNotes"
+class ProgressMeetingCompletionInformation(db.Model, Base):
+    __tablename__ = "ProgressMeetingCompletionInformation"
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -461,6 +461,8 @@ class MeetingNotes(db.Model, Base):
     mentor_meeting_notes = db.Column(db.Text)
     mentee_meeting_notes = db.Column(db.Text)
 
+    completion_timestamp_mentor = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    completion_timestamp_mentee = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def set_meeting_notes(self, notes, role):
         if role == "mentee":
@@ -468,8 +470,16 @@ class MeetingNotes(db.Model, Base):
         else:
             self.mentor_meeting_notes = notes
 
+    def set_completion_timestamp(self, role):
+        if role == "mentee":
+            self.completion_timestamp_mentee = datetime.utcnow()
+        else:
+            self.completion_timestamp_mentor = datetime.utcnow()
+
     def __repr__(self):
         return '<MeetingNotes {}>'.format(str(self.id) + ", num progress meeting: " + str(self.num_progress_meeting) + 
                 ", select id: " + str(self.select_id) +
                 ", mentor notes: " + str(self.mentor_meeting_notes) +
+                ", completion timestamp mentor: " + str(self.completion_timestamp_mentor) +
+                ", completion timestamp mentee: " + str(self.completion_timestamp_mentee) +
                 ", mentee notes: " + str(self.mentee_meeting_notes)) #how to print
