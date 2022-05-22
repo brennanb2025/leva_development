@@ -104,6 +104,26 @@
     width: 100%;
 }
 
+#finishMeetingButton{
+    outline: none;
+    border: none;
+    padding: 1%;
+    background-color: rgb(158, 63, 253);
+    color: white;
+    transition-duration: 0.3s;
+}
+
+#finishMeetingButton:hover{
+    background-color: rgb(33, 48, 74);
+}
+
+.noneText{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
 @media (max-width: 992px){
     .navbar-bottom{
         flex-direction: column;
