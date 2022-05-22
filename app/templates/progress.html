@@ -184,7 +184,7 @@
 
                                 <textarea id="meetingNotes" name="meetingNotes" placeholder="Meeting notes here..."></textarea>
                                 <br/>
-                                <button id="finishMeetingButton">Complete this meeting and save meeting notes →</button>
+                                <button id="finishMeetingButton" class="register">Complete this meeting and save meeting notes →</button>
                             </form>
 
                         {% endif %}
@@ -195,7 +195,7 @@
                     <div class="meetings-container progress-section" id="completed">
                         
                         {% if prevMeetingInfo|length == 0 %}
-                            <div class="head2">None yet!</div>
+                            <div class="head2 noneText">None yet!</div>
                         {% endif %}
 
                         <div class="half">
