@@ -348,15 +348,29 @@ class Select(db.Model, Base):
     mentor_id = db.Column(db.Integer)
     mentee_id = db.Column(db.Integer)
     
-    current_meeting_ID = db.Column(db.Integer,default=1)
+    current_meeting_number_mentor = db.Column(db.Integer,default=1)
+    current_meeting_number_mentee = db.Column(db.Integer,default=1)
     #this is actually the number meeting the user is on (within all the meetings the business has set up).
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    def inc_current_meeting_ID(self):
-        self.current_meeting_ID = self.current_meeting_ID+1
-    def dec_current_meeting_ID(self):
-        self.current_meeting_ID = self.current_meeting_ID-1
+    def set_current_meeting_ID(self, role, num):
+        if role == "mentor":
+            self.current_meeting_number_mentor = num
+        else:
+            self.current_meeting_number_mentee = num
+
+    def inc_current_meeting_ID(self, role):
+        if role == "mentor":
+            self.current_meeting_number_mentor = self.current_meeting_number_mentor+1
+        else:
+            self.current_meeting_number_mentee = self.current_meeting_number_mentee+1
+
+    def dec_current_meeting_ID(self, role):
+        if role == "mentor":
+            self.current_meeting_number_mentor = self.current_meeting_number_mentor-1
+        else:
+            self.current_meeting_number_mentee = self.current_meeting_number_mentee-1
 
 
 #Business stores information about each business that has registered users and how many users are currently registered under each one.
@@ -434,3 +448,38 @@ class ProgressMeeting(db.Model, Base):
                 ", title: " + self.title +
                 ", content_description: " + self.content_description + 
                 ", content: " + self.content) #how to print database
+
+
+class ProgressMeetingCompletionInformation(db.Model, Base):
+    __tablename__ = "ProgressMeetingCompletionInformation"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    num_progress_meeting = db.Column(db.Integer)
+    select_id = db.Column(db.Integer)
+
+    mentor_meeting_notes = db.Column(db.Text)
+    mentee_meeting_notes = db.Column(db.Text)
+
+    completion_timestamp_mentor = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    completion_timestamp_mentee = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def set_meeting_notes(self, notes, role):
+        if role == "mentee":
+            self.mentee_meeting_notes = notes
+        else:
+            self.mentor_meeting_notes = notes
+
+    def set_completion_timestamp(self, role):
+        if role == "mentee":
+            self.completion_timestamp_mentee = datetime.utcnow()
+        else:
+            self.completion_timestamp_mentor = datetime.utcnow()
+
+    def __repr__(self):
+        return '<MeetingNotes {}>'.format(str(self.id) + ", num progress meeting: " + str(self.num_progress_meeting) + 
+                ", select id: " + str(self.select_id) +
+                ", mentor notes: " + str(self.mentor_meeting_notes) +
+                ", completion timestamp mentor: " + str(self.completion_timestamp_mentor) +
+                ", completion timestamp mentee: " + str(self.completion_timestamp_mentee) +
+                ", mentee notes: " + str(self.mentee_meeting_notes)) #how to print

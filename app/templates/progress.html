@@ -86,7 +86,7 @@
 
             <div class="progress-navigation" id="progressNav2">
                 <button onclick="progressNavbar('upcoming')">
-                    Upcoming Meetings
+                    Upcoming Meeting
                 </button>
             </div>
 
@@ -158,10 +158,6 @@
                         
                             <br/>
                             Meeting #{{ currMeetingInfo["num"] }}:  {{ currMeetingInfo["title"] }}   ({{ currMeetingInfo["date"] }})
-                            <form id="meetingDoneButton" action="{{ url_for('progress') }}" method="POST">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                <button id="finishMeetingButton">Finished this meeting!</button>
-                            </form>
 
                             <br/>
 
@@ -183,7 +179,13 @@
                                 <br/>
                             </div>
 
-                            <textarea placeholder="Meeting notes here..."></textarea>
+                            <form id="meetingDoneButton" action="{{ url_for('progress') }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                                <textarea id="meetingNotes" name="meetingNotes" placeholder="Meeting notes here..."></textarea>
+                                <br/>
+                                <button id="finishMeetingButton">Complete this meeting and save meeting notes →</button>
+                            </form>
 
                         {% endif %}
                     </div>
@@ -192,6 +194,10 @@
                     
                     <div class="meetings-container progress-section" id="completed">
                         
+                        {% if prevMeetingInfo|length == 0 %}
+                            <div class="head2">None yet!</div>
+                        {% endif %}
+
                         <div class="half">
                             <ul id="completedMeetingList">
                                 {% for pm in prevMeetingInfo %}
@@ -211,8 +217,9 @@
                                     </li>
 
                                     <div class="note-box">
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra, odio eu sodales egestas, justo urna blandit orci, nec hendrerit dui nulla a felis. Sed sit amet metus sit amet ligula mollis eleifend vel et nibh. Phasellus purus lectus, ullamcorper in commodo dignissim, imperdiet eget est. Donec hendrerit, ante vel lacinia consequat, sapien mauris congue nibh, sed venenatis tellus odio vel velit. Donec varius ipsum nisl, eget iaculis erat tristique sit amet. In vel tristique lorem. Suspendisse maximus pulvinar bibendum. Cras sem turpis, cursus quis porttitor at, blandit in augue. Aliquam malesuada bibendum molestie. Integer tincidunt congue pulvinar. Vivamus eget diam vulputate, tempus augue nec, mollis enim. Sed sit amet nisi eleifend, tincidunt leo in, gravida turpis. Donec laoreet diam at bibendum mattis.
+                                        {{ pm["meetingNotes"] }}
                                     </div>
+                                    <br/><br/>
                                 {% endfor %}
                             </ul>
                         </div>
