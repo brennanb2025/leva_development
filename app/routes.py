@@ -199,10 +199,10 @@ def currentMeetingSetDone():
                     mentee_meeting_notes = form.get("meetingNotes")
                 )
                 db.session.add(completionInfo)
-                print("no meeting notes for this one, creating them for the mentee")
+                #no meeting notes for this one, creating them for the mentee
             else:
                 #update meeting notes
-                print("meeting notes already exist, setting mentee notes here")
+                #meeting notes already exist, setting mentee notes here
                 completionInfoMentee.set_meeting_notes(form.get("meetingNotes"), "mentee")
                 completionInfoMentee.set_completion_timestamp("mentee") #update timestamp
 
@@ -224,17 +224,15 @@ def currentMeetingSetDone():
                     mentor_meeting_notes = form.get("meetingNotes")
                 )
                 db.session.add(completionInfo)
-                print("no meeting notes for this one, creating them for the mentor")
+                #no meeting notes for this one, creating them for the mentor
             else:
                 #if there are existing meeting notes, update meeting notes
-                print("meeting notes already exist, setting mentor notes here")
+                #meeting notes already exist, setting mentor notes here
                 completionInfoMentor.set_meeting_notes(form.get("meetingNotes"), "mentor")
                 completionInfoMentor.set_completion_timestamp("mentor") #update timestamp
 
             selectEntry.inc_current_meeting_ID("mentor") #increment the meeting number
             db.session.commit()
-    
-    #TODO: test this
 
     return progress() #send to progress page
 
@@ -2094,7 +2092,7 @@ def not_found(e):
     logData(16,json.dumps(dictLog))
     return render_template("404_error.html")
 
-"""
+
 @app.errorhandler(Exception)
 # inbuilt function which takes error as parameter
 def error_handler(e):
@@ -2111,7 +2109,7 @@ def error_handler(e):
         dictLog['desc'] = str(e)
         logData(16,json.dumps(dictLog))
     
-    return render_template("general_error.html", code=code)"""
+    return render_template("general_error.html", code=code)
 
 
 def logData(num, msg):
