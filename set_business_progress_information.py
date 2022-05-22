@@ -21,16 +21,16 @@ def get_progress_meetings(business_id): #returns the progress meetings from a gi
 
 
 
-business_name = "leva_test_business_00"
+business_name = "The Garage"
 business_id = Business.query.filter_by(name=business_name).first().id
 
 progressMeetings = get_progress_meetings(business_id)
 
-"""
+
 print("\nProgress meetings in this business (" + business_name + "):")
 for pm in progressMeetings:
     print(pm.ProgressMeeting)
-"""
+
 
 
 
@@ -46,30 +46,62 @@ for pm in progressMeetings:
 businessID = Business.query.filter_by(name=business_name).first().id
 
 titles = []
+titles.append("Initial progress meeting")
+"""
 titles.append("Meeting 2")
 titles.append("Meeting 3")
-"""
 titles.append("title3")
 titles.append("title4")"""
 
+
 content_descriptions = []
+content_descriptions.append("""
+    Topics To Guide Your First Meeting:\n
+    ∙ Establish your goals for the mentorship program. Be clear about what you are looking for and how you can help each other. \n
+    ∙ Discuss female empowerment in the workplace, what that looks like to you, and how both the mentee and the mentor can actively support women.  \n
+    ∙ Learn about career history and personal interests.  \n
+    ∙ Coordinate another time to meet that works for both of you.
+""")
+
+"""
 content_descriptions.append("Meeting 2 description!")
 content_descriptions.append("Meeting 3 description")
-"""
 content_descriptions.append("description3")
 content_descriptions.append("description4")"""
 
+
 contentList = []
-contentList.append("""Meeting 2 content!""")
+contentList.append("""
+Sample Agenda \n
+\n
+Example Questions for Mentors\n
+∙ How do you see our culture supporting women and where are the opportunities?\n
+∙ What are your professional goals and how can I help you get there?\n
+∙ What drives you?\n
+∙ What makes you who you are?\n
+∙ What are your strengths and weaknesses?\n
+∙ What aspects of your career are you hoping to improve on?\n
+∙ How can I best support you?\n
+ \n
+Example Questions for Mentees\n
+∙ What does female empowerment in the workplace look like to you?\n
+∙ What advice do you have to better support myself as a woman and/or how I can better support other women? \n
+∙ Tell me about your path to your current position.  \n
+∙ What makes you who you are?\n
+∙ What aspects of your career have given you fulfillment?\n
+∙ How have past mentorship relationships impacted you?\n
+∙ What advice do you have for me at my stage of career?\n
+""")
+
+"""contentList.append("Meeting 2 content!")
 contentList.append("Meeting 3 content!")
-"""
 contentList.append("content3")
 contentList.append("content4")"""
 
 #Create the meetings:
 """
-first_meeting_date = datetime.datetime(2022, 6, 13) #6/13/22
-numMeetings = 2
+first_meeting_date = datetime.datetime(2022, 6, 10) #6/13/22
+numMeetings = 1
 timeBetweenMeeting = 10 #days
 for i in range(numMeetings):
     # add timeBetweenMeetings
@@ -80,14 +112,14 @@ for i in range(numMeetings):
             title=titles[i],
             content_description=content_descriptions[i],
             content=contentList[i])
-    db.session.add(newMeeting)"""
+    db.session.add(newMeeting)
+"""
 
-
-
-"""print("\n\nProgress meetings in this business (" + business_name + ") - after adding:")
+"""
+print("\n\nProgress meetings in this business (" + business_name + ") - after adding:")
 for pm in get_progress_meetings(business_id):
-    print(pm.ProgressMeeting)"""
-
+    print(pm.ProgressMeeting)
+"""
 
 
 #setting selects
@@ -109,7 +141,7 @@ for s in Select.query.all():
 #Select.query.filter_by(id=7).first().set_current_meeting_ID("mentee",2)
 #Select.query.filter_by(id=7).first().set_current_meeting_ID("mentor",2)
 
-print(ProgressMeetingCompletionInformation.query.all())
+#print(ProgressMeetingCompletionInformation.query.all())
 
 #delete meeting notes
 #ProgressMeetingCompletionInformation.query.delete()

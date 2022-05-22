@@ -1642,8 +1642,27 @@ def deleteProfile():
         delete_intro_video(user)
         delete_user_attributes(user.id)
         delete_resume(user)
-        Select.query.filter_by(mentee_id=user.id).delete()
-        Select.query.filter_by(mentor_id=user.id).delete()
+
+        selectEntry = None
+        if user.is_student: #is mentee
+            selectEntry = Select.query.filter_by(mentee_id=user.id).first()
+
+            ProgressMeetingCompletionInformation.query.filter(
+                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
+            ).delete()
+
+            Select.query.filter_by(mentee_id=user.id).delete()
+        else:
+            selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+
+            ProgressMeetingCompletionInformation.query.filter(
+                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
+            ).delete()
+
+            Select.query.filter_by(mentor_id=user.id).delete()
+
         Business.query.filter_by(id=user.business_id).first().dec_number_employees_currently_registered() 
         #decrease business number registered by 1 because this user has been deleted
         
