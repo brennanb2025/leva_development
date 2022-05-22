@@ -158,6 +158,8 @@ body{
     transition-duration: 0.4s;
     font-size: 15px;
     display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .launch a{

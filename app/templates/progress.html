@@ -164,17 +164,24 @@
                             </form>
 
                             <br/>
-                            Description:<br/>
-                            {% for para in currMeetingInfo["desc"] %}
-                                <p>{{para}}</p>
-                            {% endfor %}
-                            <br/>
 
-                            Content:<br/>
-                            {% for para in currMeetingInfo["content"] %}
-                                <p>{{para}}</p>
-                            {% endfor %}
-                            <br/>
+                            <div class="meeting-description">
+
+                                <div style="font-weight: bold;">Description:</div>
+                                {% for para in currMeetingInfo["desc"] %}
+                                    <div>{{para}}</div>
+                                {% endfor %}
+
+                                <br/>
+                                
+
+                                <div style="font-weight: bold;">Content:</div>
+                                {% for para in currMeetingInfo["content"] %}
+                                    <div>{{para}}</div>
+                                {% endfor %}
+                                
+                                <br/>
+                            </div>
 
                             <textarea placeholder="Meeting notes here..."></textarea>
 
