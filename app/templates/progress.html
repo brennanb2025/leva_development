@@ -202,14 +202,15 @@
                             <ul id="completedMeetingList">
                                 {% for pm in prevMeetingInfo %}
                                     <li>
-                                    Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})<br/>
-                                    Description:<br/> 
+                                    <div style="font-weight: bold;">Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})</div>
+                                    <br/>
+                                    <div style="font-weight: bold;">Description:</div> <br/> 
                                     {% for para in pm["desc"] %}
                                         <p>{{para}}</p>
                                     {% endfor %}
                                     <br/>
 
-                                    Content:<br/>
+                                    <div style="font-weight: bold;">Content:</div><br/>
                                     {% for para in pm["content"] %}
                                         <p>{{para}}</p>
                                     {% endfor %}

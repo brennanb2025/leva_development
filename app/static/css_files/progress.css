@@ -83,17 +83,25 @@
     display: none;
 }
 
-#completedMeetingList{
-    font-weight: bold;
-}
-
 #dropdownButtonUp, #dropdownButtonDown{
     cursor: pointer;
 }
 
-textarea{
+#meetingNotes{
     resize: none;
     width: 40%;
+}
+
+.meeting-description{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    text-align: start;
+    min-width: 40%;
+}
+
+#meetingDoneButton{
+    width: 100%;
 }
 
 @media (max-width: 992px){

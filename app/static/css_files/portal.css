@@ -190,13 +190,6 @@ html, body{
     color: rgb(26, 26, 63);
 }
 
-.meeting-description{
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
-    text-align: start;
-}
-
 @media (max-width: 992px){
     .head{
         font-size: 5vw;
