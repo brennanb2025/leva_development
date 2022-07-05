@@ -1,4 +1,4 @@
-/* We use a lot of flexboxes here */
+/* This controls the main webpage, as well as some elements in pages after the user logs in */
 
 /* Controls the entire website. Flexbox column direction to make sure all elements go from top to bottom
    scroll-behavior exists to make sure the website scrolls smoothly to a section the user chooses */

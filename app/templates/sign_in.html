@@ -23,6 +23,7 @@
     </head>
 
     <body>
+        <!--Navbar (see index1.html, main.css)-->
         <div class="header navbar navbar-expand-lg navbar-light bg-white justify-content-between p-3 sticky-top">
             <div class="navbar-brand">
                 <img src="https://static.wixstatic.com/media/12ecaa_e292ca41155b4bee9ea276dc89fef0f3~mv2.png/v1/fill/w_165,h_87,al_c,q_85,usm_0.66_1.00_0.01/IMG_0256_PNG.webp" 
@@ -90,13 +91,16 @@
 
         </div>
 
+        <!--Actual login contents below:-->
         <div class="login-container">
 
+            <!--Centering the div (see new_login.css file)-->
             <div class="detail-container" id="detail-container">
 
                 <div class="head2">Login</div>
 
                 <form action="/sign-in" method="POST">
+                    <!--I'm fairly certain this portion is for indictating that there is an error-->
                     {{ form.hidden_tag() }}
                     
                     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -111,6 +115,8 @@
                         {% endif %}
                     {% endwith %}
 
+                    <!--All the inputs for login in input-container; 
+                        flask scripts for processing the information the user gives us-->
                     <div class="input-container">
                         <label for="email">{{ form.email.label }}</label>
                         {{ form.email }}<br/>
@@ -143,6 +149,7 @@
                         {% endwith %}
                     </div>
                     
+                    <!--Logs in/indicates any errors on the part of the user-->
                     <div class="launch-box">
                         <button class="launch">
                             Log In

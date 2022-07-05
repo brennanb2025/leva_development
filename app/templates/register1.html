@@ -33,6 +33,8 @@
 
     <body>
         <div class="container">
+            <!--Decoration container determines the structure of the left side of the register page
+                (Purely decorative side)-->
             <div class="decoration-container">
                 <div class="shading">
                     <div class="content">
@@ -51,6 +53,7 @@
 
             </div>
     
+            <!--Registration container contains the actual inputs and radio buttons people put in to fill in information-->
             <div class="registration-container">
 
                     <div class="content">
@@ -61,7 +64,15 @@
                         <form action="/register" method="POST" enctype="multipart/form-data" id="submitForm">
                             {{ form.hidden_tag() }}
                         
+                            <!--The register page is divided into 5 separate steps so that users don't have to look at
+                                a list of inputs and radio buttons. This division is represented by an info-container
+                            
+                                Each info-container has a name next to it to control when each info-container shows up-->
+                            
+                            <!--Info container (basic information about user)-->
                             <div class="general1 info-container" id="general1">
+                                <!--Error handling; this similar format is used for more specific error handling
+                                    (such as users putting in invalid information)-->
                                 {% with messages = get_flashed_messages(with_categories=true) %}
                                     {% if messages %}
                                         <ul class=flashes>
@@ -75,6 +86,8 @@
                                 {% endwith %}  
 
                                 <div class="firstlast">
+                                    <!--Input containers determine the styling of the inputs-->
+                                    <!--First name-->
                                     <div class="input-container">
                                         <label for="first">{{ form.first_name.label }}</label>
                                         {{ form.first_name(value=first_name) }}<br/>
@@ -92,6 +105,7 @@
                                     {% endwith %}
                                     </div>
 
+                                    <!--Last name-->
                                     <div class="input-container">
                                         <label for="last">{{ form.last_name.label }}</label>
                                         {{ form.last_name(value=last_name) }}<br/>
@@ -110,6 +124,7 @@
                                     </div>
                                 </div>
 
+                                <!--Email-->
                                 <div class="email">
                                     <div class="input-container">
                                         <label for="email">{{ form.email.label }}</label>
@@ -128,6 +143,8 @@
                                     </div>
                                 </div>
 
+                                <!--Radio buttons example-->
+                                <!--Contact method-->
                                 <label>Contact Method</label>
                                 <div class="input-container">
                                     {% if email_or_phone is not defined or email_or_phone == none or email_or_phone == "email" %}
@@ -153,6 +170,7 @@
                                     {% endif %}
                                 </div>
 
+                                <!--Phone number (class says email because of styling purposes)-->
                                 <div class="email" id="whiteContainerPhone">
                                     <div class="input-container">
                                         <input type="tel" id="phoneNumber" name="phoneNumber" class="form_style" placeholder="123-456-7890" value="{{phone_num}}">
@@ -171,7 +189,7 @@
                                 </div>
 
                                 
-
+                                <!--Password-->
                                 <div class="password">
                                     <div class="input-container">
                                         <label for="password1">{{ form.password.label }}</label>
@@ -210,7 +228,9 @@
 
                             </div>
                     
+                            <!--Info container (personal questions about user)-->
                             <div class="personal1 info-container" id="personal1">
+                                <!--Location-->
                                 <div class="location">
                                     <div class="input-container">
                                         <label for="location">{{ form.city_name.label }}</label>
@@ -229,6 +249,7 @@
                                     {% endwith %}   
                                 </div>
 
+                                <!--Business-->
                                 <div class="business">
                                     <div class="input-container">
                                         <label for="business">{{ form.business.label }}</label>
@@ -247,6 +268,7 @@
                                     {% endwith %}
                                 </div>
 
+                                <!--Whether the user wants to be a mentor or a mentee-->
                                 <div class="Mentor">
                                     <label>Are you a mentor or a mentee?</label>
                                     <div class="input-container">
@@ -278,7 +300,9 @@
 
                             </div>
 
+                            <!--Info container (more personal questions)-->
                             <div class="personal2 info-container" id="personal2">
+                                <!--Personality-->
                                 <div class="personalities">
                                     <div class="input-container">
                                         <label for="e-mail">Describe your personality (input 3 words or phrases)</label>
@@ -299,6 +323,7 @@
                                     {% endwith %}
                                 </div>
 
+                                <!--User interests-->
                                 <div class="interests">
                                     <div class="input-container">
                                         <label for="e-mail">What are your personal interests?</label>
@@ -336,6 +361,7 @@
                                     <table class="center" class="createTable" id="tagTable"></table>
                                 </div>
 
+                                <!--User expertise-->
                                 <div class="expertise">
                                     <div class="input-container">
                                         <label for="e-mail">
@@ -377,6 +403,7 @@
                                     <table class="center" class="createTable" id="careerInterestTable"></table>
                                 </div>
 
+                                <!--User education level-->
                                 <div class="education">
                                     <div class="input-container">
                                         <label for="e-mail">Education</label>
@@ -413,6 +440,7 @@
                                     <table class="center" class="createTable" id="educationTable"></table>
                                 </div>
 
+                                <!--Short bio about the user-->
                                 <div class="bio">
                                     <div class="input-container">
                                         <label for="e-mail">Short bio (max 500 words)</label>
@@ -433,8 +461,10 @@
                                 </div>
                             </div>
                     
+                            <!--Info container (file uploads)-->
                             <div class="uploading info-container" id="uploading">
 
+                                <!--Profile picture image upload-->
                                 <div class="input-container">
                                     <label>Profile Picture (Max size = 5MB)</label>
                                     <label for="inputFile" class="choose_file_container add_something_btn">
@@ -459,6 +489,7 @@
                                     {% endwith %}
                                 </div>
 
+                                <!--Resume file upload-->
                                 <div class="input-container">
                                     <label>Resume (Optional)</label>
 
@@ -483,7 +514,9 @@
                                 </div>
                             </div>
                             
+                            <!--Info container (information about user needed to match with another user)-->
                             <div class="matching info-container" id="matching">
+                                <!--Current division within the user's company-->
                                 <div class="division">
                                     <div class="input-container">
                                         <label for="e-mail">{{ form.division.label }}</label>
@@ -502,6 +535,7 @@
                                     {% endwith %}
                                 </div>
 
+                                <!--Current user occupation-->
                                 <div class="occupation">
                                     <div class="input-container">
                                         <label for="e-mail">{{ form.current_occupation.label }}</label>
@@ -520,8 +554,10 @@
                                     {% endwith %}
                                 </div>
 
+                                <!--For mentors:-->
                                 <div class="mentor">
                                     <div id="genderMentor">
+                                        <!--Gender identity-->
                                         <label>What is your gender identity?</label>
                                         <div class="input-container">
                                             {% if mentorGenderIdentity is not defined or mentorGenderIdentity == none or mentorGenderIdentity == "male" %}
@@ -587,7 +623,9 @@
                                     </div>
                                 </div>
 
+                                <!--For mentees (class says mentor for styling purposes):-->
                                 <div class="Mentor">
+                                    <!--Mentor gender preferences-->
                                     <div id="mentorPreference">
                                     <label>Do you prefer a male or a female mentor?</label>
                                     <div class="input-container">
@@ -642,7 +680,9 @@
                                     </div>
                                 </div>
 
+                                <!--For mentors-->
                                 <div class="Mentor">
+                                    <!--Mentee division preference-->
                                     <label>
                                         <div id="menteeDivisionPreference">
                                             Do you prefer your mentee be in your division or in a different division at the company?<br/>
@@ -704,6 +744,7 @@
 
                             </div>
 
+                            <!--Buttons that cycle through each info-container page-->
                             <div class="register-box">
                                 <button class="register" type="button" id="back" onclick="register_prev()">
                                     Previous
