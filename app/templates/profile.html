@@ -76,6 +76,7 @@
         </div>
 
 
+        <!--Profile of the user-->
         <div class="background">
             <section class="display profile">
 
@@ -87,6 +88,7 @@
                     {% endif %}
                 </div>
 
+                <!--How to edit the profile of the user-->
                 {% if logged_in is defined and logged_in %}
                     <a href="{{ url_for('editProfile') }}">
                         <button class="register">
@@ -97,6 +99,10 @@
 
                 <div class="info">
                     <div class="list">
+                        <!--Each entry of information is divided into singles, which is itself divided into
+                            a label and the actual information (answer)-->
+
+                            <!--Name-->
                         <div class="single">
                             <div class="label">
                                 Name:
@@ -107,6 +113,7 @@
                             </div>
                         </div>
 
+                        <!--Job title-->
                         <div class="single">
                             <div class="label">
                                 Job Title:
@@ -117,6 +124,7 @@
                             </div>
                         </div>
 
+                        <!--Division-->
                         <div class="single">
                             <div class="label">
                                 Division:
@@ -127,6 +135,7 @@
                             </div>
                         </div>
 
+                        <!--Bio-->
                         <div class="single">
                             <div class="label">
                                 Bio:
@@ -137,6 +146,7 @@
                             </div>
                         </div>
 
+                        <!--Resume-->
                         <div class="single">
                             {% if resumeUrl is none %}
                                 <div class="label">
@@ -149,6 +159,7 @@
                             {% endif %}
                         </div>
 
+                        <!--Location-->
                         <div class="single">
                             <div class="label">
                                 Location:
@@ -159,6 +170,7 @@
                             </div>
                         </div>
 
+                        <!--Goals/Expertise-->
                         <div class="single">
                             <div class="label">
                                 Professional Goals/Areas of Expertise:
@@ -175,6 +187,7 @@
                             </div>
                         </div>
 
+                        <!--Interests-->
                         <div class="single">
                             <div class="label">
                                 Interests:
@@ -191,6 +204,7 @@
                             </div>
                         </div>
 
+                        <!--Education-->
                         <div class="single">
                             <div class="label">
                                 Education:
@@ -207,6 +221,7 @@
                             </div>
                         </div>
 
+                        <!--Personality-->
                         <div class="single">
                             <div class="label">
                                 Personality:
@@ -221,7 +236,8 @@
 
                         <!--hide all this if the current user is viewing another user's profile-->
                         {% if logged_in is defined and logged_in %}
-                        
+
+                            <!--Division preference-->
                             {% if divisionPreference is not none %}
                             <div class="single">
                                 <div class="label">
@@ -246,6 +262,7 @@
                             </div> 
                             -->
 
+                            <!--Gender preference of student-->
                             {% if mentorGenderPreference is not none and user.is_student  %}
                             <div class="single">
                                 <div class="label">
@@ -258,6 +275,7 @@
                             </div>
                             {% endif %}
 
+                            <!--Gender identity-->
                             {% if genderIdentity is not none and not user.is_student  %}
                             <div class="single">
                                 <div class="label">
@@ -274,6 +292,7 @@
                         
                     </div>
 
+                    <!--Profile picture-->
                     <div class="picture">
                         <div class="circle-border">
                             {% if profile_picture is none %}

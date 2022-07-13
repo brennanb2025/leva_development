@@ -10,6 +10,7 @@ html, body{
     flex: 1;
 }
 
+/* For responsiveness purposes for the home page (which is currently unused) */
 @media (max-width: 425px){
     .home .header-text{
         font-size: 10vw;
@@ -25,6 +26,7 @@ html, body{
     }
 }
 
+/* Profile page styling */
 .profile{
     display: flex;
     flex-direction: column;
@@ -35,6 +37,7 @@ html, body{
     margin-right: 7%;
 }
 
+/* For the purple button that is used for "edit picture" in the profile page */
 .profile button, .mentor button{
     border: none;
     outline: none;
@@ -50,11 +53,13 @@ html, body{
     justify-content: center;
 }
 
+/* The dark blue register button styling is reused here */
 .register:hover{
     background-color: rgb(33, 48, 74);
     cursor:pointer;
 }
 
+/* User profile label text styling */
 .info .label{
     color: rgb(33, 48, 74);
     font-size: 20px;
@@ -65,6 +70,9 @@ html, body{
     margin-bottom: 20px;
 }
 
+/* For the container that contains the list on the left and profile pic on the right. 
+   Padding on left and right side of the list and horizontally placed to set the list container on the left
+   and the picture on the right */
 .info{
     display: flex;
     flex-direction: row;
@@ -74,16 +82,7 @@ html, body{
     padding: 0% 5% 0% 5%;
 }
 
-.info2{
-    display: flex;
-    justify-content: space-around;
-    flex-direction: row;
-    align-items: start;
-    width: 100%;
-    padding: 0%;
-    margin-top: 50px;
-}
-
+/* List takes up more space than picture */
 .list{
     flex: 2;
     padding-left: 4%;
@@ -96,6 +95,7 @@ html, body{
     align-items: center;
 }
 
+/* Image styling */
 .picture img{
     width: 205px;
     height: 205px;
@@ -103,6 +103,7 @@ html, body{
     object-fit: cover;
 }
  
+/* Responsiveness of profile page */
 @media (max-width: 992px){
     .info{
         flex-direction: column;
@@ -120,11 +121,13 @@ html, body{
     }
 }
 
+/* Mentor page styling */
 .head{
     font-size: 50px;
     font-weight: bold;
 }
 
+/* Align the items from top to bottom; container is visible by the slightly darker gray */
 .mentor{
     display: flex;
     flex-direction: column;
@@ -133,6 +136,8 @@ html, body{
     padding: 4%;
 }
 
+/* Each mentor is shown with a card containing their profile picture and some complementary information
+   with some buttons to allow the user to choose this mentor */
 .mentor-card{
     margin-top: 30px;
     width: 70%;
@@ -142,6 +147,7 @@ html, body{
     justify-content: center;
 }
 
+/* Actual card on the left side */
 .picture-card{
     flex: 2;
     background-color: rgb(26, 26, 63);
@@ -165,6 +171,7 @@ html, body{
     object-fit: cover;
 }
 
+/* Purely decorative */
 .purple-line{
     height: 2px;
     width: 40px;
@@ -190,6 +197,7 @@ html, body{
     color: rgb(26, 26, 63);
 }
 
+/* Responsiveness of the mentor page */
 @media (max-width: 992px){
     .head{
         font-size: 5vw;
@@ -295,8 +303,4 @@ html, body{
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-.progress-navbar{
-    position: sticky;
 }
