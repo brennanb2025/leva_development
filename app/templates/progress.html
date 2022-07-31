@@ -76,6 +76,9 @@
 
         </div>
 
+        <!--The progress page has a navbar that allows the users to see their mentors/mentees, their upcoming
+            meetings, and the history of completed meetings in three separate fragments. The progressNavbar()
+            function takes a string input and changes the contents of the screen according to the string input-->
         {% if selectEntry != none %}
         <div class="navbar-bottom navbar navbar-expand-lg navbar-light bg-white justify-content-between sticky-top">
             <div class="progress-navigation" id="progressNav1">
@@ -154,6 +157,7 @@
                                 Congratulations! You have completed every progress step!
                             </div>
                         {% else %}
+                            <!--Upcoming meetings-->
                             <div class="head2">Upcoming meeting:</div>
                         
                             <br/>
@@ -161,6 +165,9 @@
 
                             <br/>
 
+                            <!--Each meeting is to have a description, some meeting notes, and a button to
+                                let the webpage know that the meeting is finished and is to be moved to the
+                                completed meetings page-->
                             <div class="meeting-description">
 
                                 <div style="font-weight: bold;">Description:</div>
@@ -199,6 +206,8 @@
                         {% endif %}
 
                         <div class="half">
+                            <!--Each completed meeting has the same description and content from when it was upcoming,
+                                but the user now has the option to put some notes for the specific meeting-->
                             <ul id="completedMeetingList">
                                 {% for pm in prevMeetingInfo %}
                                     <li>

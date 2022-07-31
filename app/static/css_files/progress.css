@@ -1,5 +1,3 @@
-
-
 .list{
     padding: 0%;
     flex: none;
@@ -7,6 +5,7 @@
     flex-direction: row;
 }
 
+/* Notebox styling */
 .note-box{
     background-color: rgb(213, 207, 207);
     padding: 1%;
@@ -46,6 +45,7 @@
     padding-bottom: 0% !important;
 }
 
+/* The navbar styling for the progress page */
 .progress-navigation{
     flex: 1;
     background-color: rgb(33, 48, 74);
@@ -75,6 +75,7 @@
     background-color: rgb(152, 84, 201);
 }
 
+/* Make sure that the default page is the mentors page when the user first navigates to the progress tab */
 #upcoming{
     display: none;
 }
@@ -83,6 +84,7 @@
     display: none;
 }
 
+/* More styling for meeting notes */
 #dropdownButtonUp, #dropdownButtonDown{
     cursor: pointer;
 }
@@ -92,6 +94,7 @@
     width: 40%;
 }
 
+/* Meeting descriptions */
 .meeting-description{
     display: flex;
     flex-direction: column;
@@ -124,6 +127,7 @@
     width: 100%;
 }
 
+/* Responsiveness */
 @media (max-width: 992px){
     .navbar-bottom{
         flex-direction: column;
