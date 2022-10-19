@@ -23,11 +23,14 @@
             }
         </style>
 
+        {{ JSGlue.include() }}
+
         <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
         <title>Register | Leva</title>
     </head>
 
     <body>
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <div class="container">
             <div class="decoration-container">
                 <div class="shading">
@@ -736,71 +739,6 @@
         <script type="text/javascript">
             setPreexistingAttributes({{interestList|tojson}}, {{careerInterestList|tojson}}, {{educationList|tojson}});
             init("{{email_or_phone}}", "{{register_type}}");
-        </script>
-
-        <script>
-            var count = 1
-
-            function update_page(){
-
-                general1 = document.getElementById("general1")
-                personal1 = document.getElementById("personal1")
-                personal2 = document.getElementById("personal2")
-                uploading = document.getElementById("uploading")
-                matching = document.getElementById("matching")
-                button_next = document.getElementById("next")
-                //button_reg = document.getElementById("register")
-
-                general1.style.display = "none"
-                personal1.style.display = "none"
-                personal2.style.display = "none"
-                uploading.style.display = "none"
-                matching.style.display = "none"
-
-                if(count == 1){
-                    general1.style.display = "block"
-                }
-                else if (count == 2){
-                    personal1.style.display = "block"
-                }
-                else if(count == 3){
-                    personal2.style.display = "block"
-                }
-                else if(count == 4){
-                    uploading.style.display = "block"
-                    button_next.removeAttribute("onclick"); //remove the next onclick attribute
-                    button_next.onclick=function() {register_next();}
-                    button_next.innerHTML = "Next"
-                }
-                else if(count == 5){
-                    matching.style.display = "block"
-                }
-
-                if (count == 5){ //NOTE: CHANGED
-                    button_next.innerHTML = "Register"
-                    button_next.removeAttribute("onclick"); //remove the next onclick attribute
-                    var form = document.getElementById("submitForm");
-                    button_next.onclick=function() {form.submit();}
-                    //button_reg.style.display = 'flex'
-                    //button_next.style.display = 'none'
-                }
-                else{
-                    //button_reg.style.display = 'none'
-                    button_next.style.display = 'flex'
-                }
-            }
-
-            function register_next(){
-                count++
-                console.log(count)
-                update_page()
-            }
-
-            function register_prev(){
-                count = Math.max(1, count - 1)
-                console.log(count)
-                update_page()
-            }
         </script>
     </body>
 

@@ -1,5 +1,6 @@
 #This file is the python flask backend
 
+from pickle import TRUE
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
@@ -201,6 +202,39 @@ def get_popular_tags():
     carInts = CareerInterest.query.order_by(CareerInterest.num_use.desc()).limit(500).all()
     schools = School.query.order_by(School.num_use.desc()).limit(500).all()
     return (tags, carInts, schools)
+
+
+#post register page 1
+@app.route('/register/validate/1', methods=['POST'])
+def registerValidate1():
+    #email checking
+
+    errors = {}
+    success = True
+
+    email = request.json['email'] 
+    
+    if email == '':
+        success = False
+        flash(u'Please enter an email.', 'emailError')
+        errors["email"] = 'Please enter an email.'
+    else:
+        regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$' #if it isn't a valid email address
+        if(not(re.search(regex,email))):
+            flash('Invalid email address', 'emailError')
+            success = False
+            errors["email"] = 'Invalid email address'
+
+        elif User.query.filter_by(email=email).first() != None: #email taken
+            success = False
+            flash(u'Email taken. Please enter a different email.', 'emailError')
+            errors["email"] = 'Email taken. Please enter a different email.'
+
+    return json.dumps({
+            'success':success,
+            'errors':json.dumps(errors)
+        })
+
 
 
 #register POST. Checks form input. If it is correctly input, creates a new user. Then sends them to the sign-in page.

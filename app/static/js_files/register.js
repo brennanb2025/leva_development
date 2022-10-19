@@ -6,6 +6,182 @@ let rowArrEdu = [];
 //remove cropping
 //var cropper;
 
+var general1
+var personal1
+var personal2
+var uploading
+var matching
+var button_next
+var formSubmission
+
+var radio_email_selected
+var radio_mentee_selected
+
+
+var csrftoken = $('meta[name=csrf-token]').attr('content')
+
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken)
+        }
+    }
+})
+
+
+//checks if the current page has submittable inputs
+function check_page_contents() {
+
+    switch(count) {
+        case 1: 
+
+            if(!validateGeneral1()) { //validateGeneral1 must pass it
+                break;
+            }
+
+            var submitData = {
+                "email" : formSubmission.email.value,
+            }
+
+            $.ajax({
+                type: "POST",
+                url: Flask.url_for("registerValidate1"), 
+                data: JSON.stringify(submitData, null, '\t'),
+                contentType: 'application/json;charset=UTF-8',
+                success: function(response) {
+                    response = JSON.parse(response);
+                    alert(response["success"])
+                    if(response["success"] === true) {
+                        incrementPageCount()
+                        update_page() //call success update_page method on data validated
+                        alert("Valid information set in general1")
+                    } else {
+                        show_validation_errors(response['errors'])
+                        alert("Invalid information set in general1")
+                    }
+                }})
+                
+            break;
+
+    }
+}
+
+//does client side validation on general1.
+function validateGeneral1() {
+    //check first name, last name, email, email_chosen_instead_of_phone, phone number, passwords
+    //formSubmission.first_name,
+    //formSubmission.last_name,
+    //formSubmission.email,
+    //radio_email_selected,
+    //document.getElementById("phoneNumber")
+    return true;
+}
+
+
+
+function show_validation_errors(errors) { //errors is a dictionary of errors that happened during server-side validation
+    alert(errors)
+    return
+}
+
+
+function incrementPageCount() {
+    count++
+    console.log(count)
+}
+
+
+//window ready
+window.addEventListener('load', function() {
+
+    //document.getElementById("imgStuff").style.display = "none"; //hide all image back
+    //document.getElementById("scrollAdvice").style.display = "none"; //hide advice
+    //remove cropping
+    //document.getElementById("cropPreview").style.display = "none"; //hide preview
+    //document.getElementById("crop-btn").style.display = "none"; //hide crop btn
+    //document.getElementById("croppedImgFile").style.display = "none"; //hide input for post form
+
+    document.getElementById("phoneNumber").style.display = "none"; //hide input for phone number
+    document.getElementById("careerExp").style.display = "none"; //hide career experience - assume they are a mentee
+    document.getElementById("genderMentor").style.display = "none"; //hide gender radio - assume they are a mentee
+    document.getElementById("newVideo").style.display = "none"; //hide new video if user hasn't input anything yet
+    //document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
+    document.getElementById("menteeDivisionPreference").style.display = "none"; //hide mentee preference - assume they are a mentee
+
+    //had to add this now that cropping is out
+    document.getElementById("image_container_div").style.display = "none"; //hide all image
+
+    general1 = document.getElementById("general1")
+    personal1 = document.getElementById("personal1")
+    personal2 = document.getElementById("personal2")
+    uploading = document.getElementById("uploading")
+    matching = document.getElementById("matching")
+    button_next = document.getElementById("next")
+
+    formSubmission = document.getElementById("submitForm")
+
+    radio_email_selected = true
+    radio_mentee_selected = true
+})
+
+
+var count = 1 //for paging
+
+function update_page(){
+    
+    //button_reg = document.getElementById("register")
+
+    general1.style.display = "none"
+    personal1.style.display = "none"
+    personal2.style.display = "none"
+    uploading.style.display = "none"
+    matching.style.display = "none"
+
+    if(count == 1){
+        general1.style.display = "block"
+    }
+    else if (count == 2){
+        personal1.style.display = "block"
+    }
+    else if(count == 3){
+        personal2.style.display = "block"
+    }
+    else if(count == 4){
+        uploading.style.display = "block"
+        button_next.removeAttribute("onclick"); //remove the next onclick attribute
+        button_next.onclick=function() {register_next();}
+        button_next.innerHTML = "Next"
+    }
+    else if(count == 5){
+        matching.style.display = "block"
+    }
+
+    if (count == 5){
+        button_next.innerHTML = "Register"
+        button_next.removeAttribute("onclick"); //remove the next onclick attribute
+        var form = document.getElementById("submitForm");
+        button_next.onclick=function() {form.submit();}
+        //button_reg.style.display = 'flex'
+        //button_next.style.display = 'none'
+    }
+    else{
+        //button_reg.style.display = 'none'
+        button_next.style.display = 'flex'
+    }
+}
+
+
+function register_next(){
+    check_page_contents()
+}
+
+function register_prev(){
+    count = Math.max(1, count - 1)
+    console.log(count)
+    update_page()
+}
+
+
 //image stuff
 inputFile = document.getElementById("inputFile");
 if(inputFile) { //ensure not null
@@ -131,28 +307,14 @@ if(inputFileResume) { //ensure not null
 }
 
 
-//document.getElementById("imgStuff").style.display = "none"; //hide all image back
-//document.getElementById("scrollAdvice").style.display = "none"; //hide advice
-//remove cropping
-//document.getElementById("cropPreview").style.display = "none"; //hide preview
-//document.getElementById("crop-btn").style.display = "none"; //hide crop btn
-//document.getElementById("croppedImgFile").style.display = "none"; //hide input for post form
-
-document.getElementById("phoneNumber").style.display = "none"; //hide input for phone number
-document.getElementById("careerExp").style.display = "none"; //hide career experience - assume they are a mentee
-document.getElementById("genderMentor").style.display = "none"; //hide gender radio - assume they are a mentee
-document.getElementById("newVideo").style.display = "none"; //hide new video if user hasn't input anything yet
-//document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
-document.getElementById("menteeDivisionPreference").style.display = "none"; //hide mentee preference - assume they are a mentee
-
-//had to add this now that cropping is out
-document.getElementById("image_container_div").style.display = "none"; //hide all image
 
 function radio_email() {
+    radio_email_selected = true
     document.getElementById("phoneNumber").style.display = "none"; //hide input for phone number
     document.getElementById("whiteContainerPhone").style.display = "none";
 }
 function radio_phone() {
+    radio_email_selected = false
     document.getElementById("phoneNumber").style.display = "block"; //show phone number
     document.getElementById("whiteContainerPhone").style.display = "block";
 }
@@ -166,6 +328,7 @@ function radio_mentor() { //function for if user selected that they are a mentor
     document.getElementById("careerInt").style.display = "none"; //hide
     document.getElementById("addCareerInterest").value = "Add experience"; //button change
     //document.getElementById("occupationInput").style.display = "block"; //show occupation entry
+    radio_mentee_selected = false
 }
 function radio_mentee() { //function for if user selected that they are a mentee
     document.getElementById("menteeDivisionPreference").style.display = "none";
@@ -176,6 +339,7 @@ function radio_mentee() { //function for if user selected that they are a mentee
     document.getElementById("mentorPreference").style.display = "block"; //show mentor preference
     document.getElementById("addCareerInterest").value = "Add interest"; //button change
     //document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
+    radio_mentee_selected = true
 }
 
 

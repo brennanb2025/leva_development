@@ -36,42 +36,42 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('careerInterestID', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['User.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['User.id'], name="fk_CareerInterestTag_user_id_User"),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('EducationTag',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('educationID', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['User.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['User.id'], name="fk_EducationTag_user_id_User"),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('InterestTag',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('interestID', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['User.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['User.id'], name="fk_InterestTag_user_id_User"),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('CareerInterest',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('careerInterestID', sa.Integer(), nullable=True),
+    #sa.Column('careerInterestID', sa.Integer(), nullable=True),
     sa.Column('title', sa.String(length=64), nullable=True),
-    sa.ForeignKeyConstraint(['careerInterestID'], ['CareerInterestTag.id'], ),
+    #sa.ForeignKeyConstraint(['careerInterestID'], ['CareerInterestTag.id'], name="fk_CareerInterest_careerInterestID_CareerInterestTag"),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('School',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('schoolID', sa.Integer(), nullable=True),
+    #sa.Column('schoolID', sa.Integer(), nullable=True),
     sa.Column('title', sa.String(length=64), nullable=True),
-    sa.ForeignKeyConstraint(['schoolID'], ['EducationTag.id'], ),
+    #sa.ForeignKeyConstraint(['schoolID'], ['EducationTag.id'], name="fk_School_schoolID_EducationTag"),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('Tag',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('tagID', sa.Integer(), nullable=True),
+    #sa.Column('tagID', sa.Integer(), nullable=True),
     sa.Column('title', sa.String(length=64), nullable=True),
-    sa.ForeignKeyConstraint(['tagID'], ['InterestTag.id'], ),
+    #sa.ForeignKeyConstraint(['tagID'], ['InterestTag.id'], name="fk_Tag_tagID_InterestTag"),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
