@@ -1,6 +1,6 @@
 var userArr = [];
 var userDictUsefulInfo = [];
-var csrftoken = $('meta[name=csrf-token]').attr('content')
+var csrftoken = $('meta[name=csrf-token]').attr('content');
 var isStudent;
 
 
@@ -14,7 +14,7 @@ $.ajaxSetup({
             xhr.setRequestHeader("X-CSRFToken", csrftoken)
         }
     }
-})
+});
 
 function remove_loading() {
     document.getElementById("loadingText").style.display = "none"; //hide loading message
@@ -108,21 +108,32 @@ function ready_document() { //will check if userArr length == 0 (no matches) and
             buttonContainer.setAttribute("class", "button-container");
             infoCard.appendChild(buttonContainer);
 
-            resumeBtnContainer = document.createElement("div");
-            resumeBtnContainer.className = "rounded-button button1";
-            resumeBtn = document.createElement("button");
-            resumeBtn.appendChild(document.createTextNode("RESUME"));
-            resumeBtn.onclick= function() {window.open(userDictUsefulInfo[userArr[i]]['resumeURL'], '_blank')};
-            resumeBtnContainer.appendChild(resumeBtn);
-            buttonContainer.appendChild(resumeBtnContainer);
 
-            profileLinkContainer = document.createElement("div");
-            profileLinkContainer.className = "rounded-button button2";
-            profileLink = document.createElement("button");
-            profileLink.appendChild(document.createTextNode("FULL PROFILE"));
-            profileLink.onclick= function() {location.href = Flask.url_for("view", {"id": userArr[i]})};
-            profileLinkContainer.appendChild(profileLink);
-            buttonContainer.appendChild(profileLinkContainer);
+            if(userDictUsefulInfo[userArr[i]]['resumeURL'] != null) { //only add resume button if they entered a resume.
+                resumeBtnContainer = document.createElement("div");
+                resumeBtnContainer.className = "rounded-button button1";
+                resumeBtn = document.createElement("button");
+                resumeBtn.appendChild(document.createTextNode("RESUME"));
+                resumeBtn.onclick= function() {window.open(userDictUsefulInfo[userArr[i]]['resumeURL'], '_blank')};
+                resumeBtnContainer.appendChild(resumeBtn);
+                buttonContainer.appendChild(resumeBtnContainer);
+
+                profileLinkContainer = document.createElement("div");
+                profileLinkContainer.className = "rounded-button button2"; //add the button2 (normal)
+                profileLink = document.createElement("button");
+                profileLink.appendChild(document.createTextNode("FULL PROFILE"));
+                profileLink.onclick= function() {location.href = Flask.url_for("view", {"id": userArr[i]})};
+                profileLinkContainer.appendChild(profileLink);
+                buttonContainer.appendChild(profileLinkContainer);
+            } else { //need to change the spacing if no resume was entered
+                profileLinkContainer = document.createElement("div");
+                profileLinkContainer.className = "rounded-button button2-push-left"; //add the button2 (altered version)
+                profileLink = document.createElement("button");
+                profileLink.appendChild(document.createTextNode("FULL PROFILE"));
+                profileLink.onclick= function() {location.href = Flask.url_for("view", {"id": userArr[i]})};
+                profileLinkContainer.appendChild(profileLink);
+                buttonContainer.appendChild(profileLinkContainer);
+            }
 
 
             bio = document.createElement("div");
@@ -155,9 +166,9 @@ function ready_document() { //will check if userArr length == 0 (no matches) and
             whiteContainer1.appendChild(regText1);
             matchesDiv.appendChild(whiteContainer1);
             //line break
-            matchesDiv.appendChild(document.createElement("br"));
-            matchesDiv.appendChild(document.createElement("br"));
-            matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
             //matching career interests
             matchingCareerInterests = document.createElement("div");
             matchingCareerInterests.appendChild(document.createTextNode("Matching career interests"));
@@ -180,9 +191,9 @@ function ready_document() { //will check if userArr length == 0 (no matches) and
             whiteContainer2.appendChild(regText2);
             matchesDiv.appendChild(whiteContainer2);
             //line break
-            matchesDiv.appendChild(document.createElement("br"));
-            matchesDiv.appendChild(document.createElement("br"));
-            matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
+            // matchesDiv.appendChild(document.createElement("br"));
             //matching schools
             matchingEducation = document.createElement("div");
             matchingEducation.appendChild(document.createTextNode("Matching education"));

@@ -6,7 +6,8 @@ from app import app, db, s3_client#, oauth
 #import lm as well?^
 from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm
 from uuid import uuid4
-from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, CareerInterestTag, Select, Business, Event
+from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
+        CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import datetime
@@ -74,14 +75,15 @@ def mentor():
 
     user = User.query.filter_by(id=session.get('userID')).first()
 
-    if Select.query.filter_by(mentee_id=user.id).first() != None: 
+    if Select.query.filter_by(mentee_id=user.id).first() != None or Select.query.filter_by(mentor_id=user.id).first() != None:
         #user already selected a mentor
         return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=False)
     
     return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=True)
 
-@app.route('/progress')
+@app.route('/progress', methods=['GET'])
 def progress():
+    
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
@@ -89,30 +91,152 @@ def progress():
     user = User.query.filter_by(id=session.get('userID')).first()
     
     isMentee = user.is_student #user.is_mentee
+    currentMeetingNumber = -1 #current meeting number
 
     select_mentor_mentee = None #the mentor or mentee that the user logged in has selected, or None
     if isMentee: 
         selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
         if selectEntry != None:
             select_mentor_mentee = User.query.filter_by(id=selectEntry.mentor_id).first()
+            currentMeetingNumber = selectEntry.current_meeting_number_mentee
     else:
         selectEntry = Select.query.filter_by(mentor_id=user.id).first()
         if selectEntry != None:
             select_mentor_mentee = User.query.filter_by(id=selectEntry.mentee_id).first()
+            currentMeetingNumber = selectEntry.current_meeting_number_mentor
+
     #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
 
-    reminderList = [] #reminders for the future
-    progressCompletedList = [] #reminders that have already passed
-    if selectEntry != None:
-        print("in progress - add this when reminder:time information is given.")
-        #timeDiff = GETCURRENTTIME - selectEntry.timestamp
-        #populate reminderList by going thru remindersByTimeDiff: list of tuples (timeDiff, reminder)
-        #1 month, 2 months, 3 months, each quarter (6, 9, 12, 15) - JUST DO EVERY 30 DAYS
-        #accumulative - show current month, then click button to see past months.
-    
+    progressDone = False
+
+    futureMeetingInfo = [] #future meeting list of info dicts
+    prevMeetingInfo = [] #previous meeting list of info dicts
+    currMeetingInfo = {} #current meeting info dict
+    if selectEntry != None and currentMeetingNumber != -1:
+        currMeeting = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting==currentMeetingNumber).first()
+        if currMeeting != None:
+            currMeetingInfo = getMeetingInfo(currMeeting)
+        else:
+            progressDone = True
+
+        previousMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting < currentMeetingNumber).all()
+        futureMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting > currentMeetingNumber).all()
+        
+        for m in previousMeetings: #build the dicts of the info about each meeting
+            prevMeetingInfo.append(getCompletedMeetingInfo(m, isMentee, selectEntry.id, m.num_meeting))
+        for m in futureMeetings:
+            futureMeetingInfo.append(getMeetingInfo(m))
+
     logData(15,"")
+
     
-    return render_template('progress.html', selectEntry=selectEntry, progressCompletedList=progressCompletedList, isMentee=isMentee, selectMentorMentee=select_mentor_mentee, userID=user.id, reminderList=reminderList)
+    return render_template('progress.html', selectEntry=selectEntry, isMentee=isMentee, \
+            selectMentorMentee=select_mentor_mentee, userID=user.id, progressDone=progressDone, \
+            currMeetingInfo=currMeetingInfo, prevMeetingInfo=prevMeetingInfo, futureMeetingInfo=futureMeetingInfo)
+
+
+#Returns a dict of all the necessary meeting information to show. 
+#This will change the text in the content description and the content into an array of the different paragraphs
+#(It splits around \n.)
+def getMeetingInfo(m): 
+    mInfo = {}
+    mInfo["num"] = m.num_meeting
+    mInfo["date"] = m.completion_date.strftime("%B %d, %Y")
+    mInfo["title"] = m.title
+    mInfo["desc"] = m.content_description.split('\n')
+    mInfo["content"] = m.content.split('\n')
+    return mInfo
+
+#Returns a dict of all the necessary meeting information to show, but for the completed meetings. 
+#Specifically, gets the meeting notes for the specified user.
+def getCompletedMeetingInfo(m, isMentee, selectId, currentMeetingNum): 
+    mInfo = {}
+    mInfo["num"] = m.num_meeting
+    mInfo["date"] = m.completion_date.strftime("%B %d, %Y")
+    mInfo["title"] = m.title
+    mInfo["desc"] = m.content_description.split('\n')
+    mInfo["content"] = m.content.split('\n')
+    
+    if isMentee:
+        mInfo["meetingNotes"] = ProgressMeetingCompletionInformation.query.filter(
+            ProgressMeetingCompletionInformation.num_progress_meeting == currentMeetingNum,
+            ProgressMeetingCompletionInformation.select_id == selectId
+        ).first().mentee_meeting_notes
+    else:
+        mInfo["meetingNotes"] = ProgressMeetingCompletionInformation.query.filter(
+            ProgressMeetingCompletionInformation.num_progress_meeting == currentMeetingNum,
+            ProgressMeetingCompletionInformation.select_id == selectId
+        ).first().mentor_meeting_notes
+        
+    return mInfo
+
+@app.route('/progress', methods=['POST'])
+def currentMeetingSetDone():
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+    
+    user = User.query.filter_by(id=session.get('userID')).first()
+    isMentee = user.is_student #user.is_mentee
+
+    form = request.form
+
+    if isMentee: 
+        selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        if selectEntry != None:
+            completionInfoMentee = ProgressMeetingCompletionInformation.query.filter(
+                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
+            ).first()
+            if completionInfoMentee == None: 
+                #if there is no existing meeting notes for this meeting
+                completionInfo = ProgressMeetingCompletionInformation(
+                    num_progress_meeting = selectEntry.current_meeting_number_mentee,
+                    select_id = selectEntry.id,
+                    mentee_meeting_notes = form.get("meetingNotes")
+                )
+                db.session.add(completionInfo)
+                #no meeting notes for this one, creating them for the mentee
+            else:
+                #update meeting notes
+                #meeting notes already exist, setting mentee notes here
+                completionInfoMentee.set_meeting_notes(form.get("meetingNotes"), "mentee")
+                completionInfoMentee.set_completion_timestamp("mentee") #update timestamp
+
+            selectEntry.inc_current_meeting_ID("mentee") #increment the meeting number
+            db.session.commit()
+
+    else:
+        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+        if selectEntry != None:
+            completionInfoMentor = ProgressMeetingCompletionInformation.query.filter(
+                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
+            ).first()
+            if completionInfoMentor == None: 
+                #if there is no existing meeting notes for this meeting
+                completionInfo = ProgressMeetingCompletionInformation(
+                    num_progress_meeting = selectEntry.current_meeting_number_mentor,
+                    select_id = selectEntry.id,
+                    mentor_meeting_notes = form.get("meetingNotes")
+                )
+                db.session.add(completionInfo)
+                #no meeting notes for this one, creating them for the mentor
+            else:
+                #if there are existing meeting notes, update meeting notes
+                #meeting notes already exist, setting mentor notes here
+                completionInfoMentor.set_meeting_notes(form.get("meetingNotes"), "mentor")
+                completionInfoMentor.set_completion_timestamp("mentor") #update timestamp
+
+            selectEntry.inc_current_meeting_ID("mentor") #increment the meeting number
+            db.session.commit()
+
+    return progress() #send to progress page
+
+
 
 #sign-in page GET.
 @app.route('/sign-in', methods=['GET'])
@@ -287,16 +411,19 @@ def registerPost():
         success = False
     
     if form1.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
-        flash(u"Please enter a preference for your mentor/mentee's division.", 'division_preference_error')
+        flash(u"Please enter a preference for your division.", 'division_preference_error')
         success = False
 
-    if (form1.get("personality1") == None or form1.get("personality1") == ''
-                or form1.get("personality2") == None or form1.get("personality2") == ''
-                or form1.get("personality3") == None or form1.get("personality3") == ''):
+    if form1.get('personality1') != None and form1.get('personality2') != None and form1.get('personality3') != None:
+        if form1.get('personality1').strip() == "" or form1.get('personality2').strip() == "" or form1.get('personality3').strip() == "":
+            flash(u"Please enter three words or phrases that describe you.", 'personality_error')
+            success = False
+    else:
         flash(u"Please enter three words or phrases that describe you.", 'personality_error')
         success = False
 
-    if not isMentee and form1.get('current_occupation') == '': #ok if blank if they're a student
+
+    if form1.get('current_occupation') == '':
         success = False
         flash(u'Please enter your current occupation.', 'currentOccupationError')
         errors.append("current_occupation")
@@ -347,51 +474,62 @@ def registerPost():
                 success = False
     #else: didn't input a resume. That's ok, they're optional.
 
+    #if "file" in request.files and request.files["file"]:
+    img = None
+    errorMsg = ""
 
-    #remove cropping
-    #if "croppedImgFile" in request.files:
-        #img = request.files["croppedImgFile"]
-    if "file" in request.files and request.files["file"]:
-        img = request.files["file"]
+    if "croppedImgFile" in request.files and request.files.get("croppedImgFile").filename != '':
+        img = request.files.get("croppedImgFile")
+    
         #remove cropping
-        #if img and int((img.getbuffer().nbytes/1024)/1024) > 5:
+        """if int((img.getbuffer().nbytes/1024)/1024) > 5:
+            flash(u'Image is too big (max 5 MB).', 'imageError')
+            success = False"""
 
-        imgSize = -1
-        if img:
-            img.seek(0, os.SEEK_END)
-            imgSize = img.tell()
-            img.seek(0)
+
+        #imgSize = -1
+        #img.seek(0, os.SEEK_END)
+        #imgSize = img.tell()
+        #img.seek(0)
         
-        if imgSize == -1:
+        """if imgSize == -1:
+            errorMsg = errorMsg + "[Couldn't read image]"
             flash(u"Couldn't read image.", 'imageError')
             success = False
         elif (imgSize/1024)/1024 > 5:
+            errorMsg = errorMsg + "[Image is too big (max 5 MB)]"
             flash(u'Image is too big (max 5 MB).', 'imageError')
             success = False
-        elif img.filename == '':
-            flash(u'Could not read image', 'imageError')
+        el"""
+        """if img.filename == '':
+            errorMsg = errorMsg + "[Could not read image filename]"
+            flash(u'Could not read image filename', 'imageError')
             success = False
-        else:
-            imgType = validate_image(img.stream)
-            if imgType == None:
-                flash(u'Could not assess image size.', 'imageError')
-            elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
-                flash(u'Accepted file types: .png, .jpg. You uploaded a', imgType + ".", 'imageError')
-                success = False
+        else:"""
+        imgType = validate_image(img.stream)
+        if imgType == None:
+            errorMsg = errorMsg + "[Could not assess image size]"
+            flash(u'Could not assess image size.', 'imageError')
+        elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
+            errorMsg = errorMsg + "[Wrong image type]"
+            flash(u'Accepted file types: .png, .jpg. You uploaded a ' + imgType + ".", 'imageError')
+            success = False
     #image is optional
     """else:
         success = False
         flash(u'Please select a file.', 'pictureError')"""
 
-    vid = None
+    """vid = None
     if "videoFile" in request.files:
-        vid = request.files["videoFile"]
+        vid = request.files["videoFile"]"""
     
     #video file optional
     """else:
         success=False
         flash(u'Please select a file.', 'videoError')"""
-    if vid:
+
+
+    """if vid:
         duration = request.form.get("videoDuration")
         if not duration:
             flash(u"Something went wrong, couldn't assess video duration. Try reuploading the video.", 'videoError')
@@ -405,7 +543,7 @@ def registerPost():
         
         if int((len(vid.read())/1024)/1024) > 40: #check size of file. Don't allow file sizes above 40MB.
             flash(u'Video is too big (max 40 MB).', 'videoError')
-            success = False
+            success = False"""
 
 
     if success: #success, registering new user
@@ -428,9 +566,9 @@ def registerPost():
                     business_id=businessRegisteredUnder.id, 
                     mentor_gender_preference=mentor_gender_preferenceForm,
                     gender_identity=gender_identityForm,
-                    division_preference=form1.get("divisionPreference"), division=form1.get('division'),
-                    personality_1=form1.get("personality1"), personality_2=form1.get("personality2"), 
-                    personality_3=form1.get("personality3"))
+                    division_preference=form1.get("divisionPreference"), division=form1.get('division').strip(),
+                    personality_1=form1.get("personality1").strip(), personality_2=form1.get("personality2").strip(), 
+                    personality_3=form1.get("personality3").strip())
         
         db.session.add(user) #add to database
         user.set_password(form1.get('password')) #must set pwd w/ hashing method
@@ -444,53 +582,57 @@ def registerPost():
         # but I can see it being useful/efficient for future features.
         interestArr = form1.getlist("tagName")
         for i in range(int(form1.get('num_tags'))):
-            interestTag = InterestTag(
-                user_id=user.id,
-                entered_name=interestArr[i]
-            )
-            db.session.add(interestTag)
-            db.session.commit() #I have to do this before I set the resource so the id will be set.
-            interestTag.set_interestID(interestArr[i], db.session)
+            name = interestArr[i].strip()
+            if name != "":
+                interestTag = InterestTag(
+                    user_id=user.id,
+                    entered_name=name
+                )
+                db.session.add(interestTag)
+                db.session.commit() #I have to do this before I set the resource so the id will be set.
+                interestTag.set_interestID(name, db.session)
 
         #get education
         eduArr = form1.getlist("educationName")
         for i in range(int(form1.get('num_education_listings'))):
-            educationTag = EducationTag(
-                user_id=user.id,
-                entered_name=eduArr[i]
-            )
-            db.session.add(educationTag)
-            db.session.commit() #I have to do this before I set the resource so the id will be set.
-            educationTag.set_educationID(eduArr[i], db.session)
+            name = eduArr[i].strip()
+            if name != "":
+                educationTag = EducationTag(
+                    user_id=user.id,
+                    entered_name=name
+                )
+                db.session.add(educationTag)
+                db.session.commit() #I have to do this before I set the resource so the id will be set.
+                educationTag.set_educationID(name, db.session)
 
         #get career interests
         cintArr = form1.getlist("careerInterestName")
         for i in range(int(form1.get('num_career_interests'))):
-            cintTag = CareerInterestTag(
-                user_id=user.id,
-                entered_name=cintArr[i]
-            )
-            db.session.add(cintTag)
-            db.session.commit() #I have to do this before I set the resource so the id will be set.
-            cintTag.set_careerInterestID(cintArr[i], db.session)
+            name = cintArr[i].strip()
+            if name != "":
+                cintTag = CareerInterestTag(
+                    user_id=user.id,
+                    entered_name=name
+                )
+                db.session.add(cintTag)
+                db.session.commit() #I have to do this before I set the resource so the id will be set.
+                cintTag.set_careerInterestID(name, db.session)
         
         #remove cropping
-        #if "croppedImgFile" in request.files:
-            #img = request.files["croppedImgFile"]
-        if "file" in request.files:
-            img = request.files["file"]
-            if img and request.files["file"]:
+        if "croppedImgFile" in request.files:
+            img = request.files.get("croppedImgFile")
+            if img:
                 output, filename = upload_media_file_to_s3(img, user)
                 user.set_profile_picture(output, filename) #set the user profile picture link
                 db.session.commit()
 
-        if "videoFile" in request.files:
+        """if "videoFile" in request.files:
             vid = request.files["videoFile"]
             if vid:
                 vid.seek(0) #I read the file before to check the length so I must put the cursor at the beginning in order to upload it.
                 output, filename = upload_media_file_to_s3(vid, user)
                 user.set_intro_video(output, filename) #set the user profile picture link
-                db.session.commit()
+                db.session.commit()"""
 
         if "resume" in request.files:
             resume = request.files["resume"]
@@ -513,7 +655,7 @@ def registerPost():
 
         return resp
     else:
-
+        flash(u'We encountered an error registering you. Please fix any errors in the following pages.', 'generalError')
         return registerPreviouslyFilledOut(form1, errors, request)
 
 
@@ -623,12 +765,12 @@ def checkBasicInfo(form1):
         success = False
         flash(u'Please enter an email.', 'emailError')
         errors.append("email")
-    else:
+    """else:
         regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$' #if it isn't a valid email address
         if(not(re.search(regex,form1.get('email')))):
             flash('Invalid email address', 'emailError')
             success = False
-            errors.append("email")
+            errors.append("email")"""
     if form1.get('first_name') == '':
         success = False
         flash(u'Please enter a first name.', 'first_nameError')
@@ -742,7 +884,8 @@ def editProfile():
 
     title="Edit profile Page"
     #return render_template('edit_profile.html', intro_video=intro_video_link, 
-    return render_template('editProfileNew.html', intro_video=intro_video_link, 
+    #return render_template('editProfileNew.html', intro_video=intro_video_link, 
+    return render_template('edit_profile_revised.html', intro_video=intro_video_link, 
             contact_method=contact_method, phone_num=phone_num, profile_picture=prof_pic_link, 
             interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
             title=title, bio=bio, interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
@@ -752,6 +895,89 @@ def editProfile():
             formPwd=formPwd, 
             user=user, userID=session.get('userID'))
 
+"""@app.route('/edit-profile-test', methods=['GET'])
+def editProfileTest():
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+
+    user = User.query.filter_by(id=session.get('userID')).first() #get the correct profile by inputting user id
+
+    formPwd = EditPasswordForm()
+
+    interestList = []
+    for interest in user.rtn_interests():
+        #interestList.append(Tag.query.filter_by(tagID=interest.interestID).first().title)
+        interest = Tag.query.filter_by(id=interest.interestID).first()
+        if interest != None:
+            interestList.append(interest.title)
+    careerInterestList = []
+    for cint in user.rtn_career_interests():
+        #careerInterestList.append(CareerInterest.query.filter_by(careerInterestID=cint.careerInterestID).first().title)
+        cint = CareerInterest.query.filter_by(id=cint.careerInterestID).first()
+        if cint != None:
+            careerInterestList.append(cint.title)
+    educationList = []
+    for school in user.rtn_education():
+        #educationList.append(School.query.filter_by(schoolID=school.educationID).first().title)
+        edu = School.query.filter_by(id=school.educationID).first()
+        if edu != None:
+            educationList.append(edu.title)
+    bio = user.bio
+
+    prof_pic_link = user.profile_picture
+    intro_video_link = user.intro_video
+    contact_method = user.email_contact
+    phone_num = user.phone_number
+    personality_1 = user.personality_1
+    personality_2 = user.personality_2
+    personality_3 = user.personality_3
+
+    mentorGenderPreference = user.mentor_gender_preference
+    if mentorGenderPreference != None:
+        if mentorGenderPreference == "male":
+            mentorGenderPreference = "Male mentor"
+        elif mentorGenderPreference == "female":
+            mentorGenderPreference = "Female mentor"
+        else:
+            mentorGenderPreference = "No preference"
+
+    divisionPreference = user.division_preference
+    if divisionPreference != None:
+        if divisionPreference == "same":
+            divisionPreference = "Same division"
+        elif divisionPreference == "different":
+            divisionPreference = "Different division"
+        else:
+            divisionPreference = "No preference"
+
+    genderIdentity = user.gender_identity
+    if genderIdentity != None:
+        if genderIdentity == "male":
+            genderIdentity = "Male"
+        elif genderIdentity == "female":
+            genderIdentity = "Female"
+        elif genderIdentity == "nonbinaryNonconforming":
+            genderIdentity = "Non-binary/non-conforming"
+        else:
+            genderIdentity = "Prefer not to respond"
+
+    interestTags, careerInterests, schools = get_popular_tags()
+
+    resumeUrl = create_resume_link(user)
+
+    logData(5,"") #log data edit profile get
+
+    title="Edit profile Page"
+    #return render_template('edit_profile.html', intro_video=intro_video_link, 
+    return render_template('edit_profile_revised.html', intro_video=intro_video_link, 
+            contact_method=contact_method, phone_num=phone_num, profile_picture=prof_pic_link, 
+            interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
+            title=title, bio=bio, interestList=interestList, careerInterestList=careerInterestList, educationList=educationList, 
+            personality_1=personality_1, personality_2=personality_2, personality_3=personality_3, division=user.division,
+            resumeUrl=resumeUrl, divisionPreference=divisionPreference,
+            mentorGenderPreference=mentorGenderPreference, genderIdentity=genderIdentity,
+            formPwd=formPwd, 
+            user=user, userID=session.get('userID'))"""
 
 @app.route('/edit-profile', methods = ['POST'])
 def editProfilePost():
@@ -760,6 +986,11 @@ def editProfilePost():
         return redirect(url_for('sign_in'))
 
     form = request.form
+
+    if form.get("submitBtn") == "editResume": #different types of submissions
+        editProfResume()
+    elif form.get("submitBtn") == "deleteResume":
+        deleteResume()
 
     success = True
     u = User.query.filter_by(id=session['userID']).first()
@@ -859,9 +1090,9 @@ def editProfilePost():
         if changedInputsSuccess:
             changeAttributes(form,u)
         if changedPersonalitySuccess:
-            u.set_personality(form.get('personality1'), form.get('personality2'), form.get('personality3'))
+            u.set_personality(form.get('personality1').strip(), form.get('personality2').strip(), form.get('personality3').strip())
         if changedDivisionSuccess:
-            u.set_division(form.get("division"))
+            u.set_division(form.get("division").strip())
         if changedDivisionPreferenceSuccess:
             u.set_division_preference(form.get("divisionPreference"))
         if changedContactMethodSuccess:
@@ -982,48 +1213,59 @@ def changeAttributes(form, user):
     interestArr = form.getlist("tagName")
     #for i in range(int(form1.get('num_tags'))):
     for i in range(len(interestArr)):
-        interestTag = InterestTag(
-            user_id=user.id,
-            entered_name=interestArr[i]
-        )
-        db.session.add(interestTag)
-        db.session.commit() #I have to do this before I set the resource so the id will be set.
-        interestTag.set_interestID(interestArr[i], db.session)
+        name = interestArr[i].strip()
+        if name != "":
+            interestTag = InterestTag(
+                user_id=user.id,
+                entered_name=name
+            )
+            db.session.add(interestTag)
+            db.session.commit() #I have to do this before I set the resource so the id will be set.
+            interestTag.set_interestID(name, db.session)
 
     #get education
     eduArr = form.getlist("educationName")
     #for i in range(int(form1.get('num_education_listings'))):
     for i in range(len(eduArr)):
-        educationTag = EducationTag(
-            user_id=user.id,
-            entered_name=eduArr[i]
-        )
-        db.session.add(educationTag)
-        db.session.commit() #I have to do this before I set the resource so the id will be set.
-        educationTag.set_educationID(eduArr[i], db.session)
+        name = eduArr[i].strip()
+        if name != "":
+            educationTag = EducationTag(
+                user_id=user.id,
+                entered_name=name
+            )
+            db.session.add(educationTag)
+            db.session.commit() #I have to do this before I set the resource so the id will be set.
+            educationTag.set_educationID(name, db.session)
 
     #get career interests
     cintArr = form.getlist("careerInterestName")
     #for i in range(int(form1.get('num_career_interests'))):
     for i in range(len(cintArr)):
-        cintTag = CareerInterestTag(
-            user_id=user.id,
-            entered_name=cintArr[i]
-        )
-        db.session.add(cintTag)
-        db.session.commit() #I have to do this before I set the resource so the id will be set.
-        cintTag.set_careerInterestID(cintArr[i], db.session)
+        name = cintArr[i].strip()
+        if name != "":
+            cintTag = CareerInterestTag(
+                user_id=user.id,
+                entered_name=name
+            )
+            db.session.add(cintTag)
+            db.session.commit() #I have to do this before I set the resource so the id will be set.
+            cintTag.set_careerInterestID(name, db.session)
 
     db.session.commit()
 
 def checkPersonality(form):
-    if form.get('personality1') == "" or form.get('personality2') == "" or form.get('personality3') == "":
+    if form.get('personality1') != None and form.get('personality2') != None and form.get('personality3') != None:
+        if form.get('personality1').strip() == "" or form.get('personality2').strip() == "" or form.get('personality3').strip() == "":
+            flash(u'You must input 3 personality traits/phrases.', 'personalityError')
+            return False
+    else:
         flash(u'You must input 3 personality traits/phrases.', 'personalityError')
         return False
+
     return True
 
 def checkDivision(form):
-    if form.get('division') == "":
+    if form.get('division').strip() == "":
         flash(u'You must input what division you are in.', 'divisionError')
         return False
     return True
@@ -1088,14 +1330,13 @@ def editProfPic():
 
     img = None
     success = True
-
-    #remove cropping
-    #if "croppedImgFile" in request.files:
-        #img = request.files["croppedImgFile"]
-    if "file" in request.files:
-        img = request.files["file"]
+    errorMsg = ""
+    
+    if "croppedImgFile" in request.files:
+        img = request.files.get("croppedImgFile")
     else:
         success=False
+        errorMsg += "[Please select a file]"
         flash(u'Please select a file.', 'pictureError')
     
     if img:
@@ -1103,30 +1344,37 @@ def editProfPic():
         """if int((img.getbuffer().nbytes/1024)/1024) > 5:
             flash(u'Image is too big (max 5 MB).', 'imageError')
             success = False"""
-        
 
-        imgSize = -1
-        img.seek(0, os.SEEK_END)
-        imgSize = img.tell()
-        img.seek(0)
+
+        #imgSize = -1
+        #img.seek(0, os.SEEK_END)
+        #imgSize = img.tell()
+        #img.seek(0)
         
-        if imgSize == -1:
+        """if imgSize == -1:
+            errorMsg = errorMsg + "[Couldn't read image]"
             flash(u"Couldn't read image.", 'imageError')
             success = False
         elif (imgSize/1024)/1024 > 5:
+            errorMsg = errorMsg + "[Image is too big (max 5 MB)]"
             flash(u'Image is too big (max 5 MB).', 'imageError')
             success = False
-        elif img.filename == '':
+        el"""
+        if img.filename == '':
+            errorMsg = errorMsg + "[Could not read image filename]"
             flash(u'Could not read image', 'imageError')
             success = False
         else:
             imgType = validate_image(img.stream)
             if imgType == None:
+                errorMsg = errorMsg + "[Could not assess image size]"
                 flash(u'Could not assess image size.', 'imageError')
             elif imgType not in json.loads(app.config['UPLOAD_EXTENSIONS']):
+                errorMsg = errorMsg + "[Wrong image type]"
                 flash(u'Accepted file types: .png, .jpg. You uploaded a ' + imgType + ".", 'imageError')
                 success = False
     else:
+        errorMsg = errorMsg + "[Image could not be found]"
         flash(u'Image could not be found.', 'imageError')
         success = False
     
@@ -1138,8 +1386,9 @@ def editProfPic():
             user.set_profile_picture(output, filename) #set the user profile picture link
             db.session.commit()
         else:
-            success=False
             flash(u'Please select a file.', 'pictureError')
+    else:
+        logData(18,errorMsg)
 
     return redirect(url_for('editProfile'))
 
@@ -1168,7 +1417,7 @@ def deleteIntroVid():
     return redirect(url_for('editProfile'))
 """
 
-@app.route('/delete-resume', methods=['POST'])
+#@app.route('/delete-resume', methods=['POST'])
 def deleteResume():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
@@ -1224,7 +1473,7 @@ def editVideo():
     return redirect(url_for('editProfile'))
 """
 
-@app.route('/edit-profile-resume', methods=['POST'])
+#@app.route('/edit-profile-resume', methods=['POST'])
 def editProfResume():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
@@ -1424,8 +1673,27 @@ def deleteProfile():
         delete_intro_video(user)
         delete_user_attributes(user.id)
         delete_resume(user)
-        Select.query.filter_by(mentee_id=user.id).delete()
-        Select.query.filter_by(mentor_id=user.id).delete()
+
+        selectEntry = None
+        if user.is_student: #is mentee
+            selectEntry = Select.query.filter_by(mentee_id=user.id).first()
+
+            ProgressMeetingCompletionInformation.query.filter(
+                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
+            ).delete()
+
+            Select.query.filter_by(mentee_id=user.id).delete()
+        else:
+            selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+
+            ProgressMeetingCompletionInformation.query.filter(
+                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
+            ).delete()
+
+            Select.query.filter_by(mentor_id=user.id).delete()
+
         Business.query.filter_by(id=user.business_id).first().dec_number_employees_currently_registered() 
         #decrease business number registered by 1 because this user has been deleted
         
@@ -1579,7 +1847,12 @@ def feedMentee(user):
     matches["interest"] = 0
 
     #get all mentors in the same business as the user. is_student should remove the user themself from the query.
-    users = User.query.filter_by(business_id=user.business_id).filter_by(is_student=False).all()
+    potentialUsers = User.query.filter_by(business_id=user.business_id).filter_by(is_student=False).all()
+
+    users = []
+    for u in potentialUsers:
+        if not mentorSelected(u.id): #only select users that have not already been chosen.
+            users.append(u)
 
     for u in users: #initialize user dictionary and check gender preference/identity
         userDict[u] = 0
@@ -1604,22 +1877,22 @@ def feedMentee(user):
     #personality
     for u in users:
         #match in any personality trait - separate to add to the value per each match.
-        if u.personality_1 == user.personality_1:
+        if u.personality_1 in user.personality_1 or user.personality_1 in u.personality_1:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
-        if u.personality_1 == user.personality_2:
+        if u.personality_1 in user.personality_2 or user.personality_2 in u.personality_1:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
-        if u.personality_1 == user.personality_3:
+        if u.personality_1 in user.personality_3 or user.personality_3 in u.personality_1:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
-        if u.personality_2 == user.personality_2:
+        if u.personality_2 in user.personality_2 or user.personality_2 in u.personality_2:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
-        if u.personality_2 == user.personality_3:
+        if u.personality_2 in user.personality_3 or user.personality_3 in u.personality_2:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
-        if u.personality_3 == user.personality_3:
+        if u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3:
             userDict[u] += heuristicVals["personality"]
             matches["personality"] += 1
     
@@ -1767,11 +2040,11 @@ def feedPost():
         return redirect(url_for('mentor'))
 
 
-    """newSelect = Select(mentee_id=session.get('userID'), mentor_id=userMatchID)
+    newSelect = Select(mentee_id=session.get('userID'), mentor_id=userMatchID)
     #selection will only be made by the user logged in - the mentee.
 
     db.session.add(newSelect)
-    db.session.commit()"""
+    db.session.commit()
     print("successfully made new selection with", User.query.filter_by(id=userMatchID).first())
     
     dictLog = {}
@@ -1807,33 +2080,6 @@ def my_connections():
     return render_template('my_network.html', isMentee=isMentee, selectUser=selectUser, userID=session.get('userID'))
 """
 
-@app.route('/reminders', methods=['GET'])
-def reminders():
-    if not(userLoggedIn()):
-        flash(u'You must log in.', 'loginRedirectError')
-        return redirect(url_for('sign_in'))
-
-    user = User.query.filter_by(id=session.get('userID')).first()
-    
-    isMentee = user.is_student #user.is_mentee
-
-    if isMentee: 
-        selectEntry = Select.query.filter_by(mentee_id=user.id).first()
-    else:
-        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
-    #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
-
-    reminderList = []
-    if selectEntry != None:
-        print("in progress - add this when reminder:time information is given.")
-        #timeDiff = selectEntry.timestamp - GETCURRENTTIME
-        #populate reminderList by going thru remindersByTimeDiff: list of tuples (timeDiff, reminder)
-        #1 month, 2 months, 3 months, each quarter (6, 9, 12, 15) - JUST DO EVERY 30 DAYS
-        #accumulative - show current month, then click button to see past months.
-    
-    return render_template('reminders.html', isMentee=isMentee, selectEntry=selectEntry, userID=user.id, reminderList=reminderList)
-
-
 def userLoggedIn():
     
     #Checks if the user is actually logged in -- commented out for easier testing
@@ -1852,15 +2098,33 @@ def handle_csrf_error(e):
     logData(17,json.dumps(dictLog))
     return render_template('csrf_error.html', reason=e.description), 400
 
+
+"""
+NOTE ABOUT THE HANDLER FOR 413:
+The config MAX_CONTENT_LENGTH is set, so the connection will close before the file can be sent.
+This means that it will immediately abort and not run the errorhandler.
+This might be fixed in the future? 
+This should be handled client-side, since there is already a bit of code in my js file to gaurd against big files.
+"""
+
+@app.errorhandler(413)
+def size_error(e):
+    print("logging error 413")
+    logData(18,"[Image is too big (max 5 MB)]")
+    flash(u'Image is too big (max 5 MB).', 'imageError')
+    return redirect(url_for('editProfile'))
+
+
 @app.errorhandler(404)
 # inbuilt function which takes error as parameter
 def not_found(e):
     # defining function
     dictLog = {}
-    dictLog['code'] = e.code
-    dictLog['desc'] = e.description
+    dictLog['code'] = 404
+    dictLog['desc'] = "404 error"
     logData(16,json.dumps(dictLog))
     return render_template("404_error.html")
+
 
 @app.errorhandler(Exception)
 # inbuilt function which takes error as parameter
@@ -1872,11 +2136,11 @@ def error_handler(e):
         return render_template("404_error.html")
     if code == 500:
         db.session.rollback()
-
-    dictLog = {}
-    dictLog['code'] = e.code
-    dictLog['desc'] = e.description
-    logData(16,json.dumps(dictLog))
+    if code != 200: #response OK
+        dictLog = {}
+        dictLog['code'] = code
+        dictLog['desc'] = str(e)
+        logData(16,json.dumps(dictLog))
     
     return render_template("general_error.html", code=code)
 

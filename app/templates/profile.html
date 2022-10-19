@@ -10,7 +10,8 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@600&display=swap" rel="stylesheet">
         <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
-        <title>My profile | Leva</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <title>Profile: {{ user.first_name }} {{ user.last_name }} | Leva</title>
         <style>
             body{
                 font-family: 'Work Sans';
@@ -24,58 +25,70 @@
 
     <body>
 
-        <div class="header">
-            <div class="logo-box">
+        <div class="header navbar navbar-expand-lg navbar-light bg-white justify-content-between p-3 sticky-top">
+            <div class="navbar-brand">
                 <img src="https://static.wixstatic.com/media/12ecaa_e292ca41155b4bee9ea276dc89fef0f3~mv2.png/v1/fill/w_165,h_87,al_c,q_85,usm_0.66_1.00_0.01/IMG_0256_PNG.webp" 
-                alt="IMG_0256.PNG" style="width:165px;height:87px;object-fit:cover;object-position:50% 50%">
+                alt="IMG_0256.PNG" style="width:10vw;height:5vw;object-fit:contain;object-position:50% 50%">
             </div>
 
-            <div class="nav-box">
-                <a href="{{ url_for('portal') }}">
-                    <button class="nav-button">
-                        Enrollment
-                    </button>
-                </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <a href="{{ url_for('view', id=userID) }}">
-                    <button class="nav-button">
-                        Profile
-                    </button>
-                </a>
-
-                <a href="{{ url_for('mentor') }}">
-                    <button class="nav-button">
-                        Mentor Matches
-                    </button>
-                </a>
-
-                <a href="{{ url_for('progress') }}">
-                    <button class="nav-button">
-                        Progress
-                    </button>
-                </a>
+            <div class="nav-box navbar-collapse collapse" id="navbarToggler">
+                <ul class="navbar-nav">
+    
+                    <li class="nav-item">
+                        <a href="{{ url_for('view', id=userID) }}">
+                            <button class="nav-button">
+                                Profile
+                            </button>
+                        </a>
+                    </li>
+    
+                    <li class="nav-item">
+                        <a href="{{ url_for('mentor') }}">
+                            <button class="nav-button">
+                                Mentor Matches
+                            </button>
+                        </a>
+                    </li>
+    
+                    <li class="nav-item">
+                        <a href="{{ url_for('progress') }}">
+                            <button class="nav-button">
+                                Progress
+                            </button>
+                        </a>
+                    </li>
+    
+                </ul>
             </div>
 
             <div class="register-box">
-                <a href="{{ url_for('logout') }}">
-                    <button class="register">
+                <button class="register">
+                    <a href="{{ url_for('logout') }}">
                         Log Out
-                    </button>
-                </a>
+                    </a>
+                </button>
             </div>
+
         </div>
 
+
+        <!--Profile of the user-->
         <div class="background">
-            <section class="profile">
+            <section class="display profile">
 
                 <div class="head">
                     {% if logged_in is defined and logged_in %}
                         My Leva Profile
                     {% else %}
-                        Leva Profile
+                        Leva Profile: {{ user.first_name }} {{ user.last_name }}
                     {% endif %}
                 </div>
 
+                <!--How to edit the profile of the user-->
                 {% if logged_in is defined and logged_in %}
                     <a href="{{ url_for('editProfile') }}">
                         <button class="register">
@@ -86,6 +99,10 @@
 
                 <div class="info">
                     <div class="list">
+                        <!--Each entry of information is divided into singles, which is itself divided into
+                            a label and the actual information (answer)-->
+
+                            <!--Name-->
                         <div class="single">
                             <div class="label">
                                 Name:
@@ -96,6 +113,7 @@
                             </div>
                         </div>
 
+                        <!--Job title-->
                         <div class="single">
                             <div class="label">
                                 Job Title:
@@ -106,6 +124,7 @@
                             </div>
                         </div>
 
+                        <!--Division-->
                         <div class="single">
                             <div class="label">
                                 Division:
@@ -116,6 +135,7 @@
                             </div>
                         </div>
 
+                        <!--Bio-->
                         <div class="single">
                             <div class="label">
                                 Bio:
@@ -126,6 +146,7 @@
                             </div>
                         </div>
 
+                        <!--Resume-->
                         <div class="single">
                             {% if resumeUrl is none %}
                                 <div class="label">
@@ -138,6 +159,7 @@
                             {% endif %}
                         </div>
 
+                        <!--Location-->
                         <div class="single">
                             <div class="label">
                                 Location:
@@ -148,6 +170,7 @@
                             </div>
                         </div>
 
+                        <!--Goals/Expertise-->
                         <div class="single">
                             <div class="label">
                                 Professional Goals/Areas of Expertise:
@@ -164,6 +187,7 @@
                             </div>
                         </div>
 
+                        <!--Interests-->
                         <div class="single">
                             <div class="label">
                                 Interests:
@@ -180,6 +204,7 @@
                             </div>
                         </div>
 
+                        <!--Education-->
                         <div class="single">
                             <div class="label">
                                 Education:
@@ -196,6 +221,7 @@
                             </div>
                         </div>
 
+                        <!--Personality-->
                         <div class="single">
                             <div class="label">
                                 Personality:
@@ -210,7 +236,8 @@
 
                         <!--hide all this if the current user is viewing another user's profile-->
                         {% if logged_in is defined and logged_in %}
-                        
+
+                            <!--Division preference-->
                             {% if divisionPreference is not none %}
                             <div class="single">
                                 <div class="label">
@@ -235,6 +262,7 @@
                             </div> 
                             -->
 
+                            <!--Gender preference of student-->
                             {% if mentorGenderPreference is not none and user.is_student  %}
                             <div class="single">
                                 <div class="label">
@@ -247,6 +275,7 @@
                             </div>
                             {% endif %}
 
+                            <!--Gender identity-->
                             {% if genderIdentity is not none and not user.is_student  %}
                             <div class="single">
                                 <div class="label">
@@ -263,6 +292,7 @@
                         
                     </div>
 
+                    <!--Profile picture-->
                     <div class="picture">
                         <div class="circle-border">
                             {% if profile_picture is none %}
@@ -275,7 +305,7 @@
                         {% if logged_in is defined and logged_in %}
                             <a href="{{ url_for('editProfile') }}">
                                 <button class="register">
-                                    Edit Profile
+                                    Edit Picture
                                 </button>
                             </a>
                         {% endif %}
@@ -286,5 +316,8 @@
         </div>
 
         <!--<script type="text/javascript" src="{{ url_for('static', filename='js_files/view.js')}}"></script>-->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
     </body>
 </html>

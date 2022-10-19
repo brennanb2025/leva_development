@@ -1,7 +1,15 @@
+/* Styling for the register page */
+
 body, html{
     height: 100%;
+    overflow: hidden;
 }
 
+*, ::after, ::before {
+    box-sizing: border-box;
+  }
+
+  /* General container used to contain everything in the webpage */
 .container{
     display: flex;
     height: 100%;
@@ -10,6 +18,7 @@ body, html{
     align-items: stretch;
 }
 
+/* Determines the background and sizing of the left side of the register page */
 .decoration-container{
     background-image: url('../background2.png');
     background-position: center;
@@ -18,6 +27,8 @@ body, html{
     flex-basis: 40%;
 }
 
+/* Determines the sizing of the register page. Flexbox determines that everything in the register container
+   positions itself from top to bottom and in the center horizontally */
 .registration-container{
     flex-basis: 60%;
     display: flex;
@@ -28,21 +39,25 @@ body, html{
     overflow: scroll;
 }
 
+/* Actual inputs and radio buttons will go in here */
 .registration-container .content{
     padding: 0%;
     width: 60%;
 }
 
+/* Making the background picture on the left look darker */
 .shading{
     height: 100%;
     width: 100%;
     background-color: rgba(158, 63, 253, 0.301);
 }
 
+/* Fiddling with padding so that the text on the left looks fine */
 .decoration-container .content{
     padding: 5% 10% 5% 10%;
 }
 
+/* Font styling, button styling, etc */
 .text{
     margin-top: 20%;
 }
@@ -58,7 +73,7 @@ body, html{
 
 input{
     height: 30px;
-    width: 100%;
+    min-width: 0;
 }
 
 .register-box{
@@ -68,15 +83,20 @@ input{
 }
 
 .register-box .register{
-    min-width: 150px;
+    width: 150px;
     height: 50px;
     padding: 3%;
+}
+
+.flashes{
+    font-size: 1.3vw;
 }
 
 #register{
     display: none;
 }
 
+/* Making sure that the general information (emails, name, etc.) are shown first before anything else */
 .general1{
     display: block;
 }
@@ -96,8 +116,6 @@ input{
 .matching{
     display: none;
 }
-
-
 
 /* Source: W3Schools */
 
@@ -164,3 +182,71 @@ input{
 	background: white;
 }
   
+
+/* BRENNAN addition: style the sample profile picture */
+.picture{
+    width: 205px;
+    height: 205px;
+    max-width: 205px;
+    max-height: 205px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.picture img{
+    max-width: 205px;
+    max-height: 205px;
+    border-radius: 102.5px;
+    object-fit: cover;
+}
+
+#char_count{
+    font-size: 1.2vw;
+}
+
+.hide_this_input{
+    height: auto;
+}
+
+/* Responsiveness (the left side is hidden for mobile users to conserve space */
+@media (max-width: 992px) {
+    .register-box .register{
+        width: 20vw;
+        height: 8vw;
+    }
+
+    input{
+        height: 2.2vw;
+    }
+
+    .regtext{
+        padding-left: 2.5vw;
+        height: 1.5vw;
+        font-size: 1.2vw;
+    }
+
+    .decoration-container{
+        display: none;
+    }
+
+    .registration-container{
+        flex-basis: 100%;
+    }
+
+    .checkmark {
+
+        height: 1.5vw;
+        width: 1.5vw;
+      }
+
+    .regtext .checkmark:after {
+        top: 0.4vw;
+       left: 0.4vw;
+       width: 0.7vw;
+       height: 0.7vw;
+       border-radius: 50%;
+       background: white;
+   }
+}

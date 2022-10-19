@@ -1,26 +1,33 @@
+/* Styling for the login page; addendum to main.css exclusively for login page */
+
+/* Container for the entire login page.*/
 .login-container{
+    /* Margin top to make sure login page doesn't overlap with the header */
     margin-top: 130px;
+    /* For some reason the padding with add to the pre-existing width. 
+    In hindsight I should have used box-sizing border-box */
     width: 94%;
     max-width: 100%;
     height: auto;
+    padding: 3%;
+    /* Centering the div */
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    padding: 3%;
     background-position: center;
     background-size: cover;
 }
 
+/* Actual card container of the login page */
 .detail-container{
     background-color: white;
     box-sizing: border-box;
     margin-top: 20px;
     width: 30%;
     padding: 3%;
+    /* The line the generates the shadow below: */
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.2);
-    transition-duration: 0.75s;
-    transition-timing-function: ease-in-out;
 }
 
 .head2{

@@ -9,6 +9,7 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@600&display=swap" rel="stylesheet">
         <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
         <title>Leva</title>
         <style>
             body{
@@ -23,56 +24,84 @@
 
     <body>
 
-        <div class="header">
-            <div class="logo-box">
+        <!--This portion determines the structure of the navbar using bootstrap-->
+
+        <!--Make the navbar have a light theme with a white background, put space between each element, make the header sticky on top-->
+        <div class="header navbar navbar-expand-lg navbar-light bg-white justify-content-between p-3 sticky-top">
+            <!--Leva logo-->
+            <div class="navbar-brand">
                 <img src="https://static.wixstatic.com/media/12ecaa_e292ca41155b4bee9ea276dc89fef0f3~mv2.png/v1/fill/w_165,h_87,al_c,q_85,usm_0.66_1.00_0.01/IMG_0256_PNG.webp" 
-                alt="IMG_0256.PNG" style="width:165px;height:87px;object-fit:cover;object-position:50% 50%">
+                alt="IMG_0256.PNG" style="width:10vw;height:5vw;object-fit:contain;object-position:50% 50%">
             </div>
 
-            <div class="nav-box">
-                <a href="#home">
-                    <button class="nav-button" onclick="scroll(100)">
-                        Home
-                    </button>
-                </a>
+            <!--Makes the navbar toggleable in mobile applications-->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <a href="#product">
-                    <button class="nav-button">
-                        Product
-                    </button>
-                </a>
-
-                <a href="#about">
-                    <button class="nav-button">
-                        About Us
-                    </button>
-                </a>
-
-                <a href="#testimonials">
-                    <button class="nav-button">
-                        Testimonials
-                    </button>
-                </a>
-
-                <a href="#contact">
-                    <button class="nav-button">
-                        Contact
-                    </button>
-                </a>
-
+            <!--Actual list of buttons for users to navigate through the webpage using bootstrap-->
+            <div class="nav-box navbar-collapse collapse" id="navbarToggler">
+                <ul class="navbar-nav">
+                    <!--Each item in the navbar should consist of a li class of nav-item, followed by
+                        a link to home, and then the button, shown below-->
+                    <li class="nav-item">
+                        <a href="#home">
+                            <button class="nav-button">
+                                Home
+                            </button>
+                        </a>
+                    </li>
+    
+                    <li class="nav-item">
+                        <a href="#product">
+                            <button class="nav-button">
+                                Product
+                            </button>
+                        </a>
+                    </li>
+    
+                    <li class="nav-item">
+                        <a href="#about">
+                            <button class="nav-button">
+                                About Us
+                            </button>
+                        </a>
+                    </li>
+    
+                    <!-- <li class="nav-item">
+                        <a href="#testimonials">
+                            <button class="nav-button">
+                                Testimonials
+                            </button>
+                        </a>
+                    </li>
+    
+                    <li class="nav-item">
+                        <a href="#contact">
+                            <button class="nav-button">
+                                Contact
+                            </button>
+                        </a>
+                    </li> -->
+    
+                </ul>
             </div>
 
+            <!--Logging in-->
             <div class="register-box">
-                <a href="{{ url_for('sign_in') }}">
-                    <button class="register">
+                <button class="register">
+                    <a href="{{ url_for('sign_in') }}">
                         Log In
-                    </button>
-                </a>
+                    </a>
+                </button>
             </div>
+
         </div>
 
+        <!--Actual content starts here-->
         <div class="background">
 
+            <!--Home screen (introductory section)-->
             <section class="home">
 
                 <a class="anchor" id="home"></a>
@@ -93,7 +122,9 @@
 
                 <div class="launch-box">
                     <button class="launch">
-                        Launch Your Program
+                        <a href="mailto:levamentorship.com?">
+                            Launch Your Program
+                        </a>
                     </button>
                 </div>
 
@@ -101,6 +132,7 @@
                 
             </section>
 
+            <!--Product description section-->
             <section class="product" >
 
                 <a class="anchor" id="product"></a>
@@ -151,16 +183,18 @@
                 </div>
             </section>
 
+            <!--Product steps (just an image)-->
             <section class="steps" >
                 <a class="anchor" id="steps"></a>
 
                 <img src="{{ url_for('static', filename='steps.webp')}}" class="step-image">
             </section>
 
+            <!--About us page-->
             <section class="about" id="about">
                 <a class="anchor" id="home"></a>
 
-                <div class="half">
+                <div class="half first">
                     <div class="something">
                         <div class="head1">
                             ABOUT US
@@ -187,7 +221,8 @@
                 </div>
             </section>
 
-            <section class="testimonials" >
+            <!--Testimonials from users (commented out, as we don't have any users yet)-->
+            <!-- <section class="testimonials" >
                 <a class="anchor" id="testimonials"></a>
 
                 <div class="head1">
@@ -236,16 +271,17 @@
                     </div>
                 </div>
 
-                <!-- Below is from W3Schools -->
+                Below is from W3Schools -->
 
-                <div style="text-align:center; margin-top: 3%;">
+                <!-- <div style="text-align:center; margin-top: 3%;">
                     <span class="dot" onclick="currentSlide(1)"></span>
                     <span class="dot" onclick="currentSlide(2)"></span>
                     <span class="dot" onclick="currentSlide(3)"></span>
                   </div>
-            </section>
+            </section>  -->
 
-            <section class="contact" >
+            <!--Contact us page (commented out, should be released when the product is finished)-->
+            <!-- <section class="contact" >
                 <a class="anchor" id="contact"></a>
 
                 <div class="half">
@@ -300,12 +336,12 @@
                     </div>
                 </div>
 
-            </section>
+            </section> -->
         </div>
 
-        <!-- Below is from W3Schools -->
-
         <script>
+
+            // Source: W3Schools
             var slideIndex = 1;
             showSlides(slideIndex);
 
@@ -357,5 +393,9 @@
 
         </script>
 
+        <!--Bootstrap-necessary files (mainly used for navbar)-->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
     </body>
 </html>

@@ -155,7 +155,7 @@ class User(UserMixin, db.Model, Base): #inherits from db.Model, base for flask-S
         return check_password_hash(self.password_hash, password) #<^=pwd hashing logic
     
     def __repr__(self):
-        return '<User {}>'.format(self.email + " " + self.first_name + " " + self.last_name) #how to print database
+        return '<User {}>'.format(str(self.id) + " " + self.email + " " + self.first_name + " " + self.last_name) #how to print database
 
 
 class InterestTag(db.Model, Base):
@@ -198,6 +198,9 @@ class InterestTag(db.Model, Base):
             searchTag.inc_num_use()
             session.commit()
 
+    def __repr__(self):
+        return '<InterestTag {}>'.format(str(self.id) + " " + str(self.entered_name) + " " + str(self.interestID))
+
 class Tag(db.Model, Base):
 
     __tablename__ = "Tag"
@@ -216,6 +219,9 @@ class Tag(db.Model, Base):
     
     def dec_num_use(self):
         self.num_use = self.num_use-1
+
+    def __repr__(self):
+        return '<Tag {}>'.format(str(self.id) + " " + str(self.title))
 
 
 class EducationTag(db.Model, Base):
@@ -249,6 +255,9 @@ class EducationTag(db.Model, Base):
             self.educationID = searchSchool.id
             searchSchool.inc_num_use()
             session.commit()
+
+    def __repr__(self):
+        return '<EducationTag {}>'.format(str(self.id) + " " + str(self.entered_name) + " " + str(self.educationID))
         
 class School(db.Model, Base):
 
@@ -268,6 +277,9 @@ class School(db.Model, Base):
     
     def dec_num_use(self):
         self.num_use = self.num_use-1
+
+    def __repr__(self):
+        return '<School {}>'.format(str(self.id) + " " + str(self.title))
 
 
 class CareerInterestTag(db.Model, Base):
@@ -301,6 +313,9 @@ class CareerInterestTag(db.Model, Base):
             self.careerInterestID = searchCInts.id
             searchCInts.inc_num_use()
             session.commit()
+
+    def __repr__(self):
+        return '<CareerInterestTag {}>'.format(str(self.id) + " " + self.entered_name + " " + str(self.careerInterestID))
         
 
 class CareerInterest(db.Model, Base):
@@ -322,6 +337,9 @@ class CareerInterest(db.Model, Base):
     def dec_num_use(self):
         self.num_use = self.num_use-1
 
+    def __repr__(self):
+        return '<CareerInterest {}>'.format(str(self.id) + " " + str(self.title))
+
 
 class Select(db.Model, Base):
     __tablename__ = "Select"
@@ -329,8 +347,30 @@ class Select(db.Model, Base):
     id = db.Column(db.Integer, primary_key=True)
     mentor_id = db.Column(db.Integer)
     mentee_id = db.Column(db.Integer)
+    
+    current_meeting_number_mentor = db.Column(db.Integer,default=1)
+    current_meeting_number_mentee = db.Column(db.Integer,default=1)
+    #this is actually the number meeting the user is on (within all the meetings the business has set up).
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def set_current_meeting_ID(self, role, num):
+        if role == "mentor":
+            self.current_meeting_number_mentor = num
+        else:
+            self.current_meeting_number_mentee = num
+
+    def inc_current_meeting_ID(self, role):
+        if role == "mentor":
+            self.current_meeting_number_mentor = self.current_meeting_number_mentor+1
+        else:
+            self.current_meeting_number_mentee = self.current_meeting_number_mentee+1
+
+    def dec_current_meeting_ID(self, role):
+        if role == "mentor":
+            self.current_meeting_number_mentor = self.current_meeting_number_mentor-1
+        else:
+            self.current_meeting_number_mentee = self.current_meeting_number_mentee-1
 
 
 #Business stores information about each business that has registered users and how many users are currently registered under each one.
@@ -348,6 +388,11 @@ class Business(db.Model, Base):
     
     def dec_number_employees_currently_registered(self):
         self.number_employees_currently_registered = self.number_employees_currently_registered-1
+
+    def __repr__(self):
+        return '<Business {}>'.format(str(self.id) + " " + str(self.name) + ", Employees max: " + 
+                str(self.number_employees_maximum) + ", number currently registered: " + 
+                str(self.number_employees_currently_registered)) #how to print database
 
 
 
@@ -375,10 +420,66 @@ class Event(db.Model, Base):
     # 15: progress view
     # 16: error (message)
     # 17: CSRF error (message)
+    # 18: edit profile picture failure
 
     message = db.Column(db.String(1024)) #json - use y = json.loads(message) to get it back.
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def __repr__(self):
-        return '<Event {}>'.format(str(self.userID) + " " + str(self.action) + " " + self.message) #how to print database
+        return '<Event {}>'.format("id = " + str(self.id) + ", userID = " + str(self.userID) + ", action = " + str(self.action) + ", message = " + self.message) #how to print database
+
+
+class ProgressMeeting(db.Model, Base):
+    __tablename__ = "ProgressMeeting"
+
+    id = db.Column(db.Integer, primary_key=True)
+    business_ID = db.Column(db.Integer) #the business that created this progress meeting
+    completion_date = db.Column(db.DateTime, index=True) #the date the meeting should be completed by
+    num_meeting = db.Column(db.Integer) #the number meeting this is
+    title = db.Column(db.String(64))
+    content_description = db.Column(db.String(256))
+    content = db.Column(db.Text)
+
+    def __repr__(self):
+        return '<ProgressMeeting {}>'.format(str(self.id) + ", businessID: " + str(self.business_ID) + 
+                ", completion_date: " + str(self.completion_date) +
+                ", num_meeting: " + str(self.num_meeting) +
+                ", title: " + self.title +
+                ", content_description: " + self.content_description + 
+                ", content: " + self.content) #how to print database
+
+
+class ProgressMeetingCompletionInformation(db.Model, Base):
+    __tablename__ = "ProgressMeetingCompletionInformation"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    num_progress_meeting = db.Column(db.Integer)
+    select_id = db.Column(db.Integer)
+
+    mentor_meeting_notes = db.Column(db.Text)
+    mentee_meeting_notes = db.Column(db.Text)
+
+    completion_timestamp_mentor = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    completion_timestamp_mentee = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def set_meeting_notes(self, notes, role):
+        if role == "mentee":
+            self.mentee_meeting_notes = notes
+        else:
+            self.mentor_meeting_notes = notes
+
+    def set_completion_timestamp(self, role):
+        if role == "mentee":
+            self.completion_timestamp_mentee = datetime.utcnow()
+        else:
+            self.completion_timestamp_mentor = datetime.utcnow()
+
+    def __repr__(self):
+        return '<MeetingNotes {}>'.format(str(self.id) + ", num progress meeting: " + str(self.num_progress_meeting) + 
+                ", select id: " + str(self.select_id) +
+                ", mentor notes: " + str(self.mentor_meeting_notes) +
+                ", completion timestamp mentor: " + str(self.completion_timestamp_mentor) +
+                ", completion timestamp mentee: " + str(self.completion_timestamp_mentee) +
+                ", mentee notes: " + str(self.mentee_meeting_notes)) #how to print

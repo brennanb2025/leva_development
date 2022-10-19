@@ -7,6 +7,10 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/create_user_table.css')}}">
         <!--<link rel="stylesheet" href="{{ url_for('static', filename='css_files/register.css')}}">-->
 
+        <!-- image cropper stuff -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.js"></script>
+
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
         <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,6 +36,8 @@
     <body>
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <div class="container">
+            <!--Decoration container determines the structure of the left side of the register page
+                (Purely decorative side)-->
             <div class="decoration-container">
                 <div class="shading">
                     <div class="content">
@@ -43,7 +49,6 @@
                         <div class="text">
                             <div class="head2">
                                 Leva your workplace.
-                                <div>Register now.</div>
                             </div>
                         </div>
                     </div>
@@ -51,6 +56,7 @@
 
             </div>
     
+            <!--Registration container contains the actual inputs and radio buttons people put in to fill in information-->
             <div class="registration-container">
 
                     <div class="content">
@@ -61,13 +67,35 @@
                         <form action="/register" method="POST" enctype="multipart/form-data" id="submitForm">
                             {{ form.hidden_tag() }}
                         
+                            <!--The register page is divided into 5 separate steps so that users don't have to look at
+                                a list of inputs and radio buttons. This division is represented by an info-container
+                            
+                                Each info-container has a name next to it to control when each info-container shows up-->
+                            
+                            <!--Info container (basic information about user)-->
                             <div class="general1 info-container" id="general1">
+                                <!--Error handling; this similar format is used for more specific error handling
+                                    (such as users putting in invalid information)-->
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        <ul class=flashes>
+                                        {% for category, message in messages %}
+                                            {% if category == 'generalError' %}
+                                            <span style="color: red;">[{{ message }}]</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}  
+
                                 <div class="firstlast">
+                                    <!--Input containers determine the styling of the inputs-->
+                                    <!--First name-->
                                     <div class="input-container">
                                         <label for="first">{{ form.first_name.label }}</label>
                                         {{ form.first_name(value=first_name) }}<br/>
-                                    </div>
-                                    {% with messages = get_flashed_messages(with_categories=true) %}
+
+                                        {% with messages = get_flashed_messages(with_categories=true) %}
                                         {% if messages %}
                                             <ul class=flashes>
                                             {% for category, message in messages %}
@@ -78,12 +106,14 @@
                                             </ul>
                                         {% endif %}
                                     {% endwith %}
+                                    </div>
 
+                                    <!--Last name-->
                                     <div class="input-container">
                                         <label for="last">{{ form.last_name.label }}</label>
                                         {{ form.last_name(value=last_name) }}<br/>
-                                    </div>
-                                    {% with messages = get_flashed_messages(with_categories=true) %}
+
+                                        {% with messages = get_flashed_messages(with_categories=true) %}
                                         {% if messages %}
                                             <ul class=flashes>
                                             {% for category, message in messages %}
@@ -94,8 +124,10 @@
                                             </ul>
                                         {% endif %}
                                     {% endwith %}
+                                    </div>
                                 </div>
 
+                                <!--Email-->
                                 <div class="email">
                                     <div class="input-container">
                                         <label for="email">{{ form.email.label }}</label>
@@ -114,6 +146,8 @@
                                     </div>
                                 </div>
 
+                                <!--Radio buttons example-->
+                                <!--Contact method-->
                                 <label>Contact Method</label>
                                 <div class="input-container">
                                     {% if email_or_phone is not defined or email_or_phone == none or email_or_phone == "email" %}
@@ -139,6 +173,7 @@
                                     {% endif %}
                                 </div>
 
+                                <!--Phone number (class says email because of styling purposes)-->
                                 <div class="email" id="whiteContainerPhone">
                                     <div class="input-container">
                                         <input type="tel" id="phoneNumber" name="phoneNumber" class="form_style" placeholder="123-456-7890" value="{{phone_num}}">
@@ -157,7 +192,7 @@
                                 </div>
 
                                 
-
+                                <!--Password-->
                                 <div class="password">
                                     <div class="input-container">
                                         <label for="password1">{{ form.password.label }}</label>
@@ -196,7 +231,9 @@
 
                             </div>
                     
+                            <!--Info container (personal questions about user)-->
                             <div class="personal1 info-container" id="personal1">
+                                <!--Location-->
                                 <div class="location">
                                     <div class="input-container">
                                         <label for="location">{{ form.city_name.label }}</label>
@@ -215,6 +252,7 @@
                                     {% endwith %}   
                                 </div>
 
+                                <!--Business-->
                                 <div class="business">
                                     <div class="input-container">
                                         <label for="business">{{ form.business.label }}</label>
@@ -233,6 +271,7 @@
                                     {% endwith %}
                                 </div>
 
+                                <!--Whether the user wants to be a mentor or a mentee-->
                                 <div class="Mentor">
                                     <label>Are you a mentor or a mentee?</label>
                                     <div class="input-container">
@@ -264,7 +303,9 @@
 
                             </div>
 
+                            <!--Info container (more personal questions)-->
                             <div class="personal2 info-container" id="personal2">
+                                <!--Personality-->
                                 <div class="personalities">
                                     <div class="input-container">
                                         <label for="e-mail">Describe your personality (input 3 words or phrases)</label>
@@ -285,6 +326,7 @@
                                     {% endwith %}
                                 </div>
 
+                                <!--User interests-->
                                 <div class="interests">
                                     <div class="input-container">
                                         <label for="e-mail">What are your personal interests?</label>
@@ -322,6 +364,7 @@
                                     <table class="center" class="createTable" id="tagTable"></table>
                                 </div>
 
+                                <!--User expertise-->
                                 <div class="expertise">
                                     <div class="input-container">
                                         <label for="e-mail">
@@ -343,7 +386,7 @@
                                                 </div>
                                             </td>
                                             <td class="add_attribute_td">
-                                                <input type="button" class="add_attribute add_something_btn" name="addCareerInterest" id="addCareerInterest" value="Add interest" onclick="add_career_interest()">
+                                                <input type="button" class="add_attribute add_something_btn" name="addCareerInterest" id="addCareerInterest" value="Add career area" onclick="add_career_interest()">
                                             </td>
                                         </tr>
                                     </table>
@@ -363,6 +406,7 @@
                                     <table class="center" class="createTable" id="careerInterestTable"></table>
                                 </div>
 
+                                <!--User education level-->
                                 <div class="education">
                                     <div class="input-container">
                                         <label for="e-mail">Education</label>
@@ -399,6 +443,7 @@
                                     <table class="center" class="createTable" id="educationTable"></table>
                                 </div>
 
+                                <!--Short bio about the user-->
                                 <div class="bio">
                                     <div class="input-container">
                                         <label for="e-mail">Short bio (max 500 words)</label>
@@ -419,8 +464,10 @@
                                 </div>
                             </div>
                     
+                            <!--Info container (file uploads)-->
                             <div class="uploading info-container" id="uploading">
 
+                                <!--Profile picture image upload-->
                                 <div class="input-container">
                                     <label>Profile Picture (Max size = 5MB)</label>
                                     <label for="inputFile" class="choose_file_container add_something_btn">
@@ -428,7 +475,10 @@
                                     </label>
                                     <input type="file" class="hide_this_input" name="file" value="file" id="inputFile" accept="image/x-png,image/png,image/jpeg">
 
-                                    <div class="image_container centerDiv pad_top" id="image_container_div"></div>
+                                    <div class="image_container picture" id="image_container_div"></div>
+                                    <p id="scrollAdvice">Scroll to resize image.</p>
+                                    <input type="file" name="croppedImgFile" id="croppedImgFile">
+
                                     {% with messages = get_flashed_messages(with_categories=true) %}
                                         {% if messages %}
                                             <ul class=flashes>
@@ -441,42 +491,15 @@
                                         {% endif %}
                                     {% endwith %}
                                 </div>
-                                
-                                <div class="input-container">
-                                    <label>Introduction Video</label>
-                                    (Max size = 40MB, max duration = 30seconds)
 
-                                    <input type="hidden" name="videoDuration" id="videoDuration" value="">
-
-                                    <label for="videoFile" class="choose_file_container add_something_btn">
-                                        Choose file
-                                    </label>
-                                    <input type="file" class="hide_this_input" name="videoFile" value="videoFile" id="videoFile" accept="video/mp4">
-                                    
-                                    <video id="newVideo" class="video_container" controls>
-                                        
-                                        Your browser does not support the video tag.
-                                    </video>
-                                    {% with messages = get_flashed_messages(with_categories=true) %}
-                                        {% if messages %}
-                                            <ul class=flashes>
-                                            {% for category, message in messages %}
-                                                {% if category == 'videoError' %}
-                                                <span style="color: red;">[{{ message }}]</span>
-                                                {% endif %}
-                                            {% endfor %}
-                                            </ul>
-                                        {% endif %}
-                                    {% endwith %}
-                                </div>
-
+                                <!--Resume file upload-->
                                 <div class="input-container">
                                     <label>Resume (Optional)</label>
 
                                     <label for="inputFileResume" class="choose_file_container add_something_btn">
                                         Choose file 
                                     </label>
-                                    (max size: 5MB)
+                                    <label>(max size: 5MB)</label>
                                     <input type="file" class="hide_this_input" name="resume" value="resume" id="inputFileResume" accept="application/pdf">
                                     <br/><span id="resumeFilename"></span><br/>
                         
@@ -494,7 +517,9 @@
                                 </div>
                             </div>
                             
+                            <!--Info container (information about user needed to match with another user)-->
                             <div class="matching info-container" id="matching">
+                                <!--Current division within the user's company-->
                                 <div class="division">
                                     <div class="input-container">
                                         <label for="e-mail">{{ form.division.label }}</label>
@@ -513,6 +538,7 @@
                                     {% endwith %}
                                 </div>
 
+                                <!--Current user occupation-->
                                 <div class="occupation">
                                     <div class="input-container">
                                         <label for="e-mail">{{ form.current_occupation.label }}</label>
@@ -531,8 +557,10 @@
                                     {% endwith %}
                                 </div>
 
+                                <!--For mentors:-->
                                 <div class="mentor">
                                     <div id="genderMentor">
+                                        <!--Gender identity-->
                                         <label>What is your gender identity?</label>
                                         <div class="input-container">
                                             {% if mentorGenderIdentity is not defined or mentorGenderIdentity == none or mentorGenderIdentity == "male" %}
@@ -598,7 +626,9 @@
                                     </div>
                                 </div>
 
+                                <!--For mentees (class says mentor for styling purposes):-->
                                 <div class="Mentor">
+                                    <!--Mentor gender preferences-->
                                     <div id="mentorPreference">
                                     <label>Do you prefer a male or a female mentor?</label>
                                     <div class="input-container">
@@ -653,7 +683,9 @@
                                     </div>
                                 </div>
 
+                                <!--For mentors-->
                                 <div class="Mentor">
+                                    <!--Mentee division preference-->
                                     <label>
                                         <div id="menteeDivisionPreference">
                                             Do you prefer your mentee be in your division or in a different division at the company?<br/>
@@ -715,6 +747,7 @@
 
                             </div>
 
+                            <!--Buttons that cycle through each info-container page-->
                             <div class="register-box">
                                 <button class="register" type="button" id="back" onclick="register_prev()">
                                     Previous
@@ -739,6 +772,83 @@
         <script type="text/javascript">
             setPreexistingAttributes({{interestList|tojson}}, {{careerInterestList|tojson}}, {{educationList|tojson}});
             init("{{email_or_phone}}", "{{register_type}}");
+        </script>
+
+        <script>
+            var count = 1
+
+            function update_page(){
+
+                general1 = document.getElementById("general1")
+                personal1 = document.getElementById("personal1")
+                personal2 = document.getElementById("personal2")
+                uploading = document.getElementById("uploading")
+                matching = document.getElementById("matching")
+                button_next = document.getElementById("next")
+                //button_reg = document.getElementById("register")
+
+                general1.style.display = "none"
+                personal1.style.display = "none"
+                personal2.style.display = "none"
+                uploading.style.display = "none"
+                matching.style.display = "none"
+
+                if(count == 1){
+                    general1.style.display = "block"
+                }
+                else if (count == 2){
+                    personal1.style.display = "block"
+                }
+                else if(count == 3){
+                    personal2.style.display = "block"
+                }
+                else if(count == 4){
+                    uploading.style.display = "block"
+                    button_next.removeAttribute("onclick"); //remove the next onclick attribute
+                    button_next.onclick=function() {register_next();}
+                    button_next.innerHTML = "Next"
+                }
+                else if(count == 5){
+                    matching.style.display = "block"
+                }
+
+                if (count == 5){ //NOTE: CHANGED
+                    button_next.innerHTML = "Register"
+                    button_next.removeAttribute("onclick"); //remove the next onclick attribute
+                    button_next.onclick=function() {
+                        var form = document.getElementById("submitForm");
+
+                        submitForm(() => form.submit());
+                        // Do this after result completes
+                    }
+                            
+                    //button_reg.style.display = 'flex'
+                    //button_next.style.display = 'none'
+                }
+                else{
+                    //button_reg.style.display = 'none'
+                    button_next.style.display = 'flex'
+                }
+            }
+
+            function register_next(){
+                count++
+                console.log(count)
+                update_page()
+            }
+
+            function register_prev(){
+                count = Math.max(1, count - 1)
+                console.log(count)
+                update_page()
+            }
+
+            function submitForm(_callback) {
+                //remove original file from request on form submit
+                document.getElementById("inputFile").remove();
+                _callback();
+            }
+
         </script>
     </body>
 

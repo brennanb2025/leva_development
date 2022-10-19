@@ -4,12 +4,14 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/main.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css_files/portal.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css_files/progress.css')}}">
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
         <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@600&display=swap" rel="stylesheet">
         <link rel="shortcut icon" href="{{ url_for('static', filename='leva_favicon.ico')}}">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
         <title>Progress | Leva</title>
         <style>
             body{
@@ -24,71 +26,217 @@
 
     <body>
 
-        <div class="header">
-            <div class="logo-box">
+        <div class="header navbar navbar-expand-lg navbar-light bg-white justify-content-between p-3 sticky-top">
+            <div class="navbar-brand">
                 <img src="https://static.wixstatic.com/media/12ecaa_e292ca41155b4bee9ea276dc89fef0f3~mv2.png/v1/fill/w_165,h_87,al_c,q_85,usm_0.66_1.00_0.01/IMG_0256_PNG.webp" 
-                alt="IMG_0256.PNG" style="width:165px;height:87px;object-fit:cover;object-position:50% 50%">
+                alt="IMG_0256.PNG" style="width:10vw;height:5vw;object-fit:contain;object-position:50% 50%">
             </div>
 
-            <div class="nav-box">
-                <a href="{{ url_for('portal') }}">
-                    <button class="nav-button">
-                        Enrollment
-                    </button>
-                </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <a href="{{ url_for('view', id=userID) }}">
-                    <button class="nav-button">
-                        Profile
-                    </button>
-                </a>
-
-                <a href="{{ url_for('mentor') }}">
-                    <button class="nav-button">
-                        Mentor Matches
-                    </button>
-                </a>
-
-                <a href="{{ url_for('progress') }}">
-                    <button class="nav-button">
-                        Progress
-                    </button>
-                </a>
+            <div class="nav-box navbar-collapse collapse" id="navbarToggler">
+                <ul class="navbar-nav">
+    
+                    <li class="nav-item">
+                        <a href="{{ url_for('view', id=userID) }}">
+                            <button class="nav-button">
+                                Profile
+                            </button>
+                        </a>
+                    </li>
+    
+                    <li class="nav-item">
+                        <a href="{{ url_for('mentor') }}">
+                            <button class="nav-button">
+                                Mentor Matches
+                            </button>
+                        </a>
+                    </li>
+    
+                    <li class="nav-item">
+                        <a href="{{ url_for('progress') }}">
+                            <button class="nav-button">
+                                Progress
+                            </button>
+                        </a>
+                    </li>
+    
+                </ul>
             </div>
 
             <div class="register-box">
-                <a href="{{ url_for('logout') }}">
-                    <button class="register">
+                <button class="register">
+                    <a href="{{ url_for('logout') }}">
                         Log Out
-                    </button>
-                </a>
+                    </a>
+                </button>
             </div>
+
         </div>
 
+        <!--The progress page has a navbar that allows the users to see their mentors/mentees, their upcoming
+            meetings, and the history of completed meetings in three separate fragments. The progressNavbar()
+            function takes a string input and changes the contents of the screen according to the string input-->
+        {% if selectEntry != none %}
+        <div class="navbar-bottom navbar navbar-expand-lg navbar-light bg-white justify-content-between sticky-top">
+            <div class="progress-navigation" id="progressNav1">
+                <button onclick="progressNavbar('mentor')">
+                    Mentor
+                </button>
+            </div>
+
+            <div class="progress-navigation" id="progressNav2">
+                <button onclick="progressNavbar('upcoming')">
+                    Upcoming Meeting
+                </button>
+            </div>
+
+            <div class="progress-navigation" id="progressNav3">
+                <button onclick="progressNavbar('completed')">
+                    Completed Meetings
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="background">
-            <section class="progress">
+            <section class="progress-tab">
 
                 <div class="head">
                     My Progress & Guidance
                 </div>
 
-                <br/><br/><br/>
 
                 {% if selectEntry != none %}
-                    {% if isMentee %}
-                        Your mentor:<br/>
-                    {% else %}
-                        Your mentee:<br/>
-                    {% endif %}
-                    {{selectMentorMentee}}
-                    <br/><br/>
+                <div class="progress-section" id="mentor">
+                    <div class="head2">
+                        {% if isMentee %}
+                            Your mentor
+                        {% else %}
+                            Your mentee
+                        {% endif %}
+                    </div>
+                    
+                    <!-- show mentor/mentee -->
+                    <div class="mentor-card">
+                        <a class="stretch" href="{{ url_for('view', id=selectMentorMentee.id) }}">
+                        <div class="picture-card">
+                            <div class="circle-border">
+                                {% if selectMentorMentee.profile_picture is none %}
+                                    <img class="profile_picture_small" src="{{url_for('static', filename='blank-profile-picture.png')}}" alt="profile_picture"><br/>
+                                    <br/>
+                                {% else %}
+                                    <img class="profile_picture_small" src="{{selectMentorMentee.profile_picture}}" alt="profile_picture"><br/><br/>
+                                    <br/>
+                                {% endif %}
+                            </div>
+                            <div class="head2">
+                                {{ selectMentorMentee.first_name }}
+                            </div>
+                            <div class="head2">
+                                {{ selectMentorMentee.last_name }}
+                            </div>
+                            <div class="purple-line"></div>
+                            <div class="division">
+                                {{ selectMentorMentee.division }}
+                            </div>
+                        </div>
+                        </a>
+                    </div>
+                </div>
+                
 
-                    Reminders:
-                    {{reminderList}}<br/><br/>
+                <div class="info meetings">
 
-                    Progress (completed stuff):
-                    {{progressCompletedList}}
-                    <br/>
+                    <div class="progress-section" id="upcoming" style="text-align: center;">
+
+                        {% if progressDone %} 
+                            <div class="head2">
+                                Congratulations! You have completed every progress step!
+                            </div>
+                        {% else %}
+                            <!--Upcoming meetings-->
+                            <div class="head2">Upcoming meeting:</div>
+                        
+                            <br/>
+                            Meeting #{{ currMeetingInfo["num"] }}:  {{ currMeetingInfo["title"] }}   ({{ currMeetingInfo["date"] }})
+
+                            <br/>
+
+                            <!--Each meeting is to have a description, some meeting notes, and a button to
+                                let the webpage know that the meeting is finished and is to be moved to the
+                                completed meetings page-->
+                            <div class="meeting-description">
+
+                                <div style="font-weight: bold;">Description:</div>
+                                {% for para in currMeetingInfo["desc"] %}
+                                    <div>{{para}}</div>
+                                {% endfor %}
+
+                                <br/>
+                                
+
+                                <div style="font-weight: bold;">Content:</div>
+                                {% for para in currMeetingInfo["content"] %}
+                                    <div>{{para}}</div>
+                                {% endfor %}
+                                
+                                <br/>
+                            </div>
+
+                            <form id="meetingDoneButton" action="{{ url_for('progress') }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                                <textarea id="meetingNotes" name="meetingNotes" placeholder="Meeting notes here..."></textarea>
+                                <br/>
+                                <button id="finishMeetingButton" class="register">Complete this meeting and save meeting notes →</button>
+                            </form>
+
+                        {% endif %}
+                    </div>
+
+                    <!--Column 1:<br/>-->
+                    
+                    <div class="meetings-container progress-section" id="completed">
+                        
+                        {% if prevMeetingInfo|length == 0 %}
+                            <div class="head2 noneText">None yet!</div>
+                        {% endif %}
+
+                        <div class="half">
+                            <!--Each completed meeting has the same description and content from when it was upcoming,
+                                but the user now has the option to put some notes for the specific meeting-->
+                            <ul id="completedMeetingList">
+                                {% for pm in prevMeetingInfo %}
+                                    <li>
+                                    <div style="font-weight: bold;">Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})</div>
+                                    <br/>
+                                    <div style="font-weight: bold;">Description:</div> <br/> 
+                                    {% for para in pm["desc"] %}
+                                        <p>{{para}}</p>
+                                    {% endfor %}
+                                    <br/>
+
+                                    <div style="font-weight: bold;">Content:</div><br/>
+                                    {% for para in pm["content"] %}
+                                        <p>{{para}}</p>
+                                    {% endfor %}
+                                    <br/><br/>
+                                    </li>
+
+                                    <div class="note-box">
+                                        {{ pm["meetingNotes"] }}
+                                    </div>
+                                    <br/><br/>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
                 {% else %}
                     {% if isMentee %}
                         Select a mentor in the Mentor Matches tab!<br/>
@@ -97,8 +245,87 @@
                     {% endif %}
                 {% endif %}
 
+
+
+
+
             </section>
         </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+
     </body>
+
+    <script>
+
+        document.getElementById("progressNav1").style.backgroundColor = "rgb(152, 84, 201)";
+
+        if(document.getElementById("pendingMeetingList") != null) {
+            openListCompletingMeetings();
+            //openListPendingMeetings();
+        }
+
+        
+        document.getElementById("dropdownButtonDown").style.display = "none";
+        
+        let list = document.getElementById("completedMeetingList");
+        
+        /*function openListPendingMeetings() {
+            var list = document.getElementById("pendingMeetingList");
+        
+            if (list.style.display == "none"){
+                list.style.display = "block";
+            }else{
+                list.style.display = "none";
+            }
+        }*/
+
+        function openListCompletingMeetings() {
+            document.getElementById("dropdownButtonDown").style.display = "none";
+            document.getElementById("dropdownButtonUp").style.display = "block";
+            if(list != null) {
+                if (list.style.display == "none"){
+                    list.style.display = "block";
+                } else {
+                    list.style.display = "none";
+                }
+            }
+        }
+            
+        function closeListCompletingMeetings() {
+            if(list != null) {
+                if (list.style.display == "none"){
+                    list.style.display = "block";
+                } else {
+                    list.style.display = "none";
+                }
+            }
+
+            document.getElementById("dropdownButtonDown").style.display = "block";
+            document.getElementById("dropdownButtonUp").style.display = "none";
+
+        }
+
+        function progressNavbar(id){
+            var all_section = document.querySelectorAll('.progress-section');
+            var all_navbar = document.querySelectorAll('.progress-navigation');
+            console.log(all_section);
+            for (var i = 0; i < all_section.length; i++){
+                all_section[i].style.display = 'none';
+                if(all_section[i].id == id) {
+                    //all_navbar[i].classList.add('selected');
+                    all_navbar[i].style.backgroundColor = "rgb(152, 84, 201)";
+                } else {
+                    all_navbar[i].style.backgroundColor = "rgb(33, 48, 74)";
+                }
+            }
+
+            if(document.getElementById(id) != null) {
+                document.getElementById(id).style.display = 'flex';
+            }
+        }
+    </script>
+
 </html>

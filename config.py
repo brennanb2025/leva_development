@@ -32,3 +32,4 @@ class Config(object):
     UPLOAD_EXTENSIONS = os.environ.get('UPLOAD_EXTENSIONS')
     UPLOAD_EXTENSIONS_RESUME = os.environ.get('UPLOAD_EXTENSIONS_RESUME')
     LOG_DATA = os.environ.get('LOG_DATA')
+    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH'))

@@ -1,11 +1,26 @@
+/* This controls the main webpage, as well as some elements in pages after the user logs in */
+
+/* Controls the entire website. Flexbox column direction to make sure all elements go from top to bottom
+   scroll-behavior exists to make sure the website scrolls smoothly to a section the user chooses */
 body, html{
     padding: 0%;
     margin: 0%;
     scroll-behavior: smooth;
+    height: 100%;
     display: flex;
     flex-direction: column;
 }
 
+/* The html and body stuff are there to deal with some wonky scrollbar issues */
+html{
+    overflow: hidden;
+}
+
+body{
+    overflow: scroll;
+}
+
+/* Anchor allows the users to skip straight to the section of choice in the navbar */
 .anchor {
     display: block;
     position: relative;
@@ -13,23 +28,14 @@ body, html{
     visibility: hidden;
 }
 
+/* Header styling */
+
 .header{
-    flex: 0;
-    background-color: white;
-    width: 96%;
-    height: 100px;
     padding: 15px 2% 15px 2%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly; 
-    align-items: center;
     border-bottom: 1px solid gray;
-    position: fixed;
-    z-index: 2;
 }
 
 .header .logo-box{
-    flex: 1;
     display: flex;
     background: transparent;
     justify-content: center;
@@ -37,23 +43,37 @@ body, html{
 }
 
 .header .nav-box{
+    flex-basis: 100%;
     display: flex;
-    flex: 1;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
 }
 
+.navbar-collapse{
+    flex-grow: 0!important;
+}
+
+.nav-item{
+    border-right: 1px solid rgb(197, 197, 197);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-item:last-child{
+    border-right: none;
+}
+
 .nav-box .nav-button{
     border: none;
-    flex: 1;
     outline: none;
-    font-size: medium;
+    width: 7vw;
+    font-size: 0.8vw;
     color: rgb(37, 37, 37);
-    background: white;
+    background: transparent;
     transition-duration: 0.4s;
     cursor: pointer;
-    height: 100%;
 }
 
 .nav-button:hover{
@@ -62,17 +82,16 @@ body, html{
 
 .header .register-box{
     display: flex;
-    flex: 1;
     justify-content: right;
 }
 
 .register-box .register{
     border: none; 
     outline: none;
-    height: 100px;
     color: white;
-    min-width: 150px;
-    text-decoration: none;
+    height: 6vw;
+    min-width: 11vw;
+    font-size: 15px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -83,16 +102,31 @@ body, html{
     transition-duration: 0.4s;
 }
 
+.register-box .register a{
+    outline: none;
+    text-decoration: none;
+    color: white;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .register:hover{
     background-color: rgb(152, 84, 201);
 }
 
+/* Actual content styling */
+
 .background{
-    padding-top: 125px;
     height: 100%;
     display: flex;
     flex-direction: column;
 }
+
+/* Home screen styling */
 
 .home{
     flex: 1;
@@ -102,6 +136,7 @@ body, html{
     background-size: cover;
 }
 
+/* Home text styling */
 .home .header-text{
     font-size: 90px;
 }
@@ -118,9 +153,11 @@ body, html{
 
 .home h3{
     font-weight: 100;
-    color: gray;
+    font-size: 20px;
+    color: rgb(85, 85, 85);
 }
 
+/* Home button styling */
 .launch-box{
     padding-top: 2%;
 }
@@ -128,21 +165,87 @@ body, html{
 .launch-box .launch{
     border: none;
     outline: none;
-    text-decoration: none;
-    min-width: 100px;
+    width: 15vw;
+    height: 5vw;
     background-color: rgb(33, 48, 74);
     color: white;
-    padding: 2%;
     transition-duration: 0.4s;
+    font-size: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.launch a{
+    width: 100%;
+    height: 100%;
+    color: white;
+    text-decoration: none;
+    font-size: 1vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.launch a:hover{
+    color: white;
 }
 
 .launch:hover{
     background-color: rgb(152, 84, 201);
 }
 
+/* For mobile/tablet use. Mostly just fiddling with font sizes and box sizes in flexbox to make it look less
+   wonky when looked at on a phone */
+@media (max-width: 992px){
+    .navbar-collapse{
+        padding-top: 1.2vw;
+    }
+
+    .nav-item{
+        border-right: none;
+    }
+
+    .nav-box{
+        order: 4;
+        justify-content: center !important;
+    }
+
+    .register-box{
+        order: 3;
+    }
+
+    .nav-box .nav-button{
+        font-size: 1.1vw;
+        width: auto;
+    }
+
+    .register-box .register{
+        font-size: 1.1vw;
+    }
+
+    .background{
+        display: inline-block;
+    }
+
+    .home h3{
+        font-size: 1.3vw;
+    }
+
+    .home .header-text{
+        font-size: 5vw;
+    }
+
+    .launch-box .launch{
+        font-size: 1vw;
+    }
+}
+
 .space{
     padding: 100px;
 }
+
+/* Product screen styling */
 
 .product{
     flex: 1;
@@ -153,17 +256,20 @@ body, html{
     align-items: center;
 }
 
+/* Product text styling */
 .product .title{
     font-size: 30px;
     padding-bottom: 4%;
 }
 
+/* Product flexbox styling, used to space all the cards out evenly*/
 .product .split{
     display: flex;
     justify-content: space-between;
     width: 100%;
 }
 
+/* Product card styling (control the style of the contents of the card, such as the icon, the card shape, etc)*/
 .split .card{
     width: 25%;
     padding: 1%;
@@ -175,8 +281,8 @@ body, html{
 }
 
 .icon{
-    width: 150px;
-    height: 150px;
+    width: 11vw;
+    height: 11vw;
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
@@ -194,6 +300,11 @@ body, html{
     background-image: url("/static/focus.png");
 }
 
+/* Product card text styling */
+label{
+    font-size: 17px;
+}
+
 .label1, .label2{
     text-align: center;
 }
@@ -201,13 +312,36 @@ body, html{
 .label1{
     margin-top: 8%;
     font-weight: 500;
+    font-size: 15px;
 }
 
 .label2{
     margin-top: 8%;
     font-weight: 100;
+    font-size: 17px;
     color: gray;
 }
+
+/* Again, for mobile/tablet use */
+@media (max-width: 992px){
+    .product .title{
+        font-size: 2.2vw;
+    }
+
+    label{
+        font-size: 1.2vw;
+    }
+
+    .label1{
+        font-size: 1.3vw;
+    }
+
+    .label2{
+        font-size: 1.3vw;
+    }
+}
+
+/* Steps screen styling */
 
 .steps{
     background-color: rgb(22, 22, 63);
@@ -220,9 +354,9 @@ body, html{
 
 .step-image{
     width: 75%;
-    height: 75%;
 }
 
+/* About screen styling */
 .about{
     flex: 1;
     height: fit-content;
@@ -230,11 +364,13 @@ body, html{
     flex-direction: row;
 }
 
+/* Flex 1 allows the about section to be split in half horizontally */
 .half{
     flex: 1;
     background-color: transparent;
 }
 
+/* The half of the about screen that serves as a decoration*/
 .about .half{
     background-image: url('/static/background2.png');
     background-position: center;
@@ -242,13 +378,16 @@ body, html{
     flex: 1;
 }
 
+/* The half of the about screen that actually has text */
 .half .something{
     background-color: white;
-    padding: 20% 23% 20% 23%;
+    padding: 20% 25% 20% 25%;
 }
 
+/* Font styling */
 .head1{
     color: rgb(158, 63, 253);
+    font-size: 17px;
     letter-spacing: 0.1em;
     font-weight: 600;
 }
@@ -268,6 +407,26 @@ body, html{
     margin-top: 8%;
     line-height: 30px;
 }
+
+/* Again, for mobile/tablet use */
+@media (max-width: 992px){
+    .head1{
+        font-size: 1.2vw;
+        letter-spacing: 0.1em;
+    }
+
+    .head2{
+        font-size: 2.2vw;
+        line-height: 3.3vw;
+    }
+    
+    .text1{
+        font-size: 1.2vw;
+        line-height: 2.4vw;
+    }
+}
+
+/* Contact screen styling */
 
 .contact{
     flex: 1;
@@ -289,12 +448,14 @@ input{
     border-right: none;
     border-left: none;
     outline: none;
-    font-size: 17px;
+    font-size: 1.2vw;
     color: gray;
     font-family: 'Work Sans';
-    height: 50px;
+    height: 2.6vw;
+    width: 100%;
 }
 
+/* Makes the input box look cool */
 input:focus{
     border-color: rgb(158, 63, 253);
 }
@@ -322,13 +483,16 @@ input:focus{
     flex: 1;
     padding: 2%;
     margin-bottom: 5%;
+    box-sizing: border-box;
 }
 
 .firstlast{
     display: flex;
     flex-direction: row;
+    width: 100%;
 }
 
+/* Testimonials screen styling */
 .testimonials{
     background-color: rgb(158, 63, 253);
     padding: 7%;
@@ -344,6 +508,7 @@ input:focus{
 
 }
 
+/* Text styling */
 .testimonials .head1{
     color: white;
     margin-bottom: 3%;
@@ -354,16 +519,18 @@ input:focus{
     color: white;
     margin-top: 0%;
     margin-bottom: 3%;
-    font-size: 40px;
+    font-size: 2vw;
 }
 
 .sub1{
     color: white;
     font-weight: bold;
+    font-size: 1.2vw;
 }
 
 .sub2{
     color: white;
+    font-size: 1.2vw;
 }
 
 /* From W3Schools */
@@ -403,4 +570,114 @@ input:focus{
   a {
       color: white;
       text-decoration: none;
+  }
+
+  .first{
+      background-color: white;
+      background-image: none !important;
+  }
+
+  /* Again, for mobile/tablet use */
+  @media (max-width: 425px){
+    section{
+        min-height: 100%;
+    }
+
+    .home{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 0;
+    }
+
+    .nav-box .nav-button{
+        font-size: 3.3vw;
+        width: auto;
+    }
+
+    .register-box .register{
+        font-size: 3.3vw;
+    }
+
+    .background{
+        display: inline-block;
+    }
+
+    .home h3{
+        font-size: 3.9vw;
+    }
+
+    .home .header-text{
+        font-size: 10vw;
+    }
+
+    .launch-box .launch{
+        font-size: 3vw;
+        width: 45vw;
+        padding-top: 10%;
+        padding-bottom: 10%;
+    }
+
+    .product .split{
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .product .title{
+        font-size: 6.6vw;
+        text-align: center;
+    }
+
+    .split .card{
+        width: 75%;
+    }
+
+    .label1{
+        font-size: 3.9vw;
+    }
+
+    .label2{
+        font-size: 3.9vw;
+    }
+
+    .about{
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .about .half{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .about .half .something{
+        height: auto;
+        padding: 0%;
+        width: 75%;
+    }
+
+    .steps{
+        min-height: auto;
+    }
+
+    .head1{
+        font-size: 2.4vw;
+    }
+
+    .head2{
+        font-size: 3.3vw;
+    }
+
+    .text1{
+        font-size: 2.4vw;
+    }
+
+    .register-box .register{
+        height: 10vw;
+        min-width: 11vw;
+    }
   }

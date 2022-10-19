@@ -6,59 +6,83 @@ html, body{
     height: 100%;
 }
 
+.home{
+    flex: 1;
+}
+
+/* For responsiveness purposes for the home page (which is currently unused) */
+@media (max-width: 425px){
+    .home .header-text{
+        font-size: 10vw;
+    }
+
+    .home h3{
+        font-size: 2.6vw;
+    }
+
+    .launch-box .launch{
+        font-size: 2vw;
+        width: 30vw;
+    }
+}
+
+/* Profile page styling */
 .profile{
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 4%;
+    margin-left: 7%;
+    margin-right: 7%;
 }
 
+/* For the purple button that is used for "edit picture" in the profile page */
 .profile button, .mentor button{
     border: none;
     outline: none;
     background-color: rgb(158, 63, 253);
     color: white;
-    height: 40px;
+    min-height: 40px;
     width: 150px;
     margin-top: 30px;
     transition-duration: 0.3s;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 
-button:hover{
+/* The dark blue register button styling is reused here */
+.register:hover{
     background-color: rgb(33, 48, 74);
     cursor:pointer;
 }
 
+/* User profile label text styling */
 .info .label{
     color: rgb(33, 48, 74);
     font-size: 20px;
-    text-decoration: underline;
+    font-weight: bold;
 }
 
 .single{
     margin-bottom: 20px;
 }
 
+/* For the container that contains the list on the left and profile pic on the right. 
+   Padding on left and right side of the list and horizontally placed to set the list container on the left
+   and the picture on the right */
 .info{
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
     width: 100%;
-    padding: 5%;
+    padding: 0% 5% 0% 5%;
 }
 
-.info2{
-    display: flex;
-    justify-content: space-around;
-    flex-direction: row;
-    align-items: start;
-    width: 100%;
-    padding: 0%;
-    margin-top: 50px;
-}
-
+/* List takes up more space than picture */
 .list{
     flex: 2;
     padding-left: 4%;
@@ -71,18 +95,39 @@ button:hover{
     align-items: center;
 }
 
+/* Image styling */
 .picture img{
     width: 205px;
     height: 205px;
     border-radius: 102.5px;
     object-fit: cover;
 }
+ 
+/* Responsiveness of profile page */
+@media (max-width: 992px){
+    .info{
+        flex-direction: column;
+        font-size: 2.2vw;
+    }
 
+    .picture{
+        order: 1;
+    }
+
+    .display .list{
+        order: 2;
+        text-align: center;
+        padding-left: 0;
+    }
+}
+
+/* Mentor page styling */
 .head{
     font-size: 50px;
     font-weight: bold;
 }
 
+/* Align the items from top to bottom; container is visible by the slightly darker gray */
 .mentor{
     display: flex;
     flex-direction: column;
@@ -91,14 +136,18 @@ button:hover{
     padding: 4%;
 }
 
+/* Each mentor is shown with a card containing their profile picture and some complementary information
+   with some buttons to allow the user to choose this mentor */
 .mentor-card{
     margin-top: 30px;
     width: 70%;
     display: flex;
     flex-direction: row;
-    margin-bottom: 10%;
+    align-items: center;
+    justify-content: center;
 }
 
+/* Actual card on the left side */
 .picture-card{
     flex: 2;
     background-color: rgb(26, 26, 63);
@@ -106,9 +155,9 @@ button:hover{
     flex-direction: column;
     align-items: center;
     color: white;
-    padding: 3% 3% 20% 3%;
+    padding: 3% 3% 13% 3%;
+    width: auto;
     max-width: 400px;
-    width: 400px
 }
 
 .picture-card .head2{
@@ -118,9 +167,11 @@ button:hover{
 .picture-card img{
     width: 205px;
     height: 205px;
-    border-radius: 102.5px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
+/* Purely decorative */
 .purple-line{
     height: 2px;
     width: 40px;
@@ -146,6 +197,47 @@ button:hover{
     color: rgb(26, 26, 63);
 }
 
+/* Responsiveness of the mentor page */
+@media (max-width: 992px){
+    .head{
+        font-size: 5vw;
+    }
+
+    .mentor-card{
+        flex-direction: column;
+    }
+
+    .picture-card{
+        padding-top: 15%;
+    }
+
+    .info-card{
+        width: 100%;
+        margin-top: 4%;
+        
+    }
+
+    .picture-card img{
+        width: 40vw;
+        height: 40vw;
+    }
+
+    .division{
+        font-size: 2vw;
+    }
+
+    .mentor button{
+        width: 20vw;
+        min-height: 4vw;
+        font-size: 2vw;
+        margin-top: 10%;
+    }
+
+    #noFound{
+        font-size: 2vw;
+    }
+}
+
 .button-container{
     display: flex;
     flex-direction: row;
@@ -154,7 +246,7 @@ button:hover{
 }
 
 .button-container button{
-    border-radius: 20px;
+    border-radius: 2vw;
 }
 
 .button2 button{
@@ -163,6 +255,15 @@ button:hover{
 }
 
 .button2 button:hover{
+    background-color: rgb(158, 63, 253);
+}
+
+.button2-push-left button{
+    background-color: rgb(26, 26, 63);
+    margin-left: 0%;
+}
+
+.button2-push-left button:hover{
     background-color: rgb(158, 63, 253);
 }
 
@@ -175,7 +276,7 @@ button:hover{
     margin-top: 0%;
 }
 
-.progress{
+.progress-tab{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -195,4 +296,11 @@ button:hover{
 
 .text-container:last-child{
     margin-bottom: 0%;
+}
+
+.progress-section{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
