@@ -340,19 +340,48 @@ def registerValidate1():
     
     if email == '':
         success = False
-        flash(u'Please enter an email.', 'emailError')
         errors["email"] = 'Please enter an email.'
     else:
-        regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$' #if it isn't a valid email address
+        """regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$' #if it isn't a valid email address
         if(not(re.search(regex,email))):
-            flash('Invalid email address', 'emailError')
             success = False
-            errors["email"] = 'Invalid email address'
+            errors["email"] = 'Invalid email address'"""
+        #commented out to allow weird email addresses
 
-        elif User.query.filter_by(email=email).first() != None: #email taken
+        if User.query.filter_by(email=email).first() != None: #email taken
             success = False
-            flash(u'Email taken. Please enter a different email.', 'emailError')
             errors["email"] = 'Email taken. Please enter a different email.'
+
+    return json.dumps({
+            'success':success,
+            'errors':json.dumps(errors)
+        })
+
+
+#post register page 2
+@app.route('/register/validate/2', methods=['POST'])
+def registerValidate2():
+    #email checking
+
+    errors = {}
+    success = True
+
+    business = request.json['business'] 
+    
+    if business == '':
+        success = False
+        errors["business"] = 'Please enter a business.'
+    else:
+        businessRegisteredUnder = Business.query.filter_by(name=business).first()
+        print(businessRegisteredUnder)
+        if businessRegisteredUnder == None: #business doesn't exist in database
+            success = False
+            errors["business"] = 'The entered business is not registered.'
+        else:
+            if businessRegisteredUnder.number_employees_maximum == businessRegisteredUnder.number_employees_currently_registered:
+                #every spot is taken in this business. 
+                success = False
+                errors["business"] = 'The entered business has no spots left for more users.'
 
     return json.dumps({
             'success':success,

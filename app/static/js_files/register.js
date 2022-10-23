@@ -3,8 +3,8 @@ const maxRows = 10;
 let rowArrTag = [];
 let rowArrCint = [];
 let rowArrEdu = [];
-//remove cropping
-//var cropper;
+
+var cropper;
 
 var general1
 var personal1
@@ -16,6 +16,8 @@ var formSubmission
 
 var radio_email_selected
 var radio_mentee_selected
+
+var submitFormCheck
 
 
 var csrftoken = $('meta[name=csrf-token]').attr('content')
@@ -32,10 +34,12 @@ $.ajaxSetup({
 //checks if the current page has submittable inputs
 function check_page_contents() {
 
+    var errors
     switch(count) {
         case 1: 
-
-            if(!validateGeneral1()) { //validateGeneral1 must pass it
+            errors = validateGeneral1()
+            if(Object.keys(errors).length != 0) { //validateGeneral1 must pass
+                alert("Please fix the registration errors on this page!")
                 break;
             }
 
@@ -50,61 +54,224 @@ function check_page_contents() {
                 contentType: 'application/json;charset=UTF-8',
                 success: function(response) {
                     response = JSON.parse(response);
-                    alert(response["success"])
                     if(response["success"] === true) {
                         incrementPageCount()
                         update_page() //call success update_page method on data validated
-                        alert("Valid information set in general1")
                     } else {
-                        show_validation_errors(response['errors'])
-                        alert("Invalid information set in general1")
+                        show_validation_errors(JSON.parse(response['errors'])) 
+                        //must call error showing directly since inside function
+                        alert("Please fix the registration errors on this page!")
                     }
                 }})
                 
             break;
 
+        case 2: 
+
+            errors = validatePersonal1()
+            if(Object.keys(errors).length != 0) { //validatePersonal1 must pass
+                alert("Please fix the registration errors on this page!")
+                break;
+            }
+
+            var submitData = {
+                "business" : formSubmission.business.value,
+            }
+
+            $.ajax({
+                type: "POST",
+                url: Flask.url_for("registerValidate2"), 
+                data: JSON.stringify(submitData, null, '\t'),
+                contentType: 'application/json;charset=UTF-8',
+                success: function(response) {
+                    response = JSON.parse(response);
+                    if(response["success"] === true) {
+                        incrementPageCount()
+                        update_page() //call success update_page method on data validated
+                    } else {
+                        show_validation_errors(JSON.parse(response['errors']))
+                        alert("Please fix the registration errors on this page!")
+                    }
+                }})
+                
+            break;
+
+        case 3: 
+            errors = validatePersonal2()
+            if(Object.keys(errors).length != 0) { //validatePersonal2 must pass
+                alert("Please fix the registration errors on this page!")
+                break;
+            }
+
+            incrementPageCount()
+            update_page() //call success update_page method on data validated
+
+            break;
+
+        case 4:
+            submitFormCheck = false
+            incrementPageCount()
+            update_page()
+            break;
+
+        case 5: 
+            errors = validateMatching()
+            if(Object.keys(errors).length != 0) { //validateMatching must pass
+                alert("Please fix the registration errors on this page!")
+                submitFormCheck = false
+                break;
+            }
+
+            submitFormCheck = true
+                
+            break;
     }
+
+    show_validation_errors(errors)
 }
 
 //does client side validation on general1.
 function validateGeneral1() {
-    //check first name, last name, email, email_chosen_instead_of_phone, phone number, passwords
-    //formSubmission.first_name,
-    //formSubmission.last_name,
-    //formSubmission.email,
-    //radio_email_selected,
-    //document.getElementById("phoneNumber")
-    return true;
+
+    var errors = {}
+    success = true
+    
+    if(formSubmission.password.value === '') {
+        errors["password"] = 'Please enter a password.'
+        success = false
+    }
+    if(formSubmission.password2.value === '') {
+        errors["password2"] = 'Please reenter your password.'
+        success = false
+    }
+    if(success) { //everything correct up to this point
+        if(formSubmission.password.value != formSubmission.password2.value) { //passwords don't match
+            errors["password2"] = 'Passwords do not match.'
+        }
+    }
+
+    if(formSubmission.email.value === '') {
+        errors['email'] = 'Please enter an email.'
+        success = false
+    }
+    /*else:
+        regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$' #if it isn't a valid email address
+        if(not(re.search(regex,form1.get('email')))):
+            flash('Invalid email address', 'emailError')
+            success = False
+            errors.append("email")*/
+    if(formSubmission.first_name.value === '') {
+        errors["first_name"] = 'Please enter a first name.'
+        success = false
+    }
+    if(formSubmission.last_name.value === '') {
+        errors["last_name"] = 'Please enter a last name.'
+        success = false
+    }
+
+    if(!radio_email_selected && document.getElementById("phoneNumber").value === "") { 
+        //user chose to be contacted by phone
+        errors["phone"] = 'Your phone number cannot be empty.'
+    }
+    return errors;
 }
 
+//does client side validation on personal1.
+function validatePersonal1() {
+    var errors = {}
+
+    //location, business, Mentor
+    if(formSubmission.city_name.value === '') {
+        errors['city_name'] = 'Please enter a city.'
+    }
+
+    if(formSubmission.business.value === '') {
+        errors['business'] = 'Please enter the company you are a part of.'
+    }
+
+    //mentor should be ok - it's a radio
+    
+    return errors;
+}
+
+//does client side validation on personal2.
+function validatePersonal2() {
+    //personality, bio, interests, expertise, education
+
+    var errors = {}
+
+    if(document.getElementById("num_tags").value === "0") {
+        errors['num_tags'] = 'Please enter at least one interest.'
+    }
+
+    if(document.getElementById("num_career_interests").value === "0") {
+        errors['num_career_interests'] = 'Please enter at least one career interest.'
+    }
+
+    if(document.getElementById("num_education_listings").value === "0") {
+        errors['num_education_listings'] = 'Please enter at least one school.'
+    }
+
+    if(formSubmission.bio.value === "") {
+        errors['bio'] = 'Your bio cannot be empty.'
+    }
+
+    if(document.getElementById("personality1").value === "" || document.getElementById("personality2").value === "" ||
+            document.getElementById("personality3").value === "") {
+        errors['personality'] = "Please enter three words or phrases that describe you."
+    }
+
+    return errors;
+}
+
+
+//does client side validation on matching.
+function validateMatching() {
+    //division, occupation, gender identity (for mentor), gender preference (for mentees), 
+    //mentee division preference (for mentors)
+
+    var errors = {}
+
+    if(formSubmission.division.value === '') {
+        errors['division'] = 'Please enter your division within the company.'
+    }
+
+    if(formSubmission.current_occupation.value === "") {
+        errors['current_occupation'] = 'Please enter your current occupation.'
+    }
+
+    return errors;
+}
 
 
 function show_validation_errors(errors) { //errors is a dictionary of errors that happened during server-side validation
-    alert(errors)
-    return
+    if(errors === null || errors === undefined) {
+        return
+    }
+    for (const [key, value] of Object.entries(errors)) {
+        console.log(key, value);
+    }
 }
-
 
 function incrementPageCount() {
     count++
     console.log(count)
 }
 
-
 //window ready
 window.addEventListener('load', function() {
 
     //document.getElementById("imgStuff").style.display = "none"; //hide all image back
-    //document.getElementById("scrollAdvice").style.display = "none"; //hide advice
+    document.getElementById("scrollAdvice").style.display = "none"; //hide advice
     //remove cropping
     //document.getElementById("cropPreview").style.display = "none"; //hide preview
     //document.getElementById("crop-btn").style.display = "none"; //hide crop btn
-    //document.getElementById("croppedImgFile").style.display = "none"; //hide input for post form
+    document.getElementById("croppedImgFile").style.display = "none"; //hide input for post form
 
     document.getElementById("phoneNumber").style.display = "none"; //hide input for phone number
     document.getElementById("careerExp").style.display = "none"; //hide career experience - assume they are a mentee
     document.getElementById("genderMentor").style.display = "none"; //hide gender radio - assume they are a mentee
-    document.getElementById("newVideo").style.display = "none"; //hide new video if user hasn't input anything yet
+    //document.getElementById("newVideo").style.display = "none"; //hide new video if user hasn't input anything yet
     //document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
     document.getElementById("menteeDivisionPreference").style.display = "none"; //hide mentee preference - assume they are a mentee
 
@@ -149,7 +316,7 @@ function update_page(){
     else if(count == 4){
         uploading.style.display = "block"
         button_next.removeAttribute("onclick"); //remove the next onclick attribute
-        button_next.onclick=function() {register_next();}
+        button_next.onclick=function() {register_next()} //reset button if going back
         button_next.innerHTML = "Next"
     }
     else if(count == 5){
@@ -160,7 +327,12 @@ function update_page(){
         button_next.innerHTML = "Register"
         button_next.removeAttribute("onclick"); //remove the next onclick attribute
         var form = document.getElementById("submitForm");
-        button_next.onclick=function() {form.submit();}
+        button_next.onclick=function() {
+            check_page_contents()
+            if(submitFormCheck) { //submitFormCheck = ensures form is good to submit after last check
+                form.submit()
+            }
+        }
         //button_reg.style.display = 'flex'
         //button_next.style.display = 'none'
     }
@@ -198,46 +370,70 @@ if(inputFile) { //ensure not null
                 
                 img = document.getElementById("image");
                 if(img) {
-                    //remove cropping
-                    //cropper.destroy(); //destroy the cropper 
+                    cropper.destroy(); //destroy the cropper 
                     img.remove(); //delete the previous img if it exists
                 }
                 newImg = document.createElement("img");
                 newImg.setAttribute("id", "image");
-                newImg.setAttribute("class", "image_container centerDiv");
+                newImg.setAttribute("class", "image_container picture");
                 newImg.setAttribute("src", e.target.result);
                 newImg.setAttribute("alt", "your image");
                 newImg.style.display = "none"; //hide image
                 newImg.addEventListener('load', function(event) {
                     newImg.style.display = "block"; //show image
-                    //remove cropping
-                    /*
                     cropper = new Cropper(newImg, {
                         aspectRatio: 1/1,
                         minCropBoxWidth: 100,
                         minCropBoxHeight: 100,
                     });
-                    */
+                    set_cropper_listener();
                 });
+
+
                 document.getElementById("image_container_div").appendChild(newImg);
                 document.getElementById("image_container_div").style.display = "block"; //show all image
                 //document.getElementById("imgStuff").style.display = "block"; //show all image stuff
-                //document.getElementById("scrollAdvice").style.display = "block"; //show advice
+                document.getElementById("scrollAdvice").style.display = "block"; //show advice
                 //remove cropping
                 //document.getElementById("crop-btn").style.display = "block"; //show advice
                 //delete old img thing if it exists, create new image and appendchild to image_container_div.
+
             };
 
-            reader.readAsDataURL(inputFile.files[0]);
+            reader.readAsDataURL(inputFile.files[0])
+            
+            if(check_image_size(inputFile.files[0], false)) {
+                //put it in the image as croppedImgFile right now
+                let file = new File([inputFile.files[0]], document.getElementById("inputFile").files[0].name,{type:"image/jpeg", lastModified:new Date().getTime()});  
+                // Create a new container
+                let container = new DataTransfer();
+                // Add the image file to the container
+                container.items.add(file);
+                document.getElementById("croppedImgFile").files = container.files;
+            }
 
-        }
+        }   
     }, false);
 } else {
     //won't proc because of defer
     console.log("Null");
 }
 
+function check_image_size(file, crop) {
+    if(((file.size/1024)/1024).toFixed(4) > 5) { // file size < 5 MB
+        if(crop) {
+            alert("Crop is too big (max size = 5 MB).");
+        } else {
+            alert("File is too big (max file size = 5 MB).");
+            document.getElementById('inputFile').value = "";
+        }
+        return false;
+    }
+    return true;
+}
+
 //video stuff
+/*
 videoFile = document.getElementById("videoFile");
 if(videoFile) { //ensure not null
     videoFile.addEventListener('change', function() {
@@ -285,6 +481,7 @@ if(videoFile) { //ensure not null
     //won't proc because of defer
     console.log("Null");
 }
+*/
 
 //resume stuff
 inputFileResume = document.getElementById("inputFileResume");
@@ -306,6 +503,54 @@ if(inputFileResume) { //ensure not null
     console.log("Null");
 }
 
+
+//let cropBtn = document.getElementById('crop-btn');
+//cropBtn.addEventListener('click', function(event) {
+function set_cropper_listener() {
+    image.addEventListener('ready', function () { //image ready --> add event listener
+        console.log("ready");
+        if(this.cropper === cropper) { //ensure ready
+            image.addEventListener('cropend', function () {
+                console.log("crop fired");
+                cropper.getCroppedCanvas().toBlob(function(blob) {  
+                    let file = new File([blob], document.getElementById("inputFile").files[0].name,{type:"image/jpeg", lastModified:new Date().getTime()});  
+                    
+                    if(check_image_size(file, true)) {
+                        // Create a new container
+                        let container = new DataTransfer();
+                        // Add the cropped image file to the container
+                        container.items.add(file);
+                        // Replace the original image file with the new cropped image file
+                        document.getElementById("croppedImgFile").files = container.files;
+                    }
+                    
+                    /*var readerNew = new FileReader();
+                    readerNew.onload = function (e) {  
+                        imgCrop = document.getElementById("croppedImage");
+                        if(imgCrop) {
+                            imgCrop.remove(); //delete the previous img if it exists
+                        }
+                        croppedImgElem = document.createElement("img");
+                        croppedImgElem.setAttribute("id", "croppedImage");
+                        croppedImgElem.setAttribute("class", "image_container centerDiv");
+                        croppedImgElem.setAttribute("src", e.target.result);
+                        croppedImgElem.setAttribute("alt", "your image");
+                        document.getElementById("cropPreview").style.display = "block"; //show advice
+                        document.getElementById("cropped_image").appendChild(croppedImgElem);
+                    }
+                    readerNew.readAsDataURL(file);*/
+                }, "image/jpeg", 0.7); //function, type, quality
+            });
+        };
+    });
+}
+
+
+function submitForm(_callback) {
+    //remove original file from request on form submit
+    document.getElementById("inputFile").remove();
+    _callback();
+}
 
 
 function radio_email() {
