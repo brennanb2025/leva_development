@@ -58,7 +58,7 @@ function check_page_contents() {
                         incrementPageCount()
                         update_page() //call success update_page method on data validated
                     } else {
-                        show_validation_errors(JSON.parse(response['errors'])) 
+                        show_validation_errors(JSON.parse(response['errors']), "general1") 
                         //must call error showing directly since inside function
                         alert("Please fix the registration errors on this page!")
                     }
@@ -89,7 +89,7 @@ function check_page_contents() {
                         incrementPageCount()
                         update_page() //call success update_page method on data validated
                     } else {
-                        show_validation_errors(JSON.parse(response['errors']))
+                        show_validation_errors(JSON.parse(response['errors']), "personal1")
                         alert("Please fix the registration errors on this page!")
                     }
                 }})
@@ -244,18 +244,29 @@ function validateMatching() {
 }
 
 
-function show_validation_errors(errors) { //errors is a dictionary of errors that happened during server-side validation
+function show_validation_errors(errors, stage) { //errors is a dictionary of errors that happened during server-side validation
     if(errors === null || errors === undefined) {
-        return
+        let errors = document.getElementById(stage).getElementsByClassName("error");
+        console.log(errors)
     }
     for (const [key, value] of Object.entries(errors)) {
         console.log(key, value);
+        //console.log(document.getElementById(key).childNodes)
+        let input = document.getElementById(key);
+        input.style.borderColor = "red"
+        setTimeout(() => {
+            document.getElementById(key).style = ""
+        }, 3000)
+        let error_node = document.createElement("span");
+        error_node.className = "error"
+        error_node.style.color = "red";
+        error_node.innerHTML = value;
+        input.parentNode.appendChild(error_node)
     }
 }
 
 function incrementPageCount() {
     count++
-    console.log(count)
 }
 
 //window ready
