@@ -210,6 +210,13 @@ input{
     height: auto;
 }
 
+.bio textarea {
+    height: 150px;
+}
+.bio #bio_char_count {
+    font-size: 14px
+}
+
 /* Responsiveness (the left side is hidden for mobile users to conserve space */
 @media (max-width: 992px) {
     .register-box .register{

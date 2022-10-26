@@ -35,11 +35,13 @@ $.ajaxSetup({
 function check_page_contents() {
 
     var errors
+
+    var showErrors = true
+
     switch(count) {
         case 1: 
             errors = validateGeneral1()
             if(Object.keys(errors).length != 0) { //validateGeneral1 must pass
-                alert("Please fix the registration errors on this page!")
                 break;
             }
 
@@ -60,7 +62,7 @@ function check_page_contents() {
                     } else {
                         show_validation_errors(JSON.parse(response['errors']), "general1") 
                         //must call error showing directly since inside function
-                        alert("Please fix the registration errors on this page!")
+                        showErrors = false
                     }
                 }})
                 
@@ -70,7 +72,6 @@ function check_page_contents() {
 
             errors = validatePersonal1()
             if(Object.keys(errors).length != 0) { //validatePersonal1 must pass
-                alert("Please fix the registration errors on this page!")
                 break;
             }
 
@@ -90,7 +91,7 @@ function check_page_contents() {
                         update_page() //call success update_page method on data validated
                     } else {
                         show_validation_errors(JSON.parse(response['errors']), "personal1")
-                        alert("Please fix the registration errors on this page!")
+                        showErrors = false
                     }
                 }})
                 
@@ -99,7 +100,6 @@ function check_page_contents() {
         case 3: 
             errors = validatePersonal2()
             if(Object.keys(errors).length != 0) { //validatePersonal2 must pass
-                alert("Please fix the registration errors on this page!")
                 break;
             }
 
@@ -117,7 +117,6 @@ function check_page_contents() {
         case 5: 
             errors = validateMatching()
             if(Object.keys(errors).length != 0) { //validateMatching must pass
-                alert("Please fix the registration errors on this page!")
                 submitFormCheck = false
                 break;
             }
@@ -127,7 +126,9 @@ function check_page_contents() {
             break;
     }
 
-    show_validation_errors(errors)
+    if(showErrors) {
+        show_validation_errors(errors)
+    }
 }
 
 //does client side validation on general1.
@@ -245,12 +246,12 @@ function validateMatching() {
 
 
 function show_validation_errors(errors, stage) { //errors is a dictionary of errors that happened during server-side validation
-    if(errors === null || errors === undefined) {
-        let errors = document.getElementById(stage).getElementsByClassName("error");
-        console.log(errors)
+    if(errors === null || errors === undefined || Object.keys(errors).length === 0) {
+        //let errors = document.getElementById(stage).getElementsByClassName("error");
+        //console.log(errors)
+        return
     }
     for (const [key, value] of Object.entries(errors)) {
-        console.log(key, value);
         //console.log(document.getElementById(key).childNodes)
         let input = document.getElementById(key);
         input.style.borderColor = "red"
@@ -263,6 +264,7 @@ function show_validation_errors(errors, stage) { //errors is a dictionary of err
         error_node.innerHTML = value;
         input.parentNode.appendChild(error_node)
     }
+    alert("Please fix the registration errors on this page!")
 }
 
 function incrementPageCount() {
@@ -355,6 +357,7 @@ function update_page(){
 
 
 function register_next(){
+    deleteErrorMessages()
     check_page_contents()
 }
 
@@ -364,6 +367,9 @@ function register_prev(){
     update_page()
 }
 
+function deleteErrorMessages() {
+    $('.error').remove();
+}
 
 //image stuff
 inputFile = document.getElementById("inputFile");
@@ -631,7 +637,7 @@ cropBtn.addEventListener('click', function(event) {
 */
 
 document.getElementById('bio').onkeyup = function () {
-    document.getElementById('char_count').innerHTML = "Characters left: " + (500 - this.value.length);
+    document.getElementById('bio_char_count').innerHTML = "Characters left: " + (500 - this.value.length);
 };
 
 function init(email_or_phone, register_type) {

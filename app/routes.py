@@ -373,7 +373,6 @@ def registerValidate2():
         errors["business"] = 'Please enter a business.'
     else:
         businessRegisteredUnder = Business.query.filter_by(name=business).first()
-        print(businessRegisteredUnder)
         if businessRegisteredUnder == None: #business doesn't exist in database
             success = False
             errors["business"] = 'The entered business is not registered.'
@@ -2154,7 +2153,7 @@ def not_found(e):
     logData(16,json.dumps(dictLog))
     return render_template("404_error.html")
 
-
+"""
 @app.errorhandler(Exception)
 # inbuilt function which takes error as parameter
 def error_handler(e):
@@ -2172,7 +2171,7 @@ def error_handler(e):
         logData(16,json.dumps(dictLog))
     
     return render_template("general_error.html", code=code)
-
+"""
 
 def logData(num, msg):
     if str(app.config['LOG_DATA']) == "True":

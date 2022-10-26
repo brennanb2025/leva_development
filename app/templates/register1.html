@@ -93,7 +93,7 @@
                                     <!--First name-->
                                     <div class="input-container">
                                         <label for="first">{{ form.first_name.label }}</label>
-                                        {{ form.first_name(value=first_name) }}<br/>
+                                        {{ form.first_name(value=first_name) }}
 
                                         {% with messages = get_flashed_messages(with_categories=true) %}
                                         {% if messages %}
@@ -111,7 +111,7 @@
                                     <!--Last name-->
                                     <div class="input-container">
                                         <label for="last">{{ form.last_name.label }}</label>
-                                        {{ form.last_name(value=last_name) }}<br/>
+                                        {{ form.last_name(value=last_name) }}
 
                                         {% with messages = get_flashed_messages(with_categories=true) %}
                                         {% if messages %}
@@ -331,7 +331,7 @@
                                     <div class="input-container">
                                         <label for="e-mail">Short bio (max 500 words)</label>
                                         <textarea id="bio" name="bio" maxlength="500">{{bio}}</textarea>
-                                        <div id="char_count" value="">Characters left: {{500}}</div>
+                                        <div id="bio_char_count" name="bio_char_count" value="">Characters left: {{500}}</div>
                                     </div>
                                     {% with messages = get_flashed_messages(with_categories=true) %}
                                         {% if messages %}
