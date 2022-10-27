@@ -221,9 +221,8 @@
                                                 {% endwith %}
                                             </div>
                                         </div>
-                                        
-                                        <!-- Job title commented out for beta test -->
-                                        <!-- <div class="single">
+            
+                                        <div class="single">
                                             <div class="label">
                                                 Job Title:
                                             </div>
@@ -231,11 +230,11 @@
                                             <div class="answer">
                                                 <input id="current_occupation" name="current_occupation" value="{{ user.current_occupation }}">
                                             </div>
-                                        </div> -->
+                                        </div>
             
                                         <div class="single">
                                             <div class="label">
-                                                Year:
+                                                Division:
                                             </div>
                     
                                             <div class="answer">
@@ -255,7 +254,7 @@
             
                                         <div class="single">
                                             <div class="label">
-                                                Hometown:
+                                                Location:
                                             </div>
                     
                                             <div class="answer">
@@ -373,8 +372,7 @@
                 
                                         <div class="single">
                                             <div class="label">
-                                                <!-- Education: -->
-                                                Major/Minor/Certificate:
+                                                Education:
                                             </div>
                     
                                             <div class="answer">
@@ -384,7 +382,7 @@
                                                         <option value="{{school.title}}">
                                                     {% endfor %}
                                                 </datalist>
-                                                <button id="addEducation" type="button" onclick="add_education()">Add field</button>
+                                                <button id="addEducation" type="button" onclick="add_education()">Add School</button>
                                                 <input type="hidden" id="num_education_listings" name="num_education_listings" value="0">
                                                 <br/><br/>
                                                 <table class="center" id="educationTable">
@@ -403,8 +401,8 @@
                                             </div>
                                         </div>
             
-                                        <!-- Personality commented out for beta test -->
-                                        <!-- <div class="single">
+            
+                                        <div class="single">
                                             <div class="label">
                                                 Personality - 3 words/phrases:
                                             </div>
@@ -425,7 +423,7 @@
                                                     </ul>
                                                 {% endif %}
                                             {% endwith %}
-                                        </div> -->
+                                        </div>
             
                                         <!--
                                         <div class="single">
@@ -439,8 +437,7 @@
                                         </div> 
                                         -->
             
-                                        <!-- Gender and Division preferences commented out for beta test -->
-                                        <!-- <div class="Mentor">
+                                        <div class="Mentor">
                                             {% if user.is_student %}
                                                 <label>Mentor gender preference:</label>
                                                 <div class="input-container">
@@ -541,7 +538,7 @@
                                                     </label>
                                                 {% endif %}
                                             </div>
-                                        </div> -->
+                                        </div>
             
                                         {% if genderIdentity is not none and not user.is_student  %}
                                         <div class="Mentor">

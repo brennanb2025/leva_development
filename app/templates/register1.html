@@ -305,8 +305,8 @@
 
                             <!--Info container (more personal questions)-->
                             <div class="personal2 info-container" id="personal2">
-                                <!--Personality (commented out for beta test)-->
-                                <!-- <div class="personalities">
+                                <!--Personality-->
+                                <div class="personalities">
                                     <div class="input-container" id="personality">
                                         <label for="e-mail">Describe your personality (input 3 words or phrases)</label>
                                         <input type="text" id="personality1" name="personality1" maxlength="50" value="{{textPersonality1}}">
@@ -324,7 +324,7 @@
                                             </ul>
                                         {% endif %}
                                     {% endwith %}
-                                </div> -->
+                                </div>
 
                                 <!--Short bio about the user-->
                                 <div class="bio">
@@ -429,7 +429,7 @@
                                 <!--User education level-->
                                 <div class="education">
                                     <div class="input-container">
-                                        <label for="e-mail">Major/Minor/Certificate</label>
+                                        <label for="e-mail">Education</label>
                                     </div>
                                     <table>
                                         <tr>
@@ -444,7 +444,7 @@
                                                 </div>
                                             </td>
                                             <td class="add_attribute_td">
-                                                <input type="button" class="add_attribute add_something_btn" name="addEducation" id="addEducation" value="Add field" onclick="add_education()">
+                                                <input type="button" class="add_attribute add_something_btn" name="addEducation" id="addEducation" value="Add school" onclick="add_education()">
                                             </td>
                                         </tr>
                                     </table>
@@ -520,11 +520,10 @@
                             <!--Info container (information about user needed to match with another user)-->
                             <div class="matching info-container" id="matching">
                                 <!--Current division within the user's company-->
-                                <!-- It currently represents year right now though, for the beta test -->
                                 <div class="division">
                                     <div class="input-container">
                                         <label for="e-mail">{{ form.division.label }}</label>
-                                        {{ form.division }}
+                                        {{ form.division(value=division) }}
                                     </div>
                                     {% with messages = get_flashed_messages(with_categories=true) %}
                                         {% if messages %}
@@ -539,8 +538,8 @@
                                     {% endwith %}
                                 </div>
 
-                                <!--Current user occupation (commented out for beta test)-->
-                                <!-- <div class="occupation">
+                                <!--Current user occupation-->
+                                <div class="occupation">
                                     <div class="input-container">
                                         <label for="e-mail">{{ form.current_occupation.label }}</label>
                                         {{ form.current_occupation(value=current_occupation) }}
@@ -556,13 +555,13 @@
                                             </ul>
                                         {% endif %}
                                     {% endwith %}
-                                </div> -->
+                                </div>
 
                                 <!--For mentors:-->
                                 <div class="mentor">
                                     <div id="genderMentor">
-                                        <!--Gender identity (Commented out for beta test)-->
-                                        <!-- <label>What is your gender identity?</label>
+                                        <!--Gender identity-->
+                                        <label>What is your gender identity?</label>
                                         <div class="input-container">
                                             {% if mentorGenderIdentity is not defined or mentorGenderIdentity == none or mentorGenderIdentity == "male" %}
                                                 <label class="regtext">Male
@@ -623,14 +622,14 @@
                                                     </ul>
                                                 {% endif %}
                                             {% endwith %}
-                                        </div> -->
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!--For mentees (class says mentor for styling purposes):-->
                                 <div class="Mentor">
-                                    <!--Mentor gender preferences (Commented out for beta test)-->
-                                    <!-- <div id="mentorPreference">
+                                    <!--Mentor gender preferences-->
+                                    <div id="mentorPreference">
                                     <label>Do you prefer a male or a female mentor?</label>
                                     <div class="input-container">
                                         {% if menteeGenderPreference is not defined or menteeGenderPreference == none or menteeGenderPreference == "male" %}
@@ -681,13 +680,13 @@
                                             {% endif %}
                                         {% endwith %}
                                     </div>
-                                    </div> -->
+                                    </div>
                                 </div>
 
                                 <!--For mentors-->
                                 <div class="Mentor">
-                                    <!--Mentee division preference (Commented out for beta test)-->
-                                    <!-- <label>
+                                    <!--Mentee division preference-->
+                                    <label>
                                         <div id="menteeDivisionPreference">
                                             Do you prefer your mentee be in your division or in a different division at the company?<br/>
                                         </div>
@@ -743,7 +742,7 @@
                                                 </ul>
                                             {% endif %}
                                         {% endwith %}
-                                    </div> -->
+                                    </div>
                                 </div>
 
                             </div>

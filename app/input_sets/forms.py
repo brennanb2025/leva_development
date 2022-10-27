@@ -16,8 +16,6 @@ from wtforms.validators import (
     URL
 )
 
-from app.input_sets.models import Select
-
 class LoginForm(FlaskForm): #these have csrf validators but I turned them off because I'm doing it manually
     email = StringField('Email')
     password = PasswordField('Password')
@@ -29,15 +27,10 @@ class RegistrationForm(FlaskForm):
     email = StringField('Email')
     password = PasswordField('Password')
     password2 = PasswordField('Repeat Password')
-    # Changed from "city" to "hometown" for the beta test
-    city_name = StringField('Hometown')
+    city_name = StringField('City')
     current_occupation = StringField('Current Occupation')
-    # Changed from "Business" to "organization" for the beta test
-    business = StringField('Organization')
-    # Changed from "Division" to "Year" for the beta test, changed from free text to selector
-    # division = StringField('Year')
-    year_choices = [("Freshman", "Freshman"), ("Sophomore", "Sophomore"), ("Junior", "Junior"), ("Senior", "Senior")]
-    division = SelectField("Year", choices=year_choices)
+    business = StringField('Business')
+    division = StringField('Division')
     submit = SubmitField('Register')
 
 class EditPasswordForm(FlaskForm):
