@@ -113,8 +113,8 @@
                             </div>
                         </div>
 
-                        <!--Job title-->
-                        <div class="single">
+                        <!--Job title (commented out for beta test)-->
+                        <!-- <div class="single">
                             <div class="label">
                                 Job Title:
                             </div>
@@ -122,12 +122,12 @@
                             <div class="answer">
                                 {{ user.current_occupation }}
                             </div>
-                        </div>
+                        </div> -->
 
                         <!--Division-->
                         <div class="single">
                             <div class="label">
-                                Division:
+                                Year:
                             </div>
     
                             <div class="answer">
@@ -162,7 +162,7 @@
                         <!--Location-->
                         <div class="single">
                             <div class="label">
-                                Location:
+                                Hometown:
                             </div>
     
                             <div class="answer">
@@ -207,7 +207,7 @@
                         <!--Education-->
                         <div class="single">
                             <div class="label">
-                                Education:
+                                Major/Minor/Certificate:
                             </div>
     
                             <div class="answer">
@@ -221,8 +221,8 @@
                             </div>
                         </div>
 
-                        <!--Personality-->
-                        <div class="single">
+                        <!--Personality (commented out for beta test)-->
+                        <!-- <div class="single">
                             <div class="label">
                                 Personality:
                             </div>
@@ -232,14 +232,14 @@
                                 {{ user.personality_2 }}<br/><br/>
                                 {{ user.personality_3 }}<br/>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!--hide all this if the current user is viewing another user's profile-->
                         {% if logged_in is defined and logged_in %}
 
-                            <!--Division preference-->
+                            <!--Division preference (commented out for beta test)-->
                             {% if divisionPreference is not none %}
-                            <div class="single">
+                            <!-- <div class="single">
                                 <div class="label">
                                     Division Preference:
                                 </div>
@@ -247,7 +247,7 @@
                                 <div class="answer">
                                     {{ divisionPreference }}
                                 </div>
-                            </div>
+                            </div> -->
                             {% endif %}
 
                             <!--
@@ -262,9 +262,9 @@
                             </div> 
                             -->
 
-                            <!--Gender preference of student-->
+                            <!--Gender preference of student (commented out for beta test)-->
                             {% if mentorGenderPreference is not none and user.is_student  %}
-                            <div class="single">
+                            <!-- <div class="single">
                                 <div class="label">
                                     Gender Preference:
                                 </div>
@@ -272,7 +272,7 @@
                                 <div class="answer">
                                     {{ mentorGenderPreference }}
                                 </div>
-                            </div>
+                            </div> -->
                             {% endif %}
 
                             <!--Gender identity-->
