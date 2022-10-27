@@ -1,6 +1,8 @@
 from app import db
-from app.input_sets.models import Event, Select
+from app.input_sets.models import Event, Select, Business
 
+for b in Business.query.all():
+    print(b)
 
 """
 Event.query.filter_by(action=16).delete()
