@@ -419,10 +419,6 @@ def registerPost():
         success = False
         flash(u'Please enter at least one career interest.', 'careerInterestError')
         errors.append("num_career_interests")
-    
-    if form1.get('bio') == "":
-        success = False
-        flash(u'Your bio cannot be empty.', 'bioError')
 
     if form1.get('radio_contact') == 'Phone number' and form1.get('phoneNumber') == "": #user chose to be contacted by phone
         flash(u'Your phone number cannot be empty.', 'phoneError')
@@ -431,24 +427,27 @@ def registerPost():
     if isMentee == None:
         success = False
 
-    if isMentee and form1.get("radio_gender_preference") == None: #mentee and mentor preference empty
-        flash(u"Please enter a preference for your mentor's gender.", 'mentor_preference_error')
-        success = False
-    if not isMentee and form1.get("radio_gender_identity") == None: #mentor and gender identity not entered
-        flash(u"Please enter your gender identity.", 'gender_identity_error')
-        success = False
+    if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #if gender preference should be taken into account, check it.
+        if isMentee and form1.get("radio_gender_preference") == None: #mentee and mentor preference empty
+            flash(u"Please enter a preference for your mentor's gender.", 'mentor_preference_error')
+            success = False
+        if not isMentee and form1.get("radio_gender_identity") == None: #mentor and gender identity not entered
+            flash(u"Please enter your gender identity.", 'gender_identity_error')
+            success = False
     
-    if form1.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
-        flash(u"Please enter a preference for your division.", 'division_preference_error')
-        success = False
+    if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #if division preference should be taken into account, check it.
+        if form1.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
+            flash(u"Please enter a preference for your division.", 'division_preference_error')
+            success = False
 
-    if form1.get('personality1') != None and form1.get('personality2') != None and form1.get('personality3') != None:
-        if form1.get('personality1').strip() == "" or form1.get('personality2').strip() == "" or form1.get('personality3').strip() == "":
+    if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True": #if personality should be taken into account, check it.
+        if form1.get('personality1') != None and form1.get('personality2') != None and form1.get('personality3') != None:
+            if form1.get('personality1').strip() == "" or form1.get('personality2').strip() == "" or form1.get('personality3').strip() == "":
+                flash(u"Please enter three words or phrases that describe you.", 'personality_error')
+                success = False
+        else:
             flash(u"Please enter three words or phrases that describe you.", 'personality_error')
             success = False
-    else:
-        flash(u"Please enter three words or phrases that describe you.", 'personality_error')
-        success = False
 
 
     if form1.get('current_occupation') == '':
@@ -577,13 +576,34 @@ def registerPost():
     if success: #success, registering new user
 
         mentor_gender_preferenceForm = form1.get("radio_gender_preference")
-        if not isMentee:
-            mentor_gender_preferenceForm = None #if mentor, this should not be entered.
+        if not isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
+            mentor_gender_preferenceForm = None #if mentor OR gender should not be taken into account, this should not be entered.
 
         gender_identityForm = form1.get("radio_gender_identity")
-        if isMentee:
+        if isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
             gender_identityForm = None #if mentee, this should not be entered.
 
+        #changed division form to be 1:Freshman, 2:Sophomore, etc.
+        division_set = form1.get('division').strip()
+        if division_set == "1":
+            division_set = "Freshman"
+        elif division_set == "2":
+            division_set = "Sophomore"
+        elif division_set == "3":
+            division_set = "Junior"
+        else:
+            division_set = "Senior"
+
+        division_preference_set = form1.get("divisionPreference")
+        if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "False":
+            #if division preference should not be taken into account, set it to None
+            division_preference_set = None
+
+        personality_1_set = personality_2_set = personality_3_set = None
+        if str(app.config['MATCHING_FLAG_Personality']) == "True":
+            personality_1_set = form1.get("personality1").strip()
+            personality_2_set = form1.get("personality2").strip()
+            personality_3_set = form1.get("personality3").strip()
 
         businessRegisteredUnder = Business.query.filter_by(name=form1.get('business')).first()
         businessRegisteredUnder.inc_number_employees_currently_registered() #increment number of users registered for this user
@@ -594,9 +614,9 @@ def registerPost():
                     business_id=businessRegisteredUnder.id, 
                     mentor_gender_preference=mentor_gender_preferenceForm,
                     gender_identity=gender_identityForm,
-                    division_preference=form1.get("divisionPreference"), division=form1.get('division').strip(),
-                    personality_1=form1.get("personality1").strip(), personality_2=form1.get("personality2").strip(), 
-                    personality_3=form1.get("personality3").strip())
+                    division_preference=division_preference_set, division=division_set,
+                    personality_1=personality_1_set, personality_2=personality_2_set,
+                    personality_3=personality_3_set)
         
         db.session.add(user) #add to database
         user.set_password(form1.get('password')) #must set pwd w/ hashing method
@@ -831,7 +851,27 @@ def checkBasicInfo(form1):
         flash(u'Please enter a city.', 'cityNameError')
         errors.append("city_name")
     
-    
+    if form1.get('num_pairings') == '':
+        success = False
+        flash(u'Please enter the amount of mentors/mentees you are willing to have.')
+        errors.append("num_pairings")
+    else:
+        if form1.get('num_pairings') == '0':
+            success = False
+            flash(u'The number of mentors/mentees you are willing to have cannot be 0.')
+            errors.append("num_pairings")
+        else:
+            try:
+                int(form1.get('num_pairings')) #try to parse the int field
+            except:
+                success = False
+                flash(u'The number of mentors/mentees you are willing to have must be an integer.')
+                errors.append("num_pairings")
+
+    if form1.get('bio') == '':
+        success = False
+        flash(u'Your bio cannot be empty.', 'bioError')
+        errors.append("bio")
     return (success, errors)
 
 
@@ -1882,47 +1922,53 @@ def feedMentee(user):
         if not mentorSelected(u.id): #only select users that have not already been chosen.
             users.append(u)
 
-    for u in users: #initialize user dictionary and check gender preference/identity
+    for u in users: #initialize user dictionary
         userDict[u] = 0
         #initialize as 0
-        if (user.mentor_gender_preference == "male" and u.gender_identity == "male") or (user.mentor_gender_preference == "female" and u.gender_identity == "female"):
-            #matching gender preference / gender
-            userDict[u] = heuristicVals["gender_pref"]
-        #ignore case mentor gender preference == "noPreference".
+
+    #check gender preference/identity
+    if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #only check if flag for gender/identity is "True"
+        for u in users: #initialize user dictionary
+            if (user.mentor_gender_preference == "male" and u.gender_identity == "male") or (user.mentor_gender_preference == "female" and u.gender_identity == "female"):
+                #matching gender preference / gender
+                userDict[u] = heuristicVals["gender_pref"]
+            #ignore case mentor gender preference == "noPreference".
 
 
     #division preferences
-    for u in users:
-        if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
-            #other user division preference
-            userDict[u] += heuristicVals["division_pref"]
-            matches["division_pref"] += 1
-        if (user.division_preference == "same" and user.division == u.division) or user.division_preference == "noPreference":
-            #this user division preference
-            userDict[u] += heuristicVals["division_pref"]
-            matches["division_pref"] += 1
+    if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #only check if flag for division preference is "True"
+        for u in users:
+            if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
+                #other user division preference
+                userDict[u] += heuristicVals["division_pref"]
+                matches["division_pref"] += 1
+            if (user.division_preference == "same" and user.division == u.division) or user.division_preference == "noPreference":
+                #this user division preference
+                userDict[u] += heuristicVals["division_pref"]
+                matches["division_pref"] += 1
 
     #personality
-    for u in users:
-        #match in any personality trait - separate to add to the value per each match.
-        if u.personality_1 in user.personality_1 or user.personality_1 in u.personality_1:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
-        if u.personality_1 in user.personality_2 or user.personality_2 in u.personality_1:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
-        if u.personality_1 in user.personality_3 or user.personality_3 in u.personality_1:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
-        if u.personality_2 in user.personality_2 or user.personality_2 in u.personality_2:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
-        if u.personality_2 in user.personality_3 or user.personality_3 in u.personality_2:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
-        if u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
+    if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":
+        for u in users:
+            #match in any personality trait - separate to add to the value per each match.
+            if u.personality_1 in user.personality_1 or user.personality_1 in u.personality_1:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
+            if u.personality_1 in user.personality_2 or user.personality_2 in u.personality_1:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
+            if u.personality_1 in user.personality_3 or user.personality_3 in u.personality_1:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
+            if u.personality_2 in user.personality_2 or user.personality_2 in u.personality_2:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
+            if u.personality_2 in user.personality_3 or user.personality_3 in u.personality_2:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
+            if u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
     
 
     schoolDict = {} #contains all the matching schools for each user (user : [school])

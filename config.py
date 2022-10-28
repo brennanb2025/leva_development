@@ -13,7 +13,7 @@ class Config(object):
     #generates a hidden field that includes a token that is used to protect the form against CSRF attacks
     
     #running from external database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     
     #running locally
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
@@ -22,6 +22,13 @@ class Config(object):
     #configure app.db database, store it in basedir.
     
     TEMPLATES_AUTO_RELOAD=True
+
+
+    #MATCHING FLAGS
+    MATCHING_FLAG_PERSONALITY = os.environ.get('MATCHING_FLAG_PERSONALITY')
+    MATCHING_FLAG_DIVISION_PREFERENCE = os.environ.get('MATCHING_FLAG_DIVISION_PREFERENCE')
+    MATCHING_FLAG_MENTOR_GENDER_PREFERENCE = os.environ.get('MATCHING_FLAG_MENTOR_GENDER_PREFERENCE')
+
 
     S3_ACCESS_KEY = os.environ.get('S3_ACCESS_KEY')
     S3_SECRET_ACCESS_KEY = os.environ.get('S3_SECRET_ACCESS_KEY')
