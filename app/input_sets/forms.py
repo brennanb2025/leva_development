@@ -31,6 +31,7 @@ class RegistrationForm(FlaskForm):
     current_occupation = StringField('Current Occupation')
     business = StringField('Business')
     division = StringField('Division')
+    num_pairings = IntegerField('Number of Pairings')
     submit = SubmitField('Register')
 
 class EditPasswordForm(FlaskForm):

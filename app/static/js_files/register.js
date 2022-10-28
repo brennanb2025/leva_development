@@ -33,7 +33,7 @@ $.ajaxSetup({
 
 //checks if the current page has submittable inputs
 function check_page_contents() {
-
+    
     var errors
 
     var showErrors = true
@@ -241,6 +241,14 @@ function validateMatching() {
         errors['current_occupation'] = 'Please enter your current occupation.'
     }
 
+    if(formSubmission.num_pairings.value === "") {
+        errors['num_pairings'] = 'Please the amount of mentors/mentees you are willing to have.'
+    } else if(formSubmission.num_pairings.value === "0") {
+        errors['num_pairings'] = 'You cannot input 0 as the amount of mentors/mentees you are willing to have.'
+    } else if(isNaN(formSubmission.num_pairings.value)) {
+        errors['num_pairings'] = 'The amount of mentors/mentees you are willing to have must be a number.'
+    }
+
     return errors;
 }
 
@@ -341,8 +349,10 @@ function update_page(){
         button_next.removeAttribute("onclick"); //remove the next onclick attribute
         var form = document.getElementById("submitForm");
         button_next.onclick=function() {
+            deleteErrorMessages()
             check_page_contents()
             if(submitFormCheck) { //submitFormCheck = ensures form is good to submit after last check
+                submitForm()
                 form.submit()
             }
         }
@@ -563,10 +573,14 @@ function set_cropper_listener() {
 }
 
 
-function submitForm(_callback) {
+function submitForm() {
+
     //remove original file from request on form submit
-    document.getElementById("inputFile").remove();
-    _callback();
+    if(document.getElementById("croppedImgFile").files.length > 0) {
+        document.getElementById("inputFile").remove();
+    } else {
+        document.getElementById("croppedImgFile").remove()
+    }
 }
 
 

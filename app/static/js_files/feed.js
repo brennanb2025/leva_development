@@ -31,7 +31,7 @@ function get_new_users(callback) { //get new users and set document
 
 // new stuff:
 function ready_document() { //will check if userArr length == 0 (no matches) and then add the next new user (userArr[0]) to the feed
-    if(userArr.length == 0) {
+    if(userArr != null && userArr.length == 0) {
         noFound = document.createElement("p");
         noFound.setAttribute("id", "noFound");
         if(isStudent === "True") {
