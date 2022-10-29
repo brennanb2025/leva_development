@@ -4,7 +4,7 @@ from pickle import TRUE
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
-from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm
+from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm, EditDivisionForm
 from uuid import uuid4
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
         CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation
@@ -604,16 +604,8 @@ def registerPost():
             gender_identityForm = None #if mentee, this should not be entered.
 
 
-        #changed division form to be 1:Freshman, 2:Sophomore, etc.
+        #changed division form to be a selector
         division_set = form1.get('division').strip()
-        if division_set == "1":
-            division_set = "Freshman"
-        elif division_set == "2":
-            division_set = "Sophomore"
-        elif division_set == "3":
-            division_set = "Junior"
-        else:
-            division_set = "Senior"
 
         division_preference_set = form1.get("divisionPreference")
         if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "False":
@@ -983,7 +975,7 @@ def editProfile():
             personality_1=personality_1, personality_2=personality_2, personality_3=personality_3, division=user.division,
             resumeUrl=resumeUrl, divisionPreference=divisionPreference,
             mentorGenderPreference=mentorGenderPreference, genderIdentity=genderIdentity,
-            formPwd=formPwd, 
+            formPwd=formPwd, formDivision=EditDivisionForm(division = user.division),
             user=user, userID=session.get('userID'))
 
 """@app.route('/edit-profile-test', methods=['GET'])
@@ -1117,19 +1109,21 @@ def editProfilePost():
             success = False
     
     changedMentorGenderSuccess = False
-    if u.is_student and form.get("radio_gender_preference") != None:
-        #ensuring that this form actually exists
-        if form.get("radio_gender_preference") != u.mentor_gender_preference: #changed preference --> check it
-            changedMentorGenderSuccess=checkMentorGenderPreference(form)
-            if not changedMentorGenderSuccess: #change unsuccessful.
-                success = False
+    if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #if gender preference should be taken into account, check it.
+        if u.is_student and form.get("radio_gender_preference") != None:
+            #ensuring that this form actually exists
+            if form.get("radio_gender_preference") != u.mentor_gender_preference: #changed preference --> check it
+                changedMentorGenderSuccess=checkMentorGenderPreference(form)
+                if not changedMentorGenderSuccess: #change unsuccessful.
+                    success = False
 
     changedGenderIdentitySuccess = False
-    if not u.is_student and form.get("radio_gender_identity") != None:
-        if form.get("radio_gender_identity") != u.gender_identity: #changed gender identity --> check it
-            changedGenderIdentitySuccess=checkGenderIdentity(form)
-            if not changedGenderIdentitySuccess: #change unsuccessful.
-                success = False
+    if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #if gender preference should be taken into account, check it.
+        if not u.is_student and form.get("radio_gender_identity") != None:
+            if form.get("radio_gender_identity") != u.gender_identity: #changed gender identity --> check it
+                changedGenderIdentitySuccess=checkGenderIdentity(form)
+                if not changedGenderIdentitySuccess: #change unsuccessful.
+                    success = False
             
     changedInputsSuccess = False
     if form.get("changedAttributes") == "True": #changed attributes --> check them
@@ -1137,11 +1131,14 @@ def editProfilePost():
         if not changedInputsSuccess: #change unsuccessful.
             success = False
     
+        
     changedPersonalitySuccess = False
-    if form.get("personality1") != u.personality_1 or form.get("personality2") != u.personality_2 or form.get("personality3") != u.personality_3: #changed --> check it
-        changedPersonalitySuccess=checkPersonality(form)
-        if not changedPersonalitySuccess: #change unsuccessful.
-            success = False
+    if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":
+        #only check if personality should be taken into account
+        if form.get("personality1") != u.personality_1 or form.get("personality2") != u.personality_2 or form.get("personality3") != u.personality_3: #changed --> check it
+            changedPersonalitySuccess=checkPersonality(form)
+            if not changedPersonalitySuccess: #change unsuccessful.
+                success = False
     
     changedDivisionSuccess = False
     if form.get("division") != u.division: #changed --> check it
@@ -1150,10 +1147,12 @@ def editProfilePost():
             success = False
     
     changedDivisionPreferenceSuccess = False
-    if form.get("divisionPreference") != u.division_preference: #changed --> check it
-        changedDivisionPreferenceSuccess=checkDivisionPreference(form, u.is_student)
-        if not changedDivisionPreferenceSuccess: #change unsuccessful.
-            success = False
+    if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True":
+        #only check if division preference should be taken into account
+        if form.get("divisionPreference") != u.division_preference: #changed --> check it
+            changedDivisionPreferenceSuccess=checkDivisionPreference(form, u.is_student)
+            if not changedDivisionPreferenceSuccess: #change unsuccessful.
+                success = False
 
     changedContactMethodSuccess = False
     if form.get("radio_contact") == "Phone number" and u.email_contact \

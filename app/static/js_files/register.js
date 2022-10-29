@@ -172,7 +172,7 @@ function validateGeneral1() {
 
     if(!radio_email_selected && document.getElementById("phoneNumber").value === "") { 
         //user chose to be contacted by phone
-        errors["phone"] = 'Your phone number cannot be empty.'
+        errors["phoneNumber"] = 'Your phone number cannot be empty.'
     }
     return errors;
 }
