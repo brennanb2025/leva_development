@@ -283,7 +283,6 @@ window.addEventListener('load', function() {
 
 function validate_then_submit() {
     deleteErrorMessages()
-    alert("VALIDATING ALL")
     errors = client_validate_everything()
     if(Object.keys(errors).length == 0) { //validate passes --> submit
         formProfileSubmit.submit()
