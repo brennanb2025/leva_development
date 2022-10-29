@@ -15,13 +15,15 @@ def get_progress_meetings(business_id): #returns the progress meetings from a gi
         .filter(
             ProgressMeeting.business_ID == business_id
         ).order_by(
-            desc(ProgressMeeting.num_meeting)
+            ProgressMeeting.num_meeting
         ).all()
 
 
+#print("Selects:")
+#print(Select.query.all())
 
 
-business_name = "The Garage"
+business_name = "test_business"
 business_id = Business.query.filter_by(name=business_name).first().id
 
 progressMeetings = get_progress_meetings(business_id)
@@ -47,11 +49,11 @@ businessID = Business.query.filter_by(name=business_name).first().id
 
 titles = []
 titles.append("Initial progress meeting")
-"""
+
 titles.append("Meeting 2")
 titles.append("Meeting 3")
 titles.append("title3")
-titles.append("title4")"""
+titles.append("title4")
 
 
 content_descriptions = []
@@ -63,11 +65,11 @@ content_descriptions.append("""
     ∙ Coordinate another time to meet that works for both of you.
 """)
 
-"""
+
 content_descriptions.append("Meeting 2 description!")
 content_descriptions.append("Meeting 3 description")
 content_descriptions.append("description3")
-content_descriptions.append("description4")"""
+content_descriptions.append("description4")
 
 
 contentList = []
@@ -93,15 +95,15 @@ Example Questions for Mentees\n
 ∙ What advice do you have for me at my stage of career?\n
 """)
 
-"""contentList.append("Meeting 2 content!")
+contentList.append("Meeting 2 content!")
 contentList.append("Meeting 3 content!")
 contentList.append("content3")
-contentList.append("content4")"""
+contentList.append("content4")
 
 #Create the meetings:
-"""
-first_meeting_date = datetime.datetime(2022, 6, 10) #6/13/22
-numMeetings = 1
+
+first_meeting_date = datetime.datetime(2022, 10, 26) #10/26/22
+numMeetings = 4
 timeBetweenMeeting = 10 #days
 for i in range(numMeetings):
     # add timeBetweenMeetings
@@ -113,16 +115,16 @@ for i in range(numMeetings):
             content_description=content_descriptions[i],
             content=contentList[i])
     db.session.add(newMeeting)
-"""
 
-"""
+
+
 print("\n\nProgress meetings in this business (" + business_name + ") - after adding:")
 for pm in get_progress_meetings(business_id):
     print(pm.ProgressMeeting)
-"""
 
 
-#setting selects
+
+#setting selects - this is unneeded and was from the past.
 """
 for u in User.query.all():
     select = Select.query.filter_by(mentee_id=u.id).first()
@@ -145,6 +147,13 @@ for s in Select.query.all():
 
 #delete meeting notes
 #ProgressMeetingCompletionInformation.query.delete()
+
+
+
+
+
+
+
 
 #Only uncomment this when the changes are final.
 #db.session.commit()

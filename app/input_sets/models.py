@@ -31,8 +31,10 @@ class User(UserMixin, db.Model, Base): #inherits from db.Model, base for flask-S
     city_name = db.Column(db.String(128))
     current_occupation = db.Column(db.String(128))
     business_id = db.Column(db.Integer) #the business that this person is registered under
+
+    num_pairings_can_make = db.Column(db.Integer)
+    #an integer that describes how many pairings this mentor/mentee can make.
     
-    #new stuff:
     mentor_gender_preference = db.Column(db.Text)
     #this is either male, female, or noPreference
 
@@ -371,6 +373,11 @@ class Select(db.Model, Base):
             self.current_meeting_number_mentor = self.current_meeting_number_mentor-1
         else:
             self.current_meeting_number_mentee = self.current_meeting_number_mentee-1
+
+    def __repr__(self):
+        return '<Select {}>'.format(str(self.id) + ", mentor=" + str(self.mentor_id) + ", mentee=" + str(self.mentee_id) + 
+                ", current_meeting_number_mentor=" + str(self.current_meeting_number_mentor) + 
+                ", current_meeting_number_mentee=" + str(self.current_meeting_number_mentor))
 
 
 #Business stores information about each business that has registered users and how many users are currently registered under each one.

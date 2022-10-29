@@ -38,6 +38,7 @@ class RegistrationForm(FlaskForm):
     # division = StringField('Year')
     year_choices = [("Freshman", "Freshman"), ("Sophomore", "Sophomore"), ("Junior", "Junior"), ("Senior", "Senior")]
     division = SelectField("Year", choices=year_choices)
+    num_pairings = IntegerField('Number of Pairings')
     submit = SubmitField('Register')
 
 class EditPasswordForm(FlaskForm):
