@@ -6,6 +6,7 @@ for b in Business.query.all():
 
 for u in User.query.all():
     print(u)
+    
 
 """
 Event.query.filter_by(action=16).delete()

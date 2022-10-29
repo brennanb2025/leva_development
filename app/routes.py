@@ -2000,9 +2000,6 @@ def feedMentee(user):
             if u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3:
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-    
-    print(matches["personality"])
-    print(matches["division_pref"])
 
     schoolDict = {} #contains all the matching schools for each user (user : [school])
     thisUserEducationTagIDs = user.rtn_education()
