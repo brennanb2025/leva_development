@@ -105,25 +105,19 @@
         <div class="background">
             <section class="progress-tab">
 
-                <div class="head">
-                    My Progress & Guidance
+                <div class="head" id="header">
+                    {% if isMentee %}
+                        Your mentor
+                    {% else %}
+                        Your mentee
+                    {% endif %}
                 </div>
 
                 {% if matchedUsers|length > 0 %}
 
                     {% for matched_user in matchedUsers %}
 
-                    <br/><br/><br/><br/>
-                    Mentee: {{ matched_user.first_name }} {{ matched_user.last_name }}
-
                     <div class="progress-section" name="mentor" id="mentor">
-                        <div class="head2">
-                            {% if isMentee %}
-                                Your mentor
-                            {% else %}
-                                Your mentee
-                            {% endif %}
-                        </div>
                         
                         <!-- show mentor/mentee -->
                         <div class="mentor-card">
@@ -164,12 +158,14 @@
                                 </div>
                             {% else %}
                                 <!--Upcoming meetings-->
-                                <div class="head2">Upcoming meeting:</div>
-                            
-                                <br/>
-                                Meeting #{{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["num"] }}:  {{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["title"] }}   ({{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["date"] }})
 
-                                <br/>
+                                <div class="mentee-label">
+                                    Mentee: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                </div>
+
+                                <div class="meeting-head">
+                                    Meeting #{{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["num"] }}:  {{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["title"] }}   ({{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["date"] }})
+                                </div>
 
                                 <!--Each meeting is to have a description, some meeting notes, and a button to
                                     let the webpage know that the meeting is finished and is to be moved to the
@@ -206,14 +202,15 @@
                         <!--Column 1:<br/>-->
                         
                         <div class="meetings-container progress-section" name="completed" id="completed">
-                            
-                            {% if matchToMeetingInfo[matched_user.id]["prev_meeting_info"]|length == 0 %}
-                                <div class="head2 noneText">None yet!</div>
-                            {% endif %}
 
-                            <div class="half">
+                            <div class="half half-extend">
                                 <!--Each completed meeting has the same description and content from when it was upcoming,
                                     but the user now has the option to put some notes for the specific meeting-->
+
+                                <div class="mentee-label">
+                                    Mentee: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                </div>
+
                                 <ul id="completedMeetingList">
                                     {% for pm in matchToMeetingInfo[matched_user.id]["prev_meeting_info"] %}
                                         <li>
@@ -239,6 +236,10 @@
                                     {% endfor %}
                                 </ul>
                             </div>
+
+                            {% if matchToMeetingInfo[matched_user.id]["prev_meeting_info"]|length == 0 %}
+                                <div class="head2 noneText">None yet!</div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -337,7 +338,23 @@
             if(showTheseElems.length != 0) {
                 for (var i = 0; i < showTheseElems.length; i++) {
                     showTheseElems.item(i).style.display = 'flex'
+                    showTheseElems.item(i).style.flexDirection = "column"
                 }
+            }
+
+            switch(id){
+                case "mentor":
+                    document.getElementById("header").innerHTML = `{% if isMentee %}
+                        Your mentor
+                    {% else %}
+                        Your mentee
+                    {% endif %}`
+                    break;
+                case "upcoming":
+                    document.getElementById("header").innerHTML = "Upcoming meetings"
+                    break;
+                case "completed":
+                    document.getElementById("header").innerHTML = "Completed Meetings"
             }
 
         }

@@ -272,9 +272,9 @@ html, body{
     font-weight: lighter;
 }
 
-.mentor-card:last-child{
+/* .mentor-card:last-child{
     margin-top: 0%;
-}
+} */
 
 .progress-tab{
     display: flex;
