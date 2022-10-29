@@ -91,71 +91,51 @@ def progress():
     user = User.query.filter_by(id=session.get('userID')).first()
     
     isMentee = user.is_student #user.is_mentee
+    currentMeetingNumber = -1 #current meeting number
 
-    currentMeetingNumbers = {} #current meeting numbers (Select id : meeting number)
-    selectEntries = [] #the select logs for this user (Select)
-
-    matched_users = [] #the mentors or mentees that the user logged in has selected (User)
-    
+    select_mentor_mentee = None #the mentor or mentee that the user logged in has selected, or None
     if isMentee: 
-        selectEntries = Select.query.filter_by(mentee_id=user.id).all() #the entries of the mentor-mentee selection
-        if len(selectEntries) != 0:
-            for select in selectEntries:
-                matched_users.append(User.query.filter_by(id=select.mentor_id).first())
-                currentMeetingNumbers[select.id] = select.current_meeting_number_mentee
+        selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        if selectEntry != None:
+            select_mentor_mentee = User.query.filter_by(id=selectEntry.mentor_id).first()
+            currentMeetingNumber = selectEntry.current_meeting_number_mentee
     else:
-        selectEntries = Select.query.filter_by(mentor_id=user.id).all() #the entries of the mentor-mentee selection
-        if len(selectEntries) != 0:
-            for select in selectEntries:
-                matched_users.append(User.query.filter_by(id=select.mentee_id).first())
-                currentMeetingNumbers[select.id] = select.current_meeting_number_mentor
+        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+        if selectEntry != None:
+            select_mentor_mentee = User.query.filter_by(id=selectEntry.mentee_id).first()
+            currentMeetingNumber = selectEntry.current_meeting_number_mentor
 
     #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
 
-    matchToMeetingInfo = {} #(Match User id : information)
+    progressDone = False
 
-    if len(selectEntries) != 0: 
+    futureMeetingInfo = [] #future meeting list of info dicts
+    prevMeetingInfo = [] #previous meeting list of info dicts
+    currMeetingInfo = {} #current meeting info dict
+    if selectEntry != None and currentMeetingNumber != -1:
+        currMeeting = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting==currentMeetingNumber).first()
+        if currMeeting != None:
+            currMeetingInfo = getMeetingInfo(currMeeting)
+        else:
+            progressDone = True
+
+        previousMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting < currentMeetingNumber).all()
+        futureMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting > currentMeetingNumber).all()
         
-        for select in selectEntries: #go through each of this user's select
-
-            progressDone = False
-
-            futureMeetingInfo = [] #future meeting list of info dicts
-            prevMeetingInfo = [] #previous meeting list of info dicts
-            currMeetingInfo = {} #current meeting info dict
-
-            currMeeting = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                    ProgressMeeting.num_meeting==currentMeetingNumbers[select.id]).first()
-            if currMeeting != None:
-                currMeetingInfo = getMeetingInfo(currMeeting)
-            else:
-                progressDone = True
-
-            previousMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                    ProgressMeeting.num_meeting < currentMeetingNumbers[select.id]).all()
-            futureMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                    ProgressMeeting.num_meeting > currentMeetingNumbers[select.id]).all()
-            
-            for m in previousMeetings: #build the dicts of the info about each meeting
-                prevMeetingInfo.append(getCompletedMeetingInfo(m, isMentee, select.id, m.num_meeting))
-            for m in futureMeetings:
-                futureMeetingInfo.append(getMeetingInfo(m))
-
-            infoDictPerUser = {}
-            infoDictPerUser["progress_done"] = progressDone
-            infoDictPerUser["future_meeting_info"] = futureMeetingInfo
-            infoDictPerUser["curr_meeting_info"] = currMeetingInfo
-            infoDictPerUser["prev_meeting_info"] = prevMeetingInfo
-
-            if isMentee:
-                matchToMeetingInfo[select.mentor_id] = infoDictPerUser
-            else:
-                matchToMeetingInfo[select.mentee_id] = infoDictPerUser
+        for m in previousMeetings: #build the dicts of the info about each meeting
+            prevMeetingInfo.append(getCompletedMeetingInfo(m, isMentee, selectEntry.id, m.num_meeting))
+        for m in futureMeetings:
+            futureMeetingInfo.append(getMeetingInfo(m))
 
     logData(15,"")
+
     
-    return render_template('progress.html', matchedUsers=matched_users, isMentee=isMentee, \
-            userID=user.id, matchToMeetingInfo=matchToMeetingInfo)
+    return render_template('progress.html', selectEntry=selectEntry, isMentee=isMentee, \
+            selectMentorMentee=select_mentor_mentee, userID=user.id, progressDone=progressDone, \
+            currMeetingInfo=currMeetingInfo, prevMeetingInfo=prevMeetingInfo, futureMeetingInfo=futureMeetingInfo)
 
 
 #Returns a dict of all the necessary meeting information to show. 
@@ -386,7 +366,7 @@ def registerValidate2():
     errors = {}
     success = True
 
-    business = request.json['business']
+    business = request.json['business'] 
     
     if business == '':
         success = False
@@ -439,10 +419,6 @@ def registerPost():
         success = False
         flash(u'Please enter at least one career interest.', 'careerInterestError')
         errors.append("num_career_interests")
-    
-    if form1.get('bio') == "":
-        success = False
-        flash(u'Your bio cannot be empty.', 'bioError')
 
     if form1.get('radio_contact') == 'Phone number' and form1.get('phoneNumber') == "": #user chose to be contacted by phone
         flash(u'Your phone number cannot be empty.', 'phoneError')
@@ -451,24 +427,27 @@ def registerPost():
     if isMentee == None:
         success = False
 
-    if isMentee and form1.get("radio_gender_preference") == None: #mentee and mentor preference empty
-        flash(u"Please enter a preference for your mentor's gender.", 'mentor_preference_error')
-        success = False
-    if not isMentee and form1.get("radio_gender_identity") == None: #mentor and gender identity not entered
-        flash(u"Please enter your gender identity.", 'gender_identity_error')
-        success = False
+    if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #if gender preference should be taken into account, check it.
+        if isMentee and form1.get("radio_gender_preference") == None: #mentee and mentor preference empty
+            flash(u"Please enter a preference for your mentor's gender.", 'mentor_preference_error')
+            success = False
+        if not isMentee and form1.get("radio_gender_identity") == None: #mentor and gender identity not entered
+            flash(u"Please enter your gender identity.", 'gender_identity_error')
+            success = False
     
-    if form1.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
-        flash(u"Please enter a preference for your division.", 'division_preference_error')
-        success = False
+    if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #if division preference should be taken into account, check it.
+        if form1.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
+            flash(u"Please enter a preference for your division.", 'division_preference_error')
+            success = False
 
-    if form1.get('personality1') != None and form1.get('personality2') != None and form1.get('personality3') != None:
-        if form1.get('personality1').strip() == "" or form1.get('personality2').strip() == "" or form1.get('personality3').strip() == "":
+    if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True": #if personality should be taken into account, check it.
+        if form1.get('personality1') != None and form1.get('personality2') != None and form1.get('personality3') != None:
+            if form1.get('personality1').strip() == "" or form1.get('personality2').strip() == "" or form1.get('personality3').strip() == "":
+                flash(u"Please enter three words or phrases that describe you.", 'personality_error')
+                success = False
+        else:
             flash(u"Please enter three words or phrases that describe you.", 'personality_error')
             success = False
-    else:
-        flash(u"Please enter three words or phrases that describe you.", 'personality_error')
-        success = False
 
 
     if form1.get('current_occupation') == '':
@@ -597,13 +576,34 @@ def registerPost():
     if success: #success, registering new user
 
         mentor_gender_preferenceForm = form1.get("radio_gender_preference")
-        if not isMentee:
-            mentor_gender_preferenceForm = None #if mentor, this should not be entered.
+        if not isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
+            mentor_gender_preferenceForm = None #if mentor OR gender should not be taken into account, this should not be entered.
 
         gender_identityForm = form1.get("radio_gender_identity")
-        if isMentee:
+        if isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
             gender_identityForm = None #if mentee, this should not be entered.
 
+        #changed division form to be 1:Freshman, 2:Sophomore, etc.
+        division_set = form1.get('division').strip()
+        if division_set == "1":
+            division_set = "Freshman"
+        elif division_set == "2":
+            division_set = "Sophomore"
+        elif division_set == "3":
+            division_set = "Junior"
+        else:
+            division_set = "Senior"
+
+        division_preference_set = form1.get("divisionPreference")
+        if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "False":
+            #if division preference should not be taken into account, set it to None
+            division_preference_set = None
+
+        personality_1_set = personality_2_set = personality_3_set = None
+        if str(app.config['MATCHING_FLAG_Personality']) == "True":
+            personality_1_set = form1.get("personality1").strip()
+            personality_2_set = form1.get("personality2").strip()
+            personality_3_set = form1.get("personality3").strip()
 
         businessRegisteredUnder = Business.query.filter_by(name=form1.get('business')).first()
         businessRegisteredUnder.inc_number_employees_currently_registered() #increment number of users registered for this user
@@ -611,12 +611,12 @@ def registerPost():
         user = User(email=form1.get('email'), first_name=form1.get('first_name'), last_name=form1.get('last_name'), 
                     is_student=isMentee, bio=form1.get('bio'), email_contact=True, phone_number=None,
                     city_name=form1.get('city_name'), current_occupation=form1.get('current_occupation'),
-                    business_id=businessRegisteredUnder.id, num_pairings_can_make=int(form1.get('num_pairings')),
+                    business_id=businessRegisteredUnder.id, 
                     mentor_gender_preference=mentor_gender_preferenceForm,
                     gender_identity=gender_identityForm,
-                    division_preference=form1.get("divisionPreference"), division=form1.get('division').strip(),
-                    personality_1=form1.get("personality1").strip(), personality_2=form1.get("personality2").strip(), 
-                    personality_3=form1.get("personality3").strip())
+                    division_preference=division_preference_set, division=division_set,
+                    personality_1=personality_1_set, personality_2=personality_2_set,
+                    personality_3=personality_3_set)
         
         db.session.add(user) #add to database
         user.set_password(form1.get('password')) #must set pwd w/ hashing method
@@ -867,7 +867,11 @@ def checkBasicInfo(form1):
                 success = False
                 flash(u'The number of mentors/mentees you are willing to have must be an integer.')
                 errors.append("num_pairings")
-        
+
+    if form1.get('bio') == '':
+        success = False
+        flash(u'Your bio cannot be empty.', 'bioError')
+        errors.append("bio")
     return (success, errors)
 
 
@@ -1740,23 +1744,21 @@ def deleteProfile():
 
         selectEntry = None
         if user.is_student: #is mentee
-            selectEntry = Select.query.filter_by(mentee_id=user.id).all()
+            selectEntry = Select.query.filter_by(mentee_id=user.id).first()
 
-            for s in selectEntry:
-                ProgressMeetingCompletionInformation.query.filter(
-                    ProgressMeetingCompletionInformation.num_progress_meeting == s.current_meeting_number_mentee,
-                    ProgressMeetingCompletionInformation.select_id == s.id
-                ).delete()
+            ProgressMeetingCompletionInformation.query.filter(
+                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
+            ).delete()
 
             Select.query.filter_by(mentee_id=user.id).delete()
         else:
-            selectEntry = Select.query.filter_by(mentor_id=user.id).all()
+            selectEntry = Select.query.filter_by(mentor_id=user.id).first()
 
-            for s in selectEntry:
-                ProgressMeetingCompletionInformation.query.filter(
-                    ProgressMeetingCompletionInformation.num_progress_meeting == s.current_meeting_number_mentor,
-                    ProgressMeetingCompletionInformation.select_id == s.id
-                ).delete()
+            ProgressMeetingCompletionInformation.query.filter(
+                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
+            ).delete()
 
             Select.query.filter_by(mentor_id=user.id).delete()
 
@@ -1885,13 +1887,6 @@ def getFeed():
     
     user = User.query.filter_by(id=session.get('userID')).first()
 
-    dictItems = {}
-    dictItems['userDictUsefulInfo'] = None
-    dictItems['userArr'] = None
-
-    if not user.is_student: #user is mentor
-        return jsonify(dictItems)
-
     return feedMentee(user)
     
 
@@ -1924,50 +1919,56 @@ def feedMentee(user):
 
     users = []
     for u in potentialUsers:
-        if mentorCanBeSelected(u.id): #only select users that have not already been chosen.
+        if not mentorSelected(u.id): #only select users that have not already been chosen.
             users.append(u)
 
-    for u in users: #initialize user dictionary and check gender preference/identity
+    for u in users: #initialize user dictionary
         userDict[u] = 0
         #initialize as 0
-        if (user.mentor_gender_preference == "male" and u.gender_identity == "male") or (user.mentor_gender_preference == "female" and u.gender_identity == "female"):
-            #matching gender preference / gender
-            userDict[u] = heuristicVals["gender_pref"]
-        #ignore case mentor gender preference == "noPreference".
+
+    #check gender preference/identity
+    if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #only check if flag for gender/identity is "True"
+        for u in users: #initialize user dictionary
+            if (user.mentor_gender_preference == "male" and u.gender_identity == "male") or (user.mentor_gender_preference == "female" and u.gender_identity == "female"):
+                #matching gender preference / gender
+                userDict[u] = heuristicVals["gender_pref"]
+            #ignore case mentor gender preference == "noPreference".
 
 
     #division preferences
-    for u in users:
-        if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
-            #other user division preference
-            userDict[u] += heuristicVals["division_pref"]
-            matches["division_pref"] += 1
-        if (user.division_preference == "same" and user.division == u.division) or user.division_preference == "noPreference":
-            #this user division preference
-            userDict[u] += heuristicVals["division_pref"]
-            matches["division_pref"] += 1
+    if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #only check if flag for division preference is "True"
+        for u in users:
+            if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
+                #other user division preference
+                userDict[u] += heuristicVals["division_pref"]
+                matches["division_pref"] += 1
+            if (user.division_preference == "same" and user.division == u.division) or user.division_preference == "noPreference":
+                #this user division preference
+                userDict[u] += heuristicVals["division_pref"]
+                matches["division_pref"] += 1
 
     #personality
-    for u in users:
-        #match in any personality trait - separate to add to the value per each match.
-        if u.personality_1 in user.personality_1 or user.personality_1 in u.personality_1:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
-        if u.personality_1 in user.personality_2 or user.personality_2 in u.personality_1:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
-        if u.personality_1 in user.personality_3 or user.personality_3 in u.personality_1:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
-        if u.personality_2 in user.personality_2 or user.personality_2 in u.personality_2:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
-        if u.personality_2 in user.personality_3 or user.personality_3 in u.personality_2:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
-        if u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3:
-            userDict[u] += heuristicVals["personality"]
-            matches["personality"] += 1
+    if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":
+        for u in users:
+            #match in any personality trait - separate to add to the value per each match.
+            if u.personality_1 in user.personality_1 or user.personality_1 in u.personality_1:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
+            if u.personality_1 in user.personality_2 or user.personality_2 in u.personality_1:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
+            if u.personality_1 in user.personality_3 or user.personality_3 in u.personality_1:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
+            if u.personality_2 in user.personality_2 or user.personality_2 in u.personality_2:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
+            if u.personality_2 in user.personality_3 or user.personality_3 in u.personality_2:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
+            if u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3:
+                userDict[u] += heuristicVals["personality"]
+                matches["personality"] += 1
     
 
     schoolDict = {} #contains all the matching schools for each user (user : [school])
@@ -2085,16 +2086,10 @@ def feedMentee(user):
     return jsonify(dictItems)
 
 
-def mentorNumberOfTimesSelected(mentorId): #if this mentor has been selected already
-    return Select.query.filter_by(mentor_id=mentorId).count()
-
-def mentorCanBeSelected(mentorId):
-    if User.query.filter_by(id=mentorId).first() == None:
-        return False
-    num_pairings_can_make = User.query.filter_by(id=mentorId).first().num_pairings_can_make
-    if num_pairings_can_make == None:
-        num_pairings_can_make = 1 #default to 1 if the user does not have a set # pairings.
-    return mentorNumberOfTimesSelected(mentorId) < num_pairings_can_make
+def mentorSelected(mentorId): #if this mentor has been selected already
+    if Select.query.filter_by(mentor_id=mentorId).first() != None:
+        return True
+    return False
 
 
 @app.route('/mentor', methods=['POST'])
@@ -2113,7 +2108,7 @@ def feedPost():
     
     userMatchID = form.get('userID')
 
-    if not mentorCanBeSelected(userMatchID): 
+    if Select.query.filter_by(mentor_id=userMatchID).first() != None: 
         #somebody selected this mentor while the current user was on this page
         flash(u'That mentor has been selected already.', 'feedError')
         return redirect(url_for('mentor'))
@@ -2182,7 +2177,7 @@ def handle_csrf_error(e):
 NOTE ABOUT THE HANDLER FOR 413:
 The config MAX_CONTENT_LENGTH is set, so the connection will close before the file can be sent.
 This means that it will immediately abort and not run the errorhandler.
-This might be fixed by flask in the future? 
+This might be fixed in the future? 
 This should be handled client-side, since there is already a bit of code in my js file to gaurd against big files.
 """
 
@@ -2204,7 +2199,6 @@ def not_found(e):
     logData(16,json.dumps(dictLog))
     return render_template("404_error.html")
 
-
 @app.errorhandler(Exception)
 # inbuilt function which takes error as parameter
 def error_handler(e):
@@ -2222,7 +2216,6 @@ def error_handler(e):
         logData(16,json.dumps(dictLog))
     
     return render_template("general_error.html", code=code)
-
 
 def logData(num, msg):
     if str(app.config['LOG_DATA']) == "True":
