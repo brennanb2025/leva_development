@@ -160,7 +160,11 @@
                                 <!--Upcoming meetings-->
 
                                 <div class="mentee-label">
-                                    Mentee: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                    {% if isMentee %}
+                                        Mentor: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                    {% else %}
+                                        Mentee: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                    {% endif %}
                                 </div>
 
                                 <div class="meeting-head">
@@ -208,7 +212,11 @@
                                     but the user now has the option to put some notes for the specific meeting-->
 
                                 <div class="mentee-label">
-                                    Mentee: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                    {% if isMentee %}
+                                        Mentor: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                    {% else %}
+                                        Mentee: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                    {% endif %}
                                 </div>
 
                                 <ul id="completedMeetingList">
