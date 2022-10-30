@@ -46,7 +46,8 @@ function ready_document() { //will check if userArr length == 0 (no matches) and
         noFound.appendChild(document.createTextNode("Please wait until you are selected by a mentee!"));
         document.getElementById("noMatchDiv").appendChild(noFound);
     } else {
-        for(let i = 0; i < 10; i++) {
+        //for(let i = 0; i < 10; i++) {
+        for(let i = 0; i < 1; i++) {
             
             if(i >= userArr.length) {
                 break;

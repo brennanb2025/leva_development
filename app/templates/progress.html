@@ -154,7 +154,7 @@
 
                             {% if matchToMeetingInfo[matched_user.id]["progress_done"] %} 
                                 <div class="head2">
-                                    Congratulations! You have completed every progress step!
+                                    Congratulations! You have completed every progress step with {{ matched_user.first_name }} {{ matched_user.last_name }}!
                                 </div>
                             {% else %}
                                 <!--Upcoming meetings-->
@@ -238,7 +238,7 @@
                             </div>
 
                             {% if matchToMeetingInfo[matched_user.id]["prev_meeting_info"]|length == 0 %}
-                                <div class="head2 noneText">None yet!</div>
+                                <div class="head2 noneText">No meetings have been completed yet with {{ matched_user.first_name }} {{ matched_user.last_name }}!</div>
                             {% endif %}
                         </div>
                     </div>
