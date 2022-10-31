@@ -1954,15 +1954,15 @@ def feedMentee(user):
             users.append(u)
 
     for u in users: #initialize user dictionary
-        userDict[u] = 0
-        #initialize as 0
+        userDict[u] = 1
+        #initialize as 1
 
     #check gender preference/identity
     if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #only check if flag for gender/identity is "True"
         for u in users: #initialize user dictionary
             if (user.mentor_gender_preference == "male" and u.gender_identity == "male") or (user.mentor_gender_preference == "female" and u.gender_identity == "female"):
                 #matching gender preference / gender
-                userDict[u] = heuristicVals["gender_pref"]
+                userDict[u] += heuristicVals["gender_pref"]
             #ignore case mentor gender preference == "noPreference".
 
     #division preferences
