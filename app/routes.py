@@ -1,6 +1,4 @@
 #This file is the python flask backend
-
-from pickle import TRUE
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
@@ -204,8 +202,15 @@ def currentMeetingSetDone():
 
     form = request.form
 
+    matchedUserId = form.get("matchedUserId")
+    if matchedUserId != None:
+        try:
+            matchedUserId = int(matchedUserId) #try cast to int
+        except:
+            return progress()
+
     if isMentee: 
-        selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        selectEntry = Select.query.filter_by(mentee_id=user.id, mentor_id=matchedUserId).first() #the entry of the mentor-mentee selection, or None
         if selectEntry != None:
             completionInfoMentee = ProgressMeetingCompletionInformation.query.filter(
                 ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
@@ -225,12 +230,11 @@ def currentMeetingSetDone():
                 #meeting notes already exist, setting mentee notes here
                 completionInfoMentee.set_meeting_notes(form.get("meetingNotes"), "mentee")
                 completionInfoMentee.set_completion_timestamp("mentee") #update timestamp
-
             selectEntry.inc_current_meeting_ID("mentee") #increment the meeting number
             db.session.commit()
 
     else:
-        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+        selectEntry = Select.query.filter_by(mentor_id=user.id, mentee_id=matchedUserId).first()
         if selectEntry != None:
             completionInfoMentor = ProgressMeetingCompletionInformation.query.filter(
                 ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
@@ -1770,7 +1774,6 @@ def deleteProfile():
 
             for s in selectEntry:
                 ProgressMeetingCompletionInformation.query.filter(
-                    ProgressMeetingCompletionInformation.num_progress_meeting == s.current_meeting_number_mentee,
                     ProgressMeetingCompletionInformation.select_id == s.id
                 ).delete()
 
@@ -1780,7 +1783,6 @@ def deleteProfile():
 
             for s in selectEntry:
                 ProgressMeetingCompletionInformation.query.filter(
-                    ProgressMeetingCompletionInformation.num_progress_meeting == s.current_meeting_number_mentor,
                     ProgressMeetingCompletionInformation.select_id == s.id
                 ).delete()
 

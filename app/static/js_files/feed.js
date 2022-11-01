@@ -89,11 +89,13 @@ function ready_document() { //will check if userArr length == 0 (no matches) and
             purpleLine.setAttribute("class", "purple-line");
             pictureCard.appendChild(purpleLine);
 
+            /*
+            Commented out for beta test
             currOccupation = document.createElement("div");
             currOccupation.setAttribute("class", "division");
             currOccupation.appendChild(document.createTextNode(userDictUsefulInfo[userArr[i]]['userCurrentOccupation']));
             pictureCard.appendChild(currOccupation);
-
+            */
 
 
             infoCard = document.createElement("div");

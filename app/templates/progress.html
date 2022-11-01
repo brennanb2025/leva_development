@@ -195,6 +195,8 @@
                                 <form id="meetingDoneButton" action="{{ url_for('progress') }}" method="POST">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
+                                    <input type="hidden" name="matchedUserId" value="{{matched_user.id}}"/>
+
                                     <textarea id="meetingNotes" name="meetingNotes" placeholder="Meeting notes here..."></textarea>
                                     <br/>
                                     <button id="finishMeetingButton" class="register">Complete this meeting and save meeting notes →</button>
