@@ -168,27 +168,30 @@
                                 </div>
 
                                 <div class="meeting-head">
-                                    Meeting #{{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["num"] }}:  {{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["title"] }}   ({{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["date"] }})
+                                    Meeting #{{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["num"] }}:  {{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["title"] }}   
+                                    <br/>(Complete by: {{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["date"] }})
                                 </div>
 
+                                <br/>
+                                
                                 <!--Each meeting is to have a description, some meeting notes, and a button to
                                     let the webpage know that the meeting is finished and is to be moved to the
                                     completed meetings page-->
                                 <div class="meeting-description">
-
-                                    <div style="font-weight: bold;">Description:</div>
-                                    {% for para in matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["desc"] %}
-                                        <div>{{para}}</div>
-                                    {% endfor %}
-
-                                    <br/>
+                                    {% if matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["desc"]|length > 0 and matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["desc"][0] != ''%}
+                                        <div style="font-weight: bold;">Description:</div>
+                                        {% for para in matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["desc"] %}
+                                            <div>{{para}}</div>
+                                        {% endfor %}
+                                        <br/>
+                                    {% endif %}
                                     
-
-                                    <div style="font-weight: bold;">Content:</div>
-                                    {% for para in matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["content"] %}
-                                        <div>{{para}}</div>
-                                    {% endfor %}
-                                    
+                                    {% if matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["content"]|length > 0 and matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["content"][0] != ''%}
+                                        <div style="font-weight: bold;">Meeting agenda:</div>
+                                        {% for para in matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["content"] %}
+                                            <div>{{para}}</div>
+                                        {% endfor %}
+                                    {% endif %}
                                     <br/>
                                 </div>
 
@@ -224,25 +227,30 @@
                                 <ul id="completedMeetingList">
                                     {% for pm in matchToMeetingInfo[matched_user.id]["prev_meeting_info"] %}
                                         <li>
-                                        <div style="font-weight: bold;">Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})</div>
+                                        <div style="font-weight: bold;">Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   
+                                            <br/>({{ pm["date"] }})
+                                        </div>
                                         <br/>
-                                        <div style="font-weight: bold;">Description:</div> <br/> 
-                                        {% for para in pm["desc"] %}
-                                            <p>{{para}}</p>
-                                        {% endfor %}
-                                        <br/>
-
-                                        <div style="font-weight: bold;">Content:</div><br/>
-                                        {% for para in pm["content"] %}
-                                            <p>{{para}}</p>
-                                        {% endfor %}
-                                        <br/><br/>
+                                        {% if pm["desc"]|length > 0 and pm["desc"][0] != ''%}
+                                            <div style="font-weight: bold;">Description:</div> <br/> 
+                                            {% for para in pm["desc"] %}
+                                                <p>{{para}}</p>
+                                            {% endfor %}
+                                            <br/>
+                                        {% endif %}
+                                        
+                                        {% if pm["content"]|length > 0 and ["content"][0] != ''%}
+                                            <div style="font-weight: bold;">Meeting agenda:</div><br/>
+                                            {% for para in pm["content"] %}
+                                                <p>{{para}}</p>
+                                            {% endfor %}
+                                        {% endif %}
                                         </li>
 
                                         <div class="note-box">
                                             {{ pm["meetingNotes"] }}
                                         </div>
-                                        <br/><br/>
+                                        <br/><br/><br/>
                                     {% endfor %}
                                 </ul>
                             </div>
