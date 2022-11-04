@@ -138,6 +138,13 @@
                                 <div class="head2">
                                     {{ matched_user.last_name }}
                                 </div>
+                                <div class="head2">
+                                    {% if matched_user.email_contact %}
+                                        {{ matched_user.email }}
+                                    {% else %}
+                                        {{ matched_user.phone_number }}
+                                    {% endif %}
+                                </div>
                                 <div class="purple-line"></div>
                                 <div class="division">
                                     {{ matched_user.division }}

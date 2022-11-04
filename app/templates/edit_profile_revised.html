@@ -188,7 +188,11 @@
                                                 {% endif %}
                                                 <div id="phoneNum">
                                                     Change phone number:<br/>
-                                                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="123-456-7890" value="{{phone_num}}">
+                                                    {% if phone_num == none %} 
+                                                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="123-456-7890" value="">
+                                                    {% else %}
+                                                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="123-456-7890" value="{{phone_num}}">
+                                                    {% endif %}
                                                 </div>
             
                                                 <!--

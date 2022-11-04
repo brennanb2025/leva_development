@@ -9,14 +9,18 @@ for b in Business.query.all():
     print(b)
 """
 
-for u in User.query.all():
-    print(u)
-    
+print(User.query.filter_by(last_name="lisa").all())
+
+#for u in User.query.all():
+#    print(u)
+
+"""
 for s in Select.query.all():
     print(s)
 
 for p in ProgressMeetingCompletionInformation.query.all():
     print(p)
+    """  
 
 
 
