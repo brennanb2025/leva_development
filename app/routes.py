@@ -1205,6 +1205,19 @@ def editProfilePost():
         logData(6,json.dumps(dataChangedDict)) #log data edit profile error
         return redirect(url_for('editProfile'))
 
+@app.route("/admin-login")
+def admin():
+    return render_template("admin.html")
+
+@app.route("/admin-data", methods = ['GET'])
+def admin_info():
+    data = {
+        "num_users": 94,
+        "server_uptime": "3 years",
+        "event": str(len(Event.query.all()))
+    }
+    return render_template("admin.html", jsonify(data))
+
 def checkFirstName(form):
     if form.get("first_name") == '':
         flash(u'Please enter a new first name.', 'firstNameError')
