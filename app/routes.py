@@ -1205,18 +1205,33 @@ def editProfilePost():
         logData(6,json.dumps(dataChangedDict)) #log data edit profile error
         return redirect(url_for('editProfile'))
 
-@app.route("/admin-login")
-def admin():
-    return render_template("admin.html")
+@app.route("/admin-cac68d5c-70dd-426a-ae05-195b2565b966", methods = ['GET'])
+def admin_login():
+    return render_template("admin-login.html")
+
+@app.route("/admin-cac68d5c-70dd-426a-ae05-195b2565b966", methods = ['POST'])
+def admin_login():
+    # check to see if the login credentials are correct, then
+    username_form = request.form.get("username")
+    password_form = request.form.get("password")
+    #if username and password match...
+    if str(app.config['ADMIN_PASSWORD']) == password_form:
+        return redirect(url_for("admin-data"))
+    else:
+        return redirect(url_for("/"))
+
 
 @app.route("/admin-data", methods = ['GET'])
 def admin_info():
-    data = {
-        "num_users": 94,
-        "server_uptime": "3 years",
-        "event": str(len(Event.query.all()))
-    }
-    return render_template("admin.html", jsonify(data))
+    if request.referrer is #did it come from login page?:
+        data = {
+            "num_users": 94,
+            "server_uptime": "3 years",
+            "event": str(len(Event.query.all()))
+        }
+        return render_template("admin.html", jsonify(data))
+    else:
+        return render_template("index1.html")
 
 def checkFirstName(form):
     if form.get("first_name") == '':

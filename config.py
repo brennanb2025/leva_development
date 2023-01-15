@@ -40,3 +40,6 @@ class Config(object):
     UPLOAD_EXTENSIONS_RESUME = os.environ.get('UPLOAD_EXTENSIONS_RESUME')
     LOG_DATA = os.environ.get('LOG_DATA')
     MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH'))
+
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+    ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME")

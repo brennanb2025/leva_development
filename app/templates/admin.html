@@ -10,17 +10,7 @@
     <h1>Creative admin page</h1>
 
     <h2>Num users:</h2>
-    <p id="data">temp</p>
+    <p id="data">{{ data }}</p>
 
-    <script>
-        function update() {
-            fetch("/admin-data")
-            .then(response => response.text())
-            .then(text => (document.getElementById("data").innerHTML = text));
-            console.log("here")
-        }
-    
-        setInterval(update, 1000);
-    </script>
 </body>
 </html>
