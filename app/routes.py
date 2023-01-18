@@ -600,7 +600,7 @@ def registerPost():
             division_preference_set = None
 
         personality_1_set = personality_2_set = personality_3_set = None
-        if str(app.config['MATCHING_FLAG_Personality']) == "True":
+        if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":
             personality_1_set = form1.get("personality1").strip()
             personality_2_set = form1.get("personality2").strip()
             personality_3_set = form1.get("personality3").strip()

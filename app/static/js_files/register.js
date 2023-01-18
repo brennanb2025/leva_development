@@ -282,6 +282,8 @@ function incrementPageCount() {
 //window ready
 window.addEventListener('load', function() {
 
+    init(document.getElementById("email_or_phone").content, document.getElementById("register_type").content);
+
     //document.getElementById("imgStuff").style.display = "none"; //hide all image back
     document.getElementById("scrollAdvice").style.display = "none"; //hide advice
     //remove cropping

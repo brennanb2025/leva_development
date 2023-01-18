@@ -653,7 +653,7 @@
 
     <script type="text/javascript" src="{{ url_for('static', filename='js_files/edit_profile.js')}}"></script>
     <script type="text/javascript">
-        init("{{contact_method}}");
+        init({{contact_method|tojson}});
         setPreexistingAttributes({{interestList|tojson}}, {{careerInterestList|tojson}}, {{educationList|tojson}});
     </script>
 </html>

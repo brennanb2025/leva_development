@@ -173,7 +173,7 @@ function init(contact_method) {
     //document.getElementById("imgStuff").style.display = "none"; //hide all image back
     //document.getElementById("vidStuff").style.display = "none"; //hide all video back
 
-    if(contact_method === "True") {
+    if(contact_method) {
         document.getElementById("phoneNum").style.display = "none"; //hide input for phone number div
     }
 
