@@ -1,6 +1,4 @@
 #This file is the python flask backend
-
-from pickle import TRUE
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
@@ -65,6 +63,32 @@ def index():
 @app.route('/portal')
 def portal():
     return render_template('portal.html', userID=session.get('userID'))
+
+
+@app.route("/admin-cac68d5c-70dd-426a-ae05-195b2565b966", methods = ['GET'])
+def admin_login():
+    return render_template("admin_login.html")
+
+@app.route("/admin-cac68d5c-70dd-426a-ae05-195b2565b966", methods = ['POST'])
+def admin_login_post():
+    # check to see if the login credentials are correct, then
+    #if username and password match...
+    if str(app.config['ADMIN_PASSWORD']) == request.form.get("username") and str(app.config['ADMIN_USERNAME']) == request.form.get("password"):
+        return redirect(url_for("admin_data"))
+    return redirect(url_for("/index"))
+
+
+@app.route("/admin-data", methods = ['GET'])
+def admin_data():
+    if url_for('admin_login_post') in request.referrer: #did it come from admin login page?
+        data = {
+            "num_users": 94,
+            "server_uptime": "3 years",
+            "event": str(Event.query.count())
+        }
+        return render_template("admin.html", data=jsonify(data))
+    else:
+        return redirect(url_for("index"))
 
 
 @app.route('/mentor')
@@ -1204,34 +1228,6 @@ def editProfilePost():
         dataChangedDict["contact"] = changedContactMethodSuccess
         logData(6,json.dumps(dataChangedDict)) #log data edit profile error
         return redirect(url_for('editProfile'))
-
-@app.route("/admin-cac68d5c-70dd-426a-ae05-195b2565b966", methods = ['GET'])
-def admin_login():
-    return render_template("admin-login.html")
-
-@app.route("/admin-cac68d5c-70dd-426a-ae05-195b2565b966", methods = ['POST'])
-def admin_login():
-    # check to see if the login credentials are correct, then
-    username_form = request.form.get("username")
-    password_form = request.form.get("password")
-    #if username and password match...
-    if str(app.config['ADMIN_PASSWORD']) == password_form:
-        return redirect(url_for("admin-data"))
-    else:
-        return redirect(url_for("/"))
-
-
-@app.route("/admin-data", methods = ['GET'])
-def admin_info():
-    if request.referrer is #did it come from login page?:
-        data = {
-            "num_users": 94,
-            "server_uptime": "3 years",
-            "event": str(len(Event.query.all()))
-        }
-        return render_template("admin.html", jsonify(data))
-    else:
-        return render_template("index1.html")
 
 def checkFirstName(form):
     if form.get("first_name") == '':

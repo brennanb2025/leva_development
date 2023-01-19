@@ -5,18 +5,23 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Very sophisticated admin login</title>
-    <style>
-
-    </style>
 </head>
 <body>
-    <h1>Login</h1>
-    <form>
-        <label for="username" id="username">Username</label>
-        <input type="text" name="username" id="username"></form>
+    <marquee
+        direction="down"
+        width="600"
+        height="300"
+        behavior="alternate"
+        style="border:solid">
+        <marquee behavior="alternate"><h1>Login admin page</h1></marquee>
+    </marquee>
+    <form action="{{ url_for('admin_login_post') }}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username">
         <label for="password">Password</label>
-        <input type="text" name="password" id="password"></form>
-        <marquee behavior="alternate">sup</marquee>
+        <input type="text" name="password" id="password">
+        <button type="submit">Login</button>
     </form>
 </body>
 </html>
