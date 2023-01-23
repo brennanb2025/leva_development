@@ -73,9 +73,9 @@ def admin_login():
 def admin_login_post():
     # check to see if the login credentials are correct, then
     #if username and password match...
-    if str(app.config['ADMIN_PASSWORD']) == request.form.get("username") and str(app.config['ADMIN_USERNAME']) == request.form.get("password"):
+    if str(app.config['ADMIN_PASSWORD']) == request.form.get("password") and str(app.config['ADMIN_USERNAME']) == request.form.get("username"):
         return redirect(url_for("admin_data"))
-    return redirect(url_for("/index"))
+    return redirect(url_for("index"))
 
 
 @app.route("/admin-data", methods = ['GET'])
