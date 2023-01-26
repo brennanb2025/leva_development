@@ -74,21 +74,130 @@ def admin_login_post():
     # check to see if the login credentials are correct, then
     #if username and password match...
     if str(app.config['ADMIN_PASSWORD']) == request.form.get("password") and str(app.config['ADMIN_USERNAME']) == request.form.get("username"):
+        session["userID"] = request.form.get("username") #put the username in the session
         return redirect(url_for("admin_data"))
     return redirect(url_for("index"))
 
 
 @app.route("/admin-data", methods = ['GET'])
 def admin_data():
-    if url_for('admin_login_post') in request.referrer: #did it come from admin login page?
-        data = {
-            "num_users": 94,
-            "server_uptime": "3 years",
-            "event": str(Event.query.count())
-        }
-        return render_template("admin.html", data=jsonify(data))
+    if session["userID"] == str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return render_template("admin.html")
     else:
         return redirect(url_for("index"))
+
+@app.route("/admin-data", methods = ['GET'])
+def admin_lookup_user():
+    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return
+
+    data = request.get_data()
+    userId = data["userId"]
+    firstName = data["firstName"]
+    lastName = data["lastName"]
+    email = data["email"]
+    
+    if userId != None:  
+        return jsonify(User.query.filter_by(id=userId).all())
+    if firstName != None and lastName != None:
+        return jsonify(User.query.filter(
+                first_name = firstName,
+                last_name = lastName).all())
+    if email != None:
+        return jsonify(User.query.filter_by(email=email).all())
+
+@app.route("/admin-selects-info", methods = ['GET'])
+def admin_selects_info(): #mentees true = search for mentees, false = mentors
+    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return
+
+    data = request.get_data()
+    businessId = data["businessId"]
+    
+    users = User.query.filter_by(
+                business=businessId
+            )
+    unmatchedUsers = []
+    listSelects = {} #select id : select
+    for u in users:
+        select = None
+        if u.is_student:
+            selects = Select.query.filter_by(mentee_id=u.id).all()
+        else:
+            selects = Select.query.filter_by(mentor_id=u.id).all()
+        if len(selects) == 0:
+            unmatchedUsers.append((u.id,u.first_name,u.last_name,u.email)) #id, first name, last name, email
+        
+        #could have multiple selects
+        for s in selects:
+            listSelects[s.id] = s #add the select
+        
+    arrInfo = []
+    for s in listSelects.keys:
+        select = listSelects[s]
+        arrInfo.append( #select, mentee, mentor
+                (select, User.query.filter_by(id=select.mentee_id), User.query.filter_by(id=select.mentor_id)))
+    
+    dictRtn = {
+        "unmatchedUsers":unmatchedUsers,
+        "matchesInfo":arrInfo
+    }
+    return jsonify(dictRtn)
+
+@app.route("/admin-user-matches", methods = ['GET'])
+def admin_user_matches(): #mentees true = search for mentees, false = mentors
+    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return
+
+
+    data = request.get_data()
+    businessId = data["businessId"]
+
+    match_and_users = db.session.query( \
+            User,
+            Select
+    ).filter( \
+        User.business_id == businessId and User.is_student
+    ).outerjoin(User, User.id == Select.mentee_id).all()
+
+    dictMenteeToMentor = {}
+    for s_u in match_and_users:
+        if dictMenteeToMentor[s_u.User] == None:
+            dictMenteeToMentor[s_u.User] = []
+        dictMenteeToMentor[s_u.User].append(User.query.filter_by(mentor_id=s_u.Select.mentor_id).first())
+
+    return jsonify(dictMenteeToMentor)
+
+@app.route("/admin-lookup-business", methods = ['GET'])
+def admin_lookup_business():
+    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return
+
+
+    data = request.get_data()
+    businessId = data["businessId"]
+    businessString = data["businessString"]
+
+
+    if businessId:
+        return jsonify(Business.query.filter_by(id=businessId).first())
+    if businessString:
+        return jsonify(Business.query.filter_by(name=businessString).first())
+
+@app.route("/admin-all-businesses", methods = ['GET'])
+def admin_all_businesses():
+    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return
+
+    return jsonify([
+            {
+                "id":b.id, 
+                "name":b.name, 
+                "number_employees_maximum":b.number_employees_maximum, 
+                "number_employees_currently_registered":b.number_employees_currently_registered
+            } 
+                for b in Business.query.all()])
+
 
 
 @app.route('/mentor')
