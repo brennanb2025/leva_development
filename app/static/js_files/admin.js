@@ -18,14 +18,14 @@ function lookup_user() { //get new users and set document
         url: Flask.url_for("admin_lookup_user"), 
         type:'GET',
         data: {
-            "userId" : userIdInput,
-            "firstName" : firstNameInput,
-            "lastName" : lastNameInput,
-            "email" : emailInput
+            "userId" : document.getElementById("userid").value,
+            "firstName" : document.getElementById("firstname").value,
+            "lastName" : document.getElementById("lastname").value,
+            "email" : document.getElementById("email").value
         },
         success: new function(data) {
             //do something here based on data
-            alert(data);
+            document.getElementById("user-display").innerHTML = JSON.stringify(data)
         }
     });
 }
@@ -37,11 +37,11 @@ function selects_info() { //get new users and set document
         url: Flask.url_for("admin_selects_info"), 
         type:'GET',
         data: {
-            "businessId" : businessId
+            "businessId" : document.getElementById("businessid").value
         },
         success: new function(data) {
             //do something here based on data
-            alert(data);
+            document.getElementById("business-display").innerHTML = JSON.stringify(data)
         }
     });
 }
@@ -52,11 +52,11 @@ function user_matches() { //get new users and set document
         url: Flask.url_for("admin_user_matches"), 
         type:'GET',
         data: {
-            "businessId" : businessId
+            "businessId" : document.getElementById("businessid").value
         },
         success: new function(data) {
             //do something here based on data
-            alert(data);
+            document.getElementById("business-display").innerHTML = JSON.stringify(data)
         }
     });
 }
@@ -67,11 +67,11 @@ function business_query() { //get new users and set document
         url: Flask.url_for("admin_lookup_business"), 
         type:'GET',
         data: {
-            "businessId" : businessId
+            "businessId" : document.getElementById("businessid").value
         },
-        success: new function(data) {
+        success: function(data) {
             //do something here based on data
-            alert(data);
+            document.getElementById("business-display").innerHTML = JSON.stringify(data)
         }
     });
 }
@@ -83,8 +83,9 @@ function all_businesses() { //get new users and set document
         dataType: 'json',
         success: function(data) {
             //do something here based on data
-            alert(data);
-            $("#display").html(data);
+            console.log(data);
+            // $("#display").html(data);
+            document.getElementById("display").innerHTML = JSON.stringify(data[0])
         }
     });
 }

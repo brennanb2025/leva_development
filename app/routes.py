@@ -173,16 +173,22 @@ def admin_lookup_business():
     if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
         return
 
+    data = request.args
+    businessId = data.get("businessId")
+    businessString = data.get("businessString")
 
-    data = request.get_data()
-    businessId = data["businessId"]
-    businessString = data["businessString"]
-
-
+    business = None
     if businessId:
-        return jsonify(Business.query.filter_by(id=businessId).first())
+        business = Business.query.filter_by(id=int(businessId)).first()
     if businessString:
-        return jsonify(Business.query.filter_by(name=businessString).first())
+        business = Business.query.filter_by(name=businessId).first()
+    return jsonify(
+        {
+            "id":business.id, 
+            "name":business.name, 
+            "number_employees_maximum":business.number_employees_maximum, 
+            "number_employees_currently_registered":business.number_employees_currently_registered
+        })
 
 @app.route("/admin-all-businesses", methods = ['GET'])
 def admin_all_businesses():
