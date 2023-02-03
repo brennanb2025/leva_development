@@ -274,15 +274,15 @@ def admin_get_events():
     if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
         return
 
-    startTime = datetime.datetime.strptime(request.args.get("startTime"), '%m/%d/%y %H:%M:%S')
-    endTime = datetime.datetime.strptime(request.args.get("endTime"), '%m/%d/%y %H:%M:%S')
+    startTime = datetime.datetime.strptime(request.args.get("startTime"), '%Y-%m-%d %H:%M:%S')
+    endTime = datetime.datetime.strptime(request.args.get("endTime"), '%Y-%m-%d %H:%M:%S')
     action = request.args.get("action")
 
     print(startTime, endTime)
 
     #note: for and here must use special ampersand character - also requires parentheses because of operator precedence
     exceptions = Event.query.filter_by(action=action).filter(
-        (Event.timestamp >= startTime) & (Event.timestamp <= endTime)).all()
+        (Event.timestamp >= startTime) & (Event.timestamp <= endTime)).limit(100).all()
 
     return jsonify([
             {

@@ -47,8 +47,23 @@
 
     <h2>Event related things</h2>
     <div>
-        <label for="eventAction">Event action</label>
-        <input type="text" name="eventAction" id="eventAction">
+        <div>
+            <label for="eventAction">Event action</label>
+            <input type="text" name="eventAction" id="eventAction">
+        </div>
+        <div>
+            <label for="startDate">Start Date</label>
+            <input type="date" name="startDate" id="startDate">
+            <label for="startTime">Start Time</label>
+            <input type="time" name="startTime" id="startTime" step="1">
+        </div>
+        <div>
+            <label for="endDate">End Date</label>
+            <input type="date" name="endDate" id="endDate">
+            <label for="endTime">End Time</label>
+            <input type="time" name="endTime" id="endTime" step="1">
+        </div>
+        
         <button onclick="get_events()">Get Events</button>
     </div>
     <div id="events-display" style="margin-top: 1%;">test</div>

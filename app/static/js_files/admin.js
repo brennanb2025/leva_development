@@ -41,7 +41,6 @@ function selects_info() { //get new users and set document
             "businessId" : document.getElementById("businessid").value
         },
         success: function(data) {
-            alert(data);
             //alert(JSON.stringify(data))
             //do something here based on data
             document.getElementById("business-display").innerHTML = JSON.stringify(data)
@@ -124,15 +123,21 @@ function get_events() {
         url: Flask.url_for("admin_get_events"), 
         type:'GET',
         data: {
-            "action" : 14, //document.getElementById("eventAction").value,
-            "startTime" : '01/01/22 13:55:26',//document.getElementById("startTime").value,
-            "endTime" : '02/10/23 13:55:26'//document.getElementById("endTime").value
+            "action" : document.getElementById("eventAction").value,
+            "startTime" : document.getElementById("startDate").value + " " + document.getElementById("startTime").value,
+            "endTime" : document.getElementById("endDate").value + " " + document.getElementById("endTime").value
         },
         success: function(data) {
             //do something here based on data
             console.log(data);
             // $("#display").html(data);
-            document.getElementById("events-display").innerHTML = JSON.stringify(data)
+            for(let i = 0; i < data.length; i++){
+                parent = document.getElementById("events-display")
+                child = document.createElement("div")
+                text = document.createTextNode(JSON.stringify(data[i]))
+                child.appendChild(text)
+                parent.appendChild(child)
+            }
         }
     });
 }
