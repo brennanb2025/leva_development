@@ -23,7 +23,7 @@ function lookup_user() { //get new users and set document
             "lastName" : document.getElementById("lastname").value,
             "email" : document.getElementById("email").value
         },
-        success: new function(data) {
+        success: function(data) {
             //do something here based on data
             document.getElementById("user-display").innerHTML = JSON.stringify(data)
         }
@@ -36,10 +36,13 @@ function selects_info() { //get new users and set document
     $.ajax({
         url: Flask.url_for("admin_selects_info"), 
         type:'GET',
+        dataType: 'json',
         data: {
             "businessId" : document.getElementById("businessid").value
         },
-        success: new function(data) {
+        success: function(data) {
+            alert(data);
+            //alert(JSON.stringify(data))
             //do something here based on data
             document.getElementById("business-display").innerHTML = JSON.stringify(data)
         }
@@ -54,8 +57,8 @@ function user_matches() { //get new users and set document
         data: {
             "businessId" : document.getElementById("businessid").value
         },
-        success: new function(data) {
-            //do something here based on data
+        success: function(data) {
+            //do something here based on data)
             document.getElementById("business-display").innerHTML = JSON.stringify(data)
         }
     });
@@ -80,12 +83,56 @@ function all_businesses() { //get new users and set document
     $.ajax({
         url: Flask.url_for("admin_all_businesses"), 
         type:'GET',
-        dataType: 'json',
         success: function(data) {
             //do something here based on data
             console.log(data);
             // $("#display").html(data);
-            document.getElementById("display").innerHTML = JSON.stringify(data[0])
+            document.getElementById("display").innerHTML = JSON.stringify(data)
+        }
+    });
+}
+
+function users_in_business() {
+    $.ajax({
+        url: Flask.url_for("admin_lookup_users_in_business"), 
+        type:'GET',
+        data: {
+            "businessId" : document.getElementById("businessid").value
+        },
+        success: function(data) {
+            //do something here based on data
+            console.log(data);
+            // $("#display").html(data);
+            document.getElementById("display").innerHTML = JSON.stringify(data)
+        }
+    });
+}
+
+
+/*
+"Actions" - the number assigned to each event logged
+Exceptions (16)
+Edit profile picture failure (18)
+Csrf error (17)
+Feed info (13)
+Chosen person feed info (14)
+Uploading file to s3 (8)
+Number of users per day (logins - 4 - must separate by timestamp, so this may require its own function).
+*/
+function get_events() {
+    $.ajax({
+        url: Flask.url_for("admin_get_events"), 
+        type:'GET',
+        data: {
+            "action" : 14, //document.getElementById("eventAction").value,
+            "startTime" : '01/01/22 13:55:26',//document.getElementById("startTime").value,
+            "endTime" : '02/10/23 13:55:26'//document.getElementById("endTime").value
+        },
+        success: function(data) {
+            //do something here based on data
+            console.log(data);
+            // $("#display").html(data);
+            document.getElementById("events-display").innerHTML = JSON.stringify(data)
         }
     });
 }

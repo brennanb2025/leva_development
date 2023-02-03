@@ -86,37 +86,68 @@ def admin_data():
     else:
         return redirect(url_for("index"))
 
-@app.route("/admin-data", methods = ['GET'])
+@app.route("/admin-lookup-user", methods = ['GET'])
 def admin_lookup_user():
     if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
         return
 
-    data = request.get_data()
-    userId = data["userId"]
-    firstName = data["firstName"]
-    lastName = data["lastName"]
-    email = data["email"]
+    userId = request.args.get("userId")
+    firstName = request.args.get("firstName")
+    lastName = request.args.get("lastName")
+    email = request.args.get("email")
     
     if userId != None:  
-        return jsonify(User.query.filter_by(id=userId).all())
+        return jsonify(
+            [{"id":u.id,
+              "email":u.email,
+              "name":u.first_name + " " + u.last_name}
+            for u in User.query.filter_by(id=userId).all()])
     if firstName != None and lastName != None:
-        return jsonify(User.query.filter(
+        return jsonify([
+            {"id":u.id,
+              "email":u.email,
+              "name":u.first_name + " " + u.last_name}
+            for u in User.query.filter(
                 first_name = firstName,
-                last_name = lastName).all())
+                last_name = lastName).all()])
     if email != None:
-        return jsonify(User.query.filter_by(email=email).all())
+        return jsonify([{"id":u.id,
+              "email":u.email,
+              "name":u.first_name + " " + u.last_name}
+            for u in 
+            User.query.filter_by(email=email).all()])
 
+@app.route("/admin-lookup-users-in-business", methods = ['GET'])
+def admin_lookup_users_in_business():
+    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return
+
+    businessId = request.args.get("businessId")
+    
+    users = User.query.filter_by(
+                business_id=businessId
+            ).all()
+
+    print(users)
+
+    return jsonify([{"id":u.id,
+                    "name":u.first_name+ " " + u.last_name,
+                    "email":u.email,
+                    "mentor_or_mentee": "mentee" if u.is_student else "mentor"
+                    } for u in users])
+
+#TODO: test this
 @app.route("/admin-selects-info", methods = ['GET'])
 def admin_selects_info(): #mentees true = search for mentees, false = mentors
     if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
         return
-
-    data = request.get_data()
-    businessId = data["businessId"]
+    
+    businessId = request.args.get("businessId")
     
     users = User.query.filter_by(
-                business=businessId
-            )
+                business_id=businessId
+            ).all()
+
     unmatchedUsers = []
     listSelects = {} #select id : select
     for u in users:
@@ -126,32 +157,53 @@ def admin_selects_info(): #mentees true = search for mentees, false = mentors
         else:
             selects = Select.query.filter_by(mentor_id=u.id).all()
         if len(selects) == 0:
-            unmatchedUsers.append((u.id,u.first_name,u.last_name,u.email)) #id, first name, last name, email
+            unmatchedUsers.append(u) #id, first name, last name, email
         
         #could have multiple selects
         for s in selects:
             listSelects[s.id] = s #add the select
         
     arrInfo = []
-    for s in listSelects.keys:
+    for s in listSelects.keys():
         select = listSelects[s]
         arrInfo.append( #select, mentee, mentor
-                (select, User.query.filter_by(id=select.mentee_id), User.query.filter_by(id=select.mentor_id)))
+                (select, User.query.filter_by(id=select.mentee_id).first(), User.query.filter_by(id=select.mentor_id).first()))
     
     dictRtn = {
-        "unmatchedUsers":unmatchedUsers,
-        "matchesInfo":arrInfo
+        "unmatchedUsers":[{ "id":u.id,
+                            "name":u.first_name+ " " + u.last_name,
+                            "email":u.email,
+                            "mentor_or_mentee": "mentee" if u.is_student else "mentor"
+                        } for u in unmatchedUsers],
+        "matchesInfo":[{
+                    "Select": {
+                        "id": select.id,
+                        "current_meeting_number_mentor":select.current_meeting_number_mentor,
+                        "current_meeting_number_mentee":select.current_meeting_number_mentee
+                    },
+                    "mentee": {
+                        "id":mentee.id,
+                        "name":mentee.first_name+ " " + mentee.last_name,
+                        "email":mentee.email
+                    },
+                    "mentor": {
+                        "id":mentor.id,
+                        "name":mentor.first_name+ " " + mentor.last_name,
+                        "email":mentor.email
+                    }
+                } for (select, mentee, mentor) in arrInfo]
     }
+
     return jsonify(dictRtn)
 
+#TODO: Test this
 @app.route("/admin-user-matches", methods = ['GET'])
 def admin_user_matches(): #mentees true = search for mentees, false = mentors
     if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
         return
 
 
-    data = request.get_data()
-    businessId = data["businessId"]
+    businessId = request.args.get("businessId")
 
     match_and_users = db.session.query( \
             User,
@@ -162,11 +214,24 @@ def admin_user_matches(): #mentees true = search for mentees, false = mentors
 
     dictMenteeToMentor = {}
     for s_u in match_and_users:
-        if dictMenteeToMentor[s_u.User] == None:
+        if not dictMenteeToMentor.__contains__(s_u.User):
             dictMenteeToMentor[s_u.User] = []
-        dictMenteeToMentor[s_u.User].append(User.query.filter_by(mentor_id=s_u.Select.mentor_id).first())
+        dictMenteeToMentor[s_u.User].append(User.query.filter_by(id=s_u.Select.mentor_id).first())
 
-    return jsonify(dictMenteeToMentor)
+    return jsonify([
+        {
+            "mentee id":u.id,
+            "mentee email":u.email,
+            "mentors":[
+                {
+                    "mentor id":m.id,
+                    "mentor email":m.email
+                }
+                for m in dictMenteeToMentor[u]
+            ]
+        } 
+        for u in dictMenteeToMentor.keys()
+    ])
 
 @app.route("/admin-lookup-business", methods = ['GET'])
 def admin_lookup_business():
@@ -204,6 +269,29 @@ def admin_all_businesses():
             } 
                 for b in Business.query.all()])
 
+@app.route("/admin-events-exceptions", methods = ['GET'])
+def admin_get_events():
+    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return
+
+    startTime = datetime.datetime.strptime(request.args.get("startTime"), '%m/%d/%y %H:%M:%S')
+    endTime = datetime.datetime.strptime(request.args.get("endTime"), '%m/%d/%y %H:%M:%S')
+    action = request.args.get("action")
+
+    print(startTime, endTime)
+
+    #note: for and here must use special ampersand character - also requires parentheses because of operator precedence
+    exceptions = Event.query.filter_by(action=action).filter(
+        (Event.timestamp >= startTime) & (Event.timestamp <= endTime)).all()
+
+    return jsonify([
+            {
+                "id":e.id, 
+                "user id":e.userID, 
+                "message":e.message, 
+                "timestamp":e.timestamp
+            } 
+                for e in exceptions])
 
 
 @app.route('/mentor')
@@ -2262,7 +2350,7 @@ def feedPost():
     
     dictLog = {}
     dictLog["userID"] = userMatchID
-    dictLog["score"] = form.get('score')
+    dictLog["score"] = form.get('userScore')
     dictLog["index"] = form.get('userIdx')
     logData(14,json.dumps(dictLog))
 
@@ -2337,7 +2425,7 @@ def not_found(e):
     dictLog['desc'] = "404 error"
     logData(16,json.dumps(dictLog))
     return render_template("404_error.html")
-
+"""
 @app.errorhandler(Exception)
 # inbuilt function which takes error as parameter
 def error_handler(e):
@@ -2355,7 +2443,7 @@ def error_handler(e):
         logData(16,json.dumps(dictLog))
     
     return render_template("general_error.html", code=code)
-
+"""
 def logData(num, msg):
     if str(app.config['LOG_DATA']) == "True":
         newEvent = Event(userID=session.get('userID'), action=num, message=msg)
