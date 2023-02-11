@@ -129,14 +129,19 @@ function get_events() {
         },
         success: function(data) {
             //do something here based on data
-            console.log(data);
             // $("#display").html(data);
+            parent = document.getElementById("events-table")
+            document.getElementById("events-display").innerHTML = "Total data count: " + data.length
+            parent.innerHTML = ""
             for(let i = 0; i < data.length; i++){
-                parent = document.getElementById("events-display")
-                child = document.createElement("div")
-                text = document.createTextNode(JSON.stringify(data[i]))
-                child.appendChild(text)
-                parent.appendChild(child)
+                row = document.createElement("tr")
+                for(const key of Object.keys(data[i])){
+                    column = document.createElement("td")
+                    text = document.createTextNode(data[i][key])
+                    column.appendChild(text)
+                    row.appendChild(column)
+                }
+                parent.appendChild(row)
             }
         }
     });
