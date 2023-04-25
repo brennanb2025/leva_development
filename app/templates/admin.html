@@ -4,101 +4,155 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/main.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/admin.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css_files/portal.css')}}">
     
     <title>Administrator Page</title>
-
+    <link href='https://fonts.googleapis.com/css?family=Work Sans' rel='stylesheet'>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
     <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
     {{ JSGlue.include() }}
-
-    <style>
-        table, td, th{
-            border: 1px solid black;
-        }
-        table{
-            border-collapse: collapse;
-        }
-    </style>
 </head>
 <body>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <h1>Creative admin page</h1>
 
-    <div id="display"></div>
-    
-    <h2>User lookup</h2>
-    <div>
-        <label for="firstname">First name</label>
-        <input type="text" name="firstname" id="firstname">
-        <label for="lastname">Last name</label>
-        <input type="text" name="lastname" id="lastname">
-    </div>
-    <div style="margin-top: 1%;">
-        <label for="userid">User ID</label>
-        <input type="text" name="userid" id="userid">
-        <label for="email">Email</label>
-        <input type="text" name="email" id="email">
-    </div>
-    <button style="margin-top: 1%;" onclick="lookup_user()">Look up</button>
-    <div id="user-display" style="margin-top: 1%;">test</div>
+    <!--Profile of the user-->
+    <div class="background">
+        <section class="display profile">
 
-    <h2>Business related things</h2>
-    <div>
-        <label for="businessid">Business ID</label>
-        <input type="text" name="businessid" id="businessid">
-        <button onclick="business_query()">Look up business</button>
-        <button onclick="user_matches()">Get matches</button>
-        <button onclick="selects_info()">Selects info</button>
-        <button onclick="users_in_business()">Users in business</button>
-    </div>
-    <div id="business-display" style="margin-top: 1%;">test</div>
+            <div class="head">
+                Admin Page
+            </div>
 
-    <h2>Event related things</h2>
-    <div>
-        <div>
-            <label for="eventAction">Event action</label>
-            <input type="text" name="eventAction" id="eventAction">
-        </div>
-        <div>
-            <label for="startDate">Start Date</label>
-            <input type="date" name="startDate" id="startDate">
-            <label for="startTime">Start Time</label>
-            <input type="time" name="startTime" id="startTime" step="1">
-        </div>
-        <div>
-            <label for="endDate">End Date</label>
-            <input type="date" name="endDate" id="endDate">
-            <label for="endTime">End Time</label>
-            <input type="time" name="endTime" id="endTime" step="1">
-        </div>
-        
-        <button onclick="get_events()">Get Events</button>
+            <div class="info">
+                <div class="list">
+                    <!--Each entry of information is divided into singles, which is itself divided into
+                        a label and the actual information (answer)-->
+
+                        <!--Name-->
+                    <div class="single">
+                        <div class="label">
+                            User Lookup:
+                        </div>
+                        <div>
+                            <label for="firstname">First name</label>
+                            <input type="text" name="firstname" id="firstname">
+                            <label for="lastname">Last name</label>
+                            <input type="text" name="lastname" id="lastname">
+                        </div>
+                        <div style="margin-top: 1%;">
+                            <label for="userid">User ID</label>
+                            <input type="text" name="userid" id="userid">
+                            <label for="email">Email</label>
+                            <input type="text" name="email" id="email">
+                        </div>
+                        <button style="margin-top: 1%;" onclick="lookup_user()">Look up</button>
+                        <div id="user-display" style="margin-top: 1%;"></div>
+                    </div>
+
+                    <div class="single">
+                        <div class="label">
+                            Business Lookups/Information:
+                        </div>
+
+                        <div>
+                            <label for="businessid">Business ID</label>
+                            <input type="text" name="businessid" id="businessid">
+                            <div class="business-option-container">
+                                <button onclick="business_query()">Look up business</button>
+                                <button onclick="user_matches()">Get matches</button>
+                                <button onclick="selects_info()">Selects info</button>
+                                <button onclick="users_in_business()">Users in business</button>
+                            </div>
+                        </div>
+                        <div id="business-display" style="margin-top: 1%;"></div>
+                    </div>
+
+                    <div class="single">
+                        <div class="label">
+                            Event Logs:
+                        </div>
+
+                        <div class="event-input">
+
+                            <div class="input-container">
+                                <label class="regtext">Exceptions
+                                    <input type="radio" id="choiceMale" name="events" value="16" checked="checked">
+                                    <span class="checkmark"></span>
+                                </label>    
+
+                                <label class="regtext">CSRF Errors
+                                    <input type="radio" id="choiceFemale" name="events" value="18" checked="checked">
+                                    <span class="checkmark"></span>
+                                </label>
+
+                                <label class="regtext">Feed Info
+                                    <input type="radio" id="choiceOther" name="events" value="13" checked="checked">
+                                    <span class="checkmark"></span>
+                                </label>
+
+                                <label class="regtext">Feed Info (Chosen People)
+                                    <input type="radio" id="choiceNoResponse" name="events" value="14" checked="checked">
+                                    <span class="checkmark"></span>
+                                </label>
+
+                                <label class="regtext">S3 File Uploads
+                                    <input type="radio" id="choiceNoResponse" name="events" value="8" checked="checked">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+
+                            <div>
+                                <label for="startDate">Start Date</label>
+                                <input type="date" name="startDate" id="startDate">
+                                <label for="startTime">Start Time</label>
+                                <input type="time" name="startTime" id="startTime" step="1">
+                            </div>
+                            <div>
+                                <label for="endDate">End Date</label>
+                                <input type="date" name="endDate" id="endDate">
+                                <label for="endTime">End Time</label>
+                                <input type="time" name="endTime" id="endTime" step="1">
+                            </div>
+                            
+                            <button onclick="get_events()">Get Events</button>
+                        </div>
+                        <div id="events-display">
+
+                        </div>
+                        <table id="events-table">
+                            <tr>
+                                <th>
+                                    ID
+                                </th>
+                                <th>
+                                    Message
+                                </th>
+                                <th>
+                                    Timestamp
+                                </th>
+                                <th>
+                                    User ID
+                                </th>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
     </div>
-    <div id="events-display" style="margin-top: 1%;">test</div>
-    <table id="events-table">
-        <tr>
-            <th>
-                ID
-            </th>
-            <th>
-                Message
-            </th>
-            <th>
-                Timestamp
-            </th>
-            <th>
-                User ID
-            </th>
-        </tr>
-    </table>
 
     <script type="text/javascript" src="{{ url_for('static', filename='js_files/admin.js')}}"></script>
     <script type="text/javascript">
         //test getting stuff
-        $(document).ready(function(){
-            all_businesses();
-        });
+        // $(document).ready(function(){
+        //     all_businesses();
+        // });
 
     </script>
 

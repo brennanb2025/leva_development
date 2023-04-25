@@ -220,12 +220,12 @@ def admin_user_matches(): #mentees true = search for mentees, false = mentors
 
     return jsonify([
         {
-            "mentee id":u.id,
-            "mentee email":u.email,
+            "mentee_id":u.id,
+            "mentee_email":u.email,
             "mentors":[
                 {
-                    "mentor id":m.id,
-                    "mentor email":m.email
+                    "mentor_id":m.id,
+                    "mentor_email":m.email
                 }
                 for m in dictMenteeToMentor[u]
             ]
@@ -2340,7 +2340,7 @@ def feedPost():
         flash(u'That mentor has been selected already.', 'feedError')
         return redirect(url_for('mentor'))
 
-
+    # Send email informing mentor matching here
     newSelect = Select(mentee_id=session.get('userID'), mentor_id=userMatchID)
     #selection will only be made by the user logged in - the mentee.
 
