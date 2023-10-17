@@ -89,71 +89,51 @@ def progress():
     user = User.query.filter_by(id=session.get('userID')).first()
     
     isMentee = user.is_student #user.is_mentee
+    currentMeetingNumber = -1 #current meeting number
 
-    currentMeetingNumbers = {} #current meeting numbers (Select id : meeting number)
-    selectEntries = [] #the select logs for this user (Select)
-
-    matched_users = [] #the mentors or mentees that the user logged in has selected (User)
-    
+    select_mentor_mentee = None #the mentor or mentee that the user logged in has selected, or None
     if isMentee: 
-        selectEntries = Select.query.filter_by(mentee_id=user.id).all() #the entries of the mentor-mentee selection
-        if len(selectEntries) != 0:
-            for select in selectEntries:
-                matched_users.append(User.query.filter_by(id=select.mentor_id).first())
-                currentMeetingNumbers[select.id] = select.current_meeting_number_mentee
+        selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        if selectEntry != None:
+            select_mentor_mentee = User.query.filter_by(id=selectEntry.mentor_id).first()
+            currentMeetingNumber = selectEntry.current_meeting_number_mentee
     else:
-        selectEntries = Select.query.filter_by(mentor_id=user.id).all() #the entries of the mentor-mentee selection
-        if len(selectEntries) != 0:
-            for select in selectEntries:
-                matched_users.append(User.query.filter_by(id=select.mentee_id).first())
-                currentMeetingNumbers[select.id] = select.current_meeting_number_mentor
+        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+        if selectEntry != None:
+            select_mentor_mentee = User.query.filter_by(id=selectEntry.mentee_id).first()
+            currentMeetingNumber = selectEntry.current_meeting_number_mentor
 
     #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
 
-    matchToMeetingInfo = {} #(Match User id : information)
+    progressDone = False
 
-    if len(selectEntries) != 0: 
+    futureMeetingInfo = [] #future meeting list of info dicts
+    prevMeetingInfo = [] #previous meeting list of info dicts
+    currMeetingInfo = {} #current meeting info dict
+    if selectEntry != None and currentMeetingNumber != -1:
+        currMeeting = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting==currentMeetingNumber).first()
+        if currMeeting != None:
+            currMeetingInfo = getMeetingInfo(currMeeting)
+        else:
+            progressDone = True
+
+        previousMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting < currentMeetingNumber).all()
+        futureMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                ProgressMeeting.num_meeting > currentMeetingNumber).all()
         
-        for select in selectEntries: #go through each of this user's select
-
-            progressDone = False
-
-            futureMeetingInfo = [] #future meeting list of info dicts
-            prevMeetingInfo = [] #previous meeting list of info dicts
-            currMeetingInfo = {} #current meeting info dict
-
-            currMeeting = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                    ProgressMeeting.num_meeting==currentMeetingNumbers[select.id]).first()
-            if currMeeting != None:
-                currMeetingInfo = getMeetingInfo(currMeeting)
-            else:
-                progressDone = True
-
-            previousMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                    ProgressMeeting.num_meeting < currentMeetingNumbers[select.id]).all()
-            futureMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                    ProgressMeeting.num_meeting > currentMeetingNumbers[select.id]).all()
-            
-            for m in previousMeetings: #build the dicts of the info about each meeting
-                prevMeetingInfo.append(getCompletedMeetingInfo(m, isMentee, select.id, m.num_meeting))
-            for m in futureMeetings:
-                futureMeetingInfo.append(getMeetingInfo(m))
-
-            infoDictPerUser = {}
-            infoDictPerUser["progress_done"] = progressDone
-            infoDictPerUser["future_meeting_info"] = futureMeetingInfo
-            infoDictPerUser["curr_meeting_info"] = currMeetingInfo
-            infoDictPerUser["prev_meeting_info"] = prevMeetingInfo
-
-            if isMentee:
-                matchToMeetingInfo[select.mentor_id] = infoDictPerUser
-            else:
-                matchToMeetingInfo[select.mentee_id] = infoDictPerUser
+        for m in previousMeetings: #build the dicts of the info about each meeting
+            prevMeetingInfo.append(getCompletedMeetingInfo(m, isMentee, selectEntry.id, m.num_meeting))
+        for m in futureMeetings:
+            futureMeetingInfo.append(getMeetingInfo(m))
 
     logData(15,"")
+
     
-    return render_template('progress.html', matchedUsers=matched_users, isMentee=isMentee, \
-            userID=user.id, matchToMeetingInfo=matchToMeetingInfo)
+    return render_template('progress.html', selectEntry=selectEntry, isMentee=isMentee, \
+            selectMentorMentee=select_mentor_mentee, userID=user.id, progressDone=progressDone, \
+            currMeetingInfo=currMeetingInfo, prevMeetingInfo=prevMeetingInfo, futureMeetingInfo=futureMeetingInfo)
 
 
 #Returns a dict of all the necessary meeting information to show. 
@@ -390,7 +370,7 @@ def registerValidate2():
     errors = {}
     success = True
 
-    business = request.json['business']
+    business = request.json['business'] 
     
     if business == '':
         success = False
@@ -602,8 +582,11 @@ def registerPost():
         mentor_gender_preferenceForm = form1.get("radio_gender_preference")
         if not isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
             mentor_gender_preferenceForm = None #if mentor OR gender should not be taken into account, this should not be entered.
+        if not isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
+            mentor_gender_preferenceForm = None #if mentor OR gender should not be taken into account, this should not be entered.
 
         gender_identityForm = form1.get("radio_gender_identity")
+        if isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
         if isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
             gender_identityForm = None #if mentee, this should not be entered.
 
@@ -629,7 +612,7 @@ def registerPost():
         user = User(email=form1.get('email'), first_name=form1.get('first_name'), last_name=form1.get('last_name'), 
                     is_student=isMentee, bio=form1.get('bio'), email_contact=True, phone_number=None,
                     city_name=form1.get('city_name'), current_occupation=form1.get('current_occupation'),
-                    business_id=businessRegisteredUnder.id, num_pairings_can_make=int(form1.get('num_pairings')),
+                    business_id=businessRegisteredUnder.id, 
                     mentor_gender_preference=mentor_gender_preferenceForm,
                     gender_identity=gender_identityForm,
                     division_preference=division_preference_set, division=division_set,
@@ -1770,7 +1753,7 @@ def deleteProfile():
 
         selectEntry = None
         if user.is_student: #is mentee
-            selectEntry = Select.query.filter_by(mentee_id=user.id).all()
+            selectEntry = Select.query.filter_by(mentee_id=user.id).first()
 
             for s in selectEntry:
                 ProgressMeetingCompletionInformation.query.filter(
@@ -1779,7 +1762,7 @@ def deleteProfile():
 
             Select.query.filter_by(mentee_id=user.id).delete()
         else:
-            selectEntry = Select.query.filter_by(mentor_id=user.id).all()
+            selectEntry = Select.query.filter_by(mentor_id=user.id).first()
 
             for s in selectEntry:
                 ProgressMeetingCompletionInformation.query.filter(
@@ -1913,13 +1896,6 @@ def getFeed():
     
     user = User.query.filter_by(id=session.get('userID')).first()
 
-    dictItems = {}
-    dictItems['userDictUsefulInfo'] = None
-    dictItems['userArr'] = None
-
-    if not user.is_student: #user is mentor
-        return jsonify(dictItems)
-
     return feedMentee(user)
     
 
@@ -1952,7 +1928,7 @@ def feedMentee(user):
 
     users = []
     for u in potentialUsers:
-        if mentorCanBeSelected(u.id): #only select users that have not already been chosen.
+        if not mentorSelected(u.id): #only select users that have not already been chosen.
             users.append(u)
 
     for u in users: #initialize user dictionary
@@ -1968,6 +1944,16 @@ def feedMentee(user):
             #ignore case mentor gender preference == "noPreference".
 
     #division preferences
+    if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #only check if flag for division preference is "True"
+        for u in users:
+            if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
+                #other user division preference
+                userDict[u] += heuristicVals["division_pref"]
+                matches["division_pref"] += 1
+            if (user.division_preference == "same" and user.division == u.division) or user.division_preference == "noPreference":
+                #this user division preference
+                userDict[u] += heuristicVals["division_pref"]
+                matches["division_pref"] += 1
     if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #only check if flag for division preference is "True"
         for u in users:
             if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
@@ -2117,16 +2103,10 @@ def feedMentee(user):
     return jsonify(dictItems)
 
 
-def mentorNumberOfTimesSelected(mentorId): #if this mentor has been selected already
-    return Select.query.filter_by(mentor_id=mentorId).count()
-
-def mentorCanBeSelected(mentorId):
-    if User.query.filter_by(id=mentorId).first() == None:
-        return False
-    num_pairings_can_make = User.query.filter_by(id=mentorId).first().num_pairings_can_make
-    if num_pairings_can_make == None:
-        num_pairings_can_make = 1 #default to 1 if the user does not have a set # pairings.
-    return mentorNumberOfTimesSelected(mentorId) < num_pairings_can_make
+def mentorSelected(mentorId): #if this mentor has been selected already
+    if Select.query.filter_by(mentor_id=mentorId).first() != None:
+        return True
+    return False
 
 
 @app.route('/mentor', methods=['POST'])
@@ -2145,7 +2125,7 @@ def feedPost():
     
     userMatchID = form.get('userID')
 
-    if not mentorCanBeSelected(userMatchID): 
+    if Select.query.filter_by(mentor_id=userMatchID).first() != None: 
         #somebody selected this mentor while the current user was on this page
         flash(u'That mentor has been selected already.', 'feedError')
         return redirect(url_for('mentor'))
@@ -2214,7 +2194,7 @@ def handle_csrf_error(e):
 NOTE ABOUT THE HANDLER FOR 413:
 The config MAX_CONTENT_LENGTH is set, so the connection will close before the file can be sent.
 This means that it will immediately abort and not run the errorhandler.
-This might be fixed by flask in the future? 
+This might be fixed in the future? 
 This should be handled client-side, since there is already a bit of code in my js file to gaurd against big files.
 """
 

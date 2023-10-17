@@ -34,13 +34,13 @@ function ready_document() { //will check if userArr length == 0 (no matches) and
     if(userArr != null && userArr.length == 0) {
         noFound = document.createElement("p");
         noFound.setAttribute("id", "noFound");
-        if(isStudent === "True") {
+        if(isStudent) {
             noFound.appendChild(document.createTextNode("No mentor matches found."));
         } else {
             noFound.appendChild(document.createTextNode("Please wait until you are selected by a mentee!"));
         }
         document.getElementById("noMatchDiv").appendChild(noFound);
-    } else if(isStudent === "False") {
+    } else if(!isStudent) {
         noFound = document.createElement("p");
         noFound.setAttribute("id", "noFound");
         noFound.appendChild(document.createTextNode("Please wait until you are selected by a mentee!"));
