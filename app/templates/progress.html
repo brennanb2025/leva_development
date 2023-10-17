@@ -105,25 +105,19 @@
         <div class="background">
             <section class="progress-tab">
 
-                <div class="head">
-                    My Progress & Guidance
+                <div class="head" id="header">
+                    {% if isMentee %}
+                        Your mentor
+                    {% else %}
+                        Your mentee
+                    {% endif %}
                 </div>
 
                 {% if matchedUsers|length > 0 %}
 
                     {% for matched_user in matchedUsers %}
 
-                    <br/><br/><br/><br/>
-                    Mentee: {{ matched_user.first_name }} {{ matched_user.last_name }}
-
                     <div class="progress-section" name="mentor" id="mentor">
-                        <div class="head2">
-                            {% if isMentee %}
-                                Your mentor
-                            {% else %}
-                                Your mentee
-                            {% endif %}
-                        </div>
                         
                         <!-- show mentor/mentee -->
                         <div class="mentor-card">
@@ -144,6 +138,13 @@
                                 <div class="head2">
                                     {{ matched_user.last_name }}
                                 </div>
+                                <div class="head2">
+                                    {% if matched_user.email_contact %}
+                                        {{ matched_user.email }}
+                                    {% else %}
+                                        {{ matched_user.phone_number }}
+                                    {% endif %}
+                                </div>
                                 <div class="purple-line"></div>
                                 <div class="division">
                                     {{ matched_user.division }}
@@ -160,40 +161,51 @@
 
                             {% if matchToMeetingInfo[matched_user.id]["progress_done"] %} 
                                 <div class="head2">
-                                    Congratulations! You have completed every progress step!
+                                    Congratulations! You have completed every progress step with {{ matched_user.first_name }} {{ matched_user.last_name }}!
                                 </div>
                             {% else %}
                                 <!--Upcoming meetings-->
-                                <div class="head2">Upcoming meeting:</div>
-                            
-                                <br/>
-                                Meeting #{{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["num"] }}:  {{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["title"] }}   ({{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["date"] }})
+
+                                <div class="mentee-label">
+                                    {% if isMentee %}
+                                        Mentor: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                    {% else %}
+                                        Mentee: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                    {% endif %}
+                                </div>
+
+                                <div class="meeting-head">
+                                    Meeting #{{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["num"] }}:  {{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["title"] }}   
+                                    <br/>(Complete by: {{ matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["date"] }})
+                                </div>
 
                                 <br/>
-
+                                
                                 <!--Each meeting is to have a description, some meeting notes, and a button to
                                     let the webpage know that the meeting is finished and is to be moved to the
                                     completed meetings page-->
                                 <div class="meeting-description">
-
-                                    <div style="font-weight: bold;">Description:</div>
-                                    {% for para in matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["desc"] %}
-                                        <div>{{para}}</div>
-                                    {% endfor %}
-
-                                    <br/>
+                                    {% if matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["desc"]|length > 0 and matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["desc"][0] != ''%}
+                                        <div style="font-weight: bold;">Description:</div>
+                                        {% for para in matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["desc"] %}
+                                            <div>{{para}}</div>
+                                        {% endfor %}
+                                        <br/>
+                                    {% endif %}
                                     
-
-                                    <div style="font-weight: bold;">Content:</div>
-                                    {% for para in matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["content"] %}
-                                        <div>{{para}}</div>
-                                    {% endfor %}
-                                    
+                                    {% if matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["content"]|length > 0 and matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["content"][0] != ''%}
+                                        <div style="font-weight: bold;">Meeting agenda:</div>
+                                        {% for para in matchToMeetingInfo[matched_user.id]["curr_meeting_info"]["content"] %}
+                                            <div>{{para}}</div>
+                                        {% endfor %}
+                                    {% endif %}
                                     <br/>
                                 </div>
 
                                 <form id="meetingDoneButton" action="{{ url_for('progress') }}" method="POST">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                                    <input type="hidden" name="matchedUserId" value="{{matched_user.id}}"/>
 
                                     <textarea id="meetingNotes" name="meetingNotes" placeholder="Meeting notes here..."></textarea>
                                     <br/>
@@ -206,39 +218,53 @@
                         <!--Column 1:<br/>-->
                         
                         <div class="meetings-container progress-section" name="completed" id="completed">
-                            
-                            {% if matchToMeetingInfo[matched_user.id]["prev_meeting_info"]|length == 0 %}
-                                <div class="head2 noneText">None yet!</div>
-                            {% endif %}
 
-                            <div class="half">
+                            <div class="half half-extend">
                                 <!--Each completed meeting has the same description and content from when it was upcoming,
                                     but the user now has the option to put some notes for the specific meeting-->
+
+                                <div class="mentee-label">
+                                    {% if isMentee %}
+                                        Mentor: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                    {% else %}
+                                        Mentee: {{ matched_user.first_name }} {{ matched_user.last_name }}
+                                    {% endif %}
+                                </div>
+
                                 <ul id="completedMeetingList">
                                     {% for pm in matchToMeetingInfo[matched_user.id]["prev_meeting_info"] %}
                                         <li>
-                                        <div style="font-weight: bold;">Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   ({{ pm["date"] }})</div>
+                                        <div style="font-weight: bold;">Meeting #{{ pm["num"] }}:  {{ pm["title"] }}   
+                                            <br/>({{ pm["date"] }})
+                                        </div>
                                         <br/>
-                                        <div style="font-weight: bold;">Description:</div> <br/> 
-                                        {% for para in pm["desc"] %}
-                                            <p>{{para}}</p>
-                                        {% endfor %}
-                                        <br/>
-
-                                        <div style="font-weight: bold;">Content:</div><br/>
-                                        {% for para in pm["content"] %}
-                                            <p>{{para}}</p>
-                                        {% endfor %}
-                                        <br/><br/>
+                                        {% if pm["desc"]|length > 0 and pm["desc"][0] != ''%}
+                                            <div style="font-weight: bold;">Description:</div> <br/> 
+                                            {% for para in pm["desc"] %}
+                                                <p>{{para}}</p>
+                                            {% endfor %}
+                                            <br/>
+                                        {% endif %}
+                                        
+                                        {% if pm["content"]|length > 0 and ["content"][0] != ''%}
+                                            <div style="font-weight: bold;">Meeting agenda:</div><br/>
+                                            {% for para in pm["content"] %}
+                                                <p>{{para}}</p>
+                                            {% endfor %}
+                                        {% endif %}
                                         </li>
 
                                         <div class="note-box">
                                             {{ pm["meetingNotes"] }}
                                         </div>
-                                        <br/><br/>
+                                        <br/><br/><br/>
                                     {% endfor %}
                                 </ul>
                             </div>
+
+                            {% if matchToMeetingInfo[matched_user.id]["prev_meeting_info"]|length == 0 %}
+                                <div class="head2 noneText">No meetings have been completed yet with {{ matched_user.first_name }} {{ matched_user.last_name }}!</div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -337,7 +363,23 @@
             if(showTheseElems.length != 0) {
                 for (var i = 0; i < showTheseElems.length; i++) {
                     showTheseElems.item(i).style.display = 'flex'
+                    showTheseElems.item(i).style.flexDirection = "column"
                 }
+            }
+
+            switch(id){
+                case "mentor":
+                    document.getElementById("header").innerHTML = `{% if isMentee %}
+                        Your mentor
+                    {% else %}
+                        Your mentee
+                    {% endif %}`
+                    break;
+                case "upcoming":
+                    document.getElementById("header").innerHTML = "Upcoming meetings"
+                    break;
+                case "completed":
+                    document.getElementById("header").innerHTML = "Completed Meetings"
             }
 
         }

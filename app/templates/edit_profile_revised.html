@@ -151,7 +151,12 @@
                                             </div>
                     
                                             <div class="answer">
-                                                <input value="{{ user.first_name }}" id="first_name" name="first_name"> <input value="{{ user.last_name }}" id="last_name" name="last_name">
+                                                <div>
+                                                    <input value="{{ user.first_name }}" id="first_name" name="first_name">
+                                                </div>
+                                                <div>
+                                                    <input value="{{ user.last_name }}" id="last_name" name="last_name">
+                                                </div>
                                             </div>
                                         </div>
             
@@ -183,7 +188,11 @@
                                                 {% endif %}
                                                 <div id="phoneNum">
                                                     Change phone number:<br/>
-                                                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="123-456-7890">
+                                                    {% if phone_num == none %} 
+                                                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="123-456-7890" value="">
+                                                    {% else %}
+                                                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="123-456-7890" value="{{phone_num}}">
+                                                    {% endif %}
                                                 </div>
             
                                                 <!--
@@ -236,9 +245,9 @@
                                             <div class="label">
                                                 Division:
                                             </div>
-                    
                                             <div class="answer">
-                                                <input id="division" name="division" value="{{ user.division }}">
+                                                <label for="e-mail">{{ formDivision.division.label }}</label>
+                                                {{ formDivision.division }}
                                             </div>
                                         </div>
             
@@ -607,19 +616,50 @@
                                             </div>
                                         </div>
                                         {% endif %}
+                                        -->
                                         
                                     </div>
                                     </div>
                                 </div>
 
                             </div>
-                            <button name="changeProfile" id="changeProfile">
+                            <button name="changeProfile" id="changeProfile" type="button" onclick="validate_then_submit()">
                                 Apply Changes
                             </button>
                         </form>
 
                     </div>
                     
+                </div>
+
+
+                <br/><br/>
+                <div class="edit-information">
+                    <div class="info info2">
+                        <div class="single">
+                            <form action="/edit-profile-password" method="POST" enctype="multipart/form-data" id="submitPwdForm">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <div class="label">
+                                    Edit password
+                                </div>
+
+                                <div class="answer">
+                                    <div>
+                                        <label for="password1">{{ formPwd.password.label }}</label>
+                                        {{ formPwd.password }}
+                                    </div>
+
+                                    <div>
+                                        <label for="password2">{{ formPwd.password2.label }}</label>
+                                        {{ formPwd.password2 }}
+                                    </div>
+                                </div>
+                                <button name="changePassword" id="changePassword" type="button" onclick="validate_password_then_submit()">
+                                    Change Password
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="single">

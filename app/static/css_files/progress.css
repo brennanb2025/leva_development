@@ -100,7 +100,7 @@
     flex-direction: column;
     justify-content: start;
     text-align: start;
-    min-width: 40%;
+    width: 100%;
 }
 
 #meetingDoneButton{
@@ -144,3 +144,18 @@
     }
 }
 
+.meeting-head{
+    margin-top: 2%;
+    width: 100%;
+    text-align: start;
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.mentee-label{
+    margin-top: 2%;
+    width: 100%;
+    text-align: center;
+    font-size: 25px;
+    font-weight: 700;
+}

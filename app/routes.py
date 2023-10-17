@@ -1,10 +1,8 @@
 #This file is the python flask backend
-
-from pickle import TRUE
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
 from app import app, db, s3_client#, oauth
 #import lm as well?^
-from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm
+from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm, EditDivisionForm
 from uuid import uuid4
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
         CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation
@@ -184,8 +182,15 @@ def currentMeetingSetDone():
 
     form = request.form
 
+    matchedUserId = form.get("matchedUserId")
+    if matchedUserId != None:
+        try:
+            matchedUserId = int(matchedUserId) #try cast to int
+        except:
+            return progress()
+
     if isMentee: 
-        selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        selectEntry = Select.query.filter_by(mentee_id=user.id, mentor_id=matchedUserId).first() #the entry of the mentor-mentee selection, or None
         if selectEntry != None:
             completionInfoMentee = ProgressMeetingCompletionInformation.query.filter(
                 ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
@@ -205,12 +210,11 @@ def currentMeetingSetDone():
                 #meeting notes already exist, setting mentee notes here
                 completionInfoMentee.set_meeting_notes(form.get("meetingNotes"), "mentee")
                 completionInfoMentee.set_completion_timestamp("mentee") #update timestamp
-
             selectEntry.inc_current_meeting_ID("mentee") #increment the meeting number
             db.session.commit()
 
     else:
-        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+        selectEntry = Select.query.filter_by(mentor_id=user.id, mentee_id=matchedUserId).first()
         if selectEntry != None:
             completionInfoMentor = ProgressMeetingCompletionInformation.query.filter(
                 ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
@@ -578,21 +582,17 @@ def registerPost():
         mentor_gender_preferenceForm = form1.get("radio_gender_preference")
         if not isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
             mentor_gender_preferenceForm = None #if mentor OR gender should not be taken into account, this should not be entered.
+        if not isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
+            mentor_gender_preferenceForm = None #if mentor OR gender should not be taken into account, this should not be entered.
 
         gender_identityForm = form1.get("radio_gender_identity")
         if isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
+        if isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
             gender_identityForm = None #if mentee, this should not be entered.
 
-        #changed division form to be 1:Freshman, 2:Sophomore, etc.
+
+        #changed division form to be a selector
         division_set = form1.get('division').strip()
-        if division_set == "1":
-            division_set = "Freshman"
-        elif division_set == "2":
-            division_set = "Sophomore"
-        elif division_set == "3":
-            division_set = "Junior"
-        else:
-            division_set = "Senior"
 
         division_preference_set = form1.get("divisionPreference")
         if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "False":
@@ -604,6 +604,7 @@ def registerPost():
             personality_1_set = form1.get("personality1").strip()
             personality_2_set = form1.get("personality2").strip()
             personality_3_set = form1.get("personality3").strip()
+
 
         businessRegisteredUnder = Business.query.filter_by(name=form1.get('business')).first()
         businessRegisteredUnder.inc_number_employees_currently_registered() #increment number of users registered for this user
@@ -867,11 +868,12 @@ def checkBasicInfo(form1):
                 success = False
                 flash(u'The number of mentors/mentees you are willing to have must be an integer.')
                 errors.append("num_pairings")
-
+        
     if form1.get('bio') == '':
         success = False
         flash(u'Your bio cannot be empty.', 'bioError')
         errors.append("bio")
+
     return (success, errors)
 
 
@@ -960,7 +962,7 @@ def editProfile():
             personality_1=personality_1, personality_2=personality_2, personality_3=personality_3, division=user.division,
             resumeUrl=resumeUrl, divisionPreference=divisionPreference,
             mentorGenderPreference=mentorGenderPreference, genderIdentity=genderIdentity,
-            formPwd=formPwd, 
+            formPwd=formPwd, formDivision=EditDivisionForm(division = user.division),
             user=user, userID=session.get('userID'))
 
 """@app.route('/edit-profile-test', methods=['GET'])
@@ -1094,19 +1096,21 @@ def editProfilePost():
             success = False
     
     changedMentorGenderSuccess = False
-    if u.is_student and form.get("radio_gender_preference") != None:
-        #ensuring that this form actually exists
-        if form.get("radio_gender_preference") != u.mentor_gender_preference: #changed preference --> check it
-            changedMentorGenderSuccess=checkMentorGenderPreference(form)
-            if not changedMentorGenderSuccess: #change unsuccessful.
-                success = False
+    if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #if gender preference should be taken into account, check it.
+        if u.is_student and form.get("radio_gender_preference") != None:
+            #ensuring that this form actually exists
+            if form.get("radio_gender_preference") != u.mentor_gender_preference: #changed preference --> check it
+                changedMentorGenderSuccess=checkMentorGenderPreference(form)
+                if not changedMentorGenderSuccess: #change unsuccessful.
+                    success = False
 
     changedGenderIdentitySuccess = False
-    if not u.is_student and form.get("radio_gender_identity") != None:
-        if form.get("radio_gender_identity") != u.gender_identity: #changed gender identity --> check it
-            changedGenderIdentitySuccess=checkGenderIdentity(form)
-            if not changedGenderIdentitySuccess: #change unsuccessful.
-                success = False
+    if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #if gender preference should be taken into account, check it.
+        if not u.is_student and form.get("radio_gender_identity") != None:
+            if form.get("radio_gender_identity") != u.gender_identity: #changed gender identity --> check it
+                changedGenderIdentitySuccess=checkGenderIdentity(form)
+                if not changedGenderIdentitySuccess: #change unsuccessful.
+                    success = False
             
     changedInputsSuccess = False
     if form.get("changedAttributes") == "True": #changed attributes --> check them
@@ -1114,11 +1118,14 @@ def editProfilePost():
         if not changedInputsSuccess: #change unsuccessful.
             success = False
     
+        
     changedPersonalitySuccess = False
-    if form.get("personality1") != u.personality_1 or form.get("personality2") != u.personality_2 or form.get("personality3") != u.personality_3: #changed --> check it
-        changedPersonalitySuccess=checkPersonality(form)
-        if not changedPersonalitySuccess: #change unsuccessful.
-            success = False
+    if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":
+        #only check if personality should be taken into account
+        if form.get("personality1") != u.personality_1 or form.get("personality2") != u.personality_2 or form.get("personality3") != u.personality_3: #changed --> check it
+            changedPersonalitySuccess=checkPersonality(form)
+            if not changedPersonalitySuccess: #change unsuccessful.
+                success = False
     
     changedDivisionSuccess = False
     if form.get("division") != u.division: #changed --> check it
@@ -1127,10 +1134,12 @@ def editProfilePost():
             success = False
     
     changedDivisionPreferenceSuccess = False
-    if form.get("divisionPreference") != u.division_preference: #changed --> check it
-        changedDivisionPreferenceSuccess=checkDivisionPreference(form, u.is_student)
-        if not changedDivisionPreferenceSuccess: #change unsuccessful.
-            success = False
+    if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True":
+        #only check if division preference should be taken into account
+        if form.get("divisionPreference") != u.division_preference: #changed --> check it
+            changedDivisionPreferenceSuccess=checkDivisionPreference(form, u.is_student)
+            if not changedDivisionPreferenceSuccess: #change unsuccessful.
+                success = False
 
     changedContactMethodSuccess = False
     if form.get("radio_contact") == "Phone number" and u.email_contact \
@@ -1746,19 +1755,19 @@ def deleteProfile():
         if user.is_student: #is mentee
             selectEntry = Select.query.filter_by(mentee_id=user.id).first()
 
-            ProgressMeetingCompletionInformation.query.filter(
-                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
-                ProgressMeetingCompletionInformation.select_id == selectEntry.id
-            ).delete()
+            for s in selectEntry:
+                ProgressMeetingCompletionInformation.query.filter(
+                    ProgressMeetingCompletionInformation.select_id == s.id
+                ).delete()
 
             Select.query.filter_by(mentee_id=user.id).delete()
         else:
             selectEntry = Select.query.filter_by(mentor_id=user.id).first()
 
-            ProgressMeetingCompletionInformation.query.filter(
-                ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
-                ProgressMeetingCompletionInformation.select_id == selectEntry.id
-            ).delete()
+            for s in selectEntry:
+                ProgressMeetingCompletionInformation.query.filter(
+                    ProgressMeetingCompletionInformation.select_id == s.id
+                ).delete()
 
             Select.query.filter_by(mentor_id=user.id).delete()
 
@@ -1923,19 +1932,28 @@ def feedMentee(user):
             users.append(u)
 
     for u in users: #initialize user dictionary
-        userDict[u] = 0
-        #initialize as 0
+        userDict[u] = 1
+        #initialize as 1
 
     #check gender preference/identity
     if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #only check if flag for gender/identity is "True"
         for u in users: #initialize user dictionary
             if (user.mentor_gender_preference == "male" and u.gender_identity == "male") or (user.mentor_gender_preference == "female" and u.gender_identity == "female"):
                 #matching gender preference / gender
-                userDict[u] = heuristicVals["gender_pref"]
+                userDict[u] += heuristicVals["gender_pref"]
             #ignore case mentor gender preference == "noPreference".
 
-
     #division preferences
+    if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #only check if flag for division preference is "True"
+        for u in users:
+            if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
+                #other user division preference
+                userDict[u] += heuristicVals["division_pref"]
+                matches["division_pref"] += 1
+            if (user.division_preference == "same" and user.division == u.division) or user.division_preference == "noPreference":
+                #this user division preference
+                userDict[u] += heuristicVals["division_pref"]
+                matches["division_pref"] += 1
     if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #only check if flag for division preference is "True"
         for u in users:
             if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
@@ -1969,7 +1987,6 @@ def feedMentee(user):
             if u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3:
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-    
 
     schoolDict = {} #contains all the matching schools for each user (user : [school])
     thisUserEducationTagIDs = user.rtn_education()

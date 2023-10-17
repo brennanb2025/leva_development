@@ -377,7 +377,7 @@ class Select(db.Model, Base):
     def __repr__(self):
         return '<Select {}>'.format(str(self.id) + ", mentor=" + str(self.mentor_id) + ", mentee=" + str(self.mentee_id) + 
                 ", current_meeting_number_mentor=" + str(self.current_meeting_number_mentor) + 
-                ", current_meeting_number_mentee=" + str(self.current_meeting_number_mentor))
+                ", current_meeting_number_mentee=" + str(self.current_meeting_number_mentee))
 
 
 #Business stores information about each business that has registered users and how many users are currently registered under each one.
