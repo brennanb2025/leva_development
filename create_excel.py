@@ -1,5 +1,4 @@
 from decimal import DivisionByZero
-import xlwt
 from xlwt import Workbook
 from app import db
 from app.input_sets.models import Business, Select, User, \
