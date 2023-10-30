@@ -490,3 +490,24 @@ class ProgressMeetingCompletionInformation(db.Model, Base):
                 ", completion timestamp mentor: " + str(self.completion_timestamp_mentor) +
                 ", completion timestamp mentee: " + str(self.completion_timestamp_mentee) +
                 ", mentee notes: " + str(self.mentee_meeting_notes)) #how to print
+
+
+
+class AdminUser(db.Model, Base):
+
+    __tablename__ = "AdminUser"
+    
+    id = db.Column(db.Integer, primary_key=True) #id = primary key
+    email = db.Column(db.String(64), index=True, unique=True) #defined as strings, max length = ().
+    password_hash = db.Column(db.String(128)) #not storing plaintext pwd, hashing first.
+    first_name = db.Column(db.String(64))
+    last_name = db.Column(db.String(64))
+
+    business_id = db.Column(db.Integer) #the business that this admin user manages
+
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password) #<^=pwd hashing logic

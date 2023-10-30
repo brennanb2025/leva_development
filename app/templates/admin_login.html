@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Very sophisticated admin login</title>
+</head>
+<body>
+    <marquee
+        direction="down"
+        width="600"
+        height="300"
+        behavior="alternate"
+        style="border:solid">
+        <marquee behavior="alternate"><h1>Login admin page</h1></marquee>
+    </marquee>
+    <form action="{{ url_for('admin_login_post') }}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password">
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
