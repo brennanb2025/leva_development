@@ -13,8 +13,11 @@ admin_get_events
 logData(num, msg)
 
 """
-from app.input_sets.models import User, Select, Business, Event
+from app.input_sets.models import User, Select, Business, Event, ProgressMeetingCompletionInformation
 from app import app, db
+import app.model.feed as feed
+from app.utils.create_excel import create_excel_sheet
+
 
 def admin_validate_login(username, password):
     return str(app.config['ADMIN_PASSWORD']) == password and str(app.config['ADMIN_USERNAME']) == username
@@ -75,7 +78,7 @@ def user_matches(businessId):
 
     dictMenteeToMentor = {}
     for s_u in match_and_users:
-        if not dictMenteeToMentor.__contains__(s_u.User):
+        if s_u.User not in dictMenteeToMentor:
             dictMenteeToMentor[s_u.User] = []
         dictMenteeToMentor[s_u.User].append(User.query.filter_by(id=s_u.Select.mentor_id).first())
 
@@ -101,7 +104,120 @@ def get_events(action, startTime, endTime):
     return Event.query.filter_by(action=action).filter(
         (Event.timestamp >= startTime) & (Event.timestamp <= endTime)).limit(100).all()
 
+#gets all matches (even if user is already matched, including already matched people.)
+def get_all_matches(userId):
+    #returns array of objects: match info (userid, matching stuff, score, etc)
 
+    user = User.query.filter_by(id=userId).first()
+
+    if user is None:
+        return None
+
+    if user.is_student:
+        return feed.get_all_matches(userId)
+    return None
+
+
+#get potential future matches for user
+def get_potential_matches(userId):
+    #returns array of objects: match info (userid, matching stuff, score, etc)
+
+    user = User.query.filter_by(id=userId).first()
+    if user is None:
+        return None
+
+    if user.is_student:
+        return feed.feedMentee(userId)
+    return None
+
+#does not handle multiple mentees : one mentor. Must be one mentor : 1 mentee
+def validate_matches(matches): #takes {menteeId : mentorId}
+    invalidMatches = {}
+
+    #verify all are mentee:mentor
+    for m in matches.keys():
+        if not m.is_student:
+            invalidMatches[m] = matches[m]
+        if matches[m].is_student:
+            invalidMatches[m] = matches[m]
+
+    #handle multiple mentees choosing the same mentor
+
+    numMentorMatching = {}
+    #get the # each mentor is matched:
+    for m in matches.values():
+        if m in numMentorMatching:
+            numMentorMatching[m] += 1
+        else:
+            numMentorMatching[m] = 1
+
+
+    #verify none already in database
+    for m in matches.keys():
+
+        #this match doesn't exist in the db
+        selectQuery = db.session.query( \
+                Select
+            ).filter( \
+                Select.mentee == m.id and Select.mentor_id == matches[m].id
+            ).first()
+        if selectQuery != None:
+            invalidMatches[m] = matches[m] #invalid
+
+        #check if the pairing can each make another match
+        mentee = User.query.filter_by(id=m.id)
+        mentor = User.query.filter_by(id=matches[m].id)
+        selectsMentee = Select.query.filter_by(mentee_id=m.id).all()
+        selectsMentor = Select.query.filter_by(mentor_id=matches[m].userId).all()
+        
+        if len(selectsMentee) >= mentee.num_pairings_can_make or \
+                numMentorMatching[matches[m].id]+len(selectsMentor) >= mentor.num_pairings_can_make:
+            #can't go over number of times this mentor has been chosen in the given dict
+            # + the # of pairings the mentor was already a part of.
+            invalidMatches[m] = matches[m] #invalid
+
+    return invalidMatches
+
+
+def applyMatches(matches): #takes {menteeId : mentorId} -> bool denoting success
+    if len(validate_matches(matches)) != 0:
+        return False
+
+    for m in matches.keys: #post new select for each pairing
+        success = feed.feedPost(m.id, matches[m].id)
+        if not success:
+            return False
+
+    return True
+    
+def deleteMatch(menteeId, mentorId):
+
+    selectQuery = db.session.query( \
+                Select
+            ).filter( \
+                Select.mentee_id == menteeId and Select.mentor_id == mentorId
+            ).first()
+
+    if selectQuery is None:
+        return False
+
+    print("deleting match:", selectQuery)
+
+    #delete any progress meetings associated with this user
+    ProgressMeetingCompletionInformation.query.filter(
+            #ProgressMeetingCompletionInformation.num_progress_meeting == selectQuery.current_meeting_number_mentee,
+            ProgressMeetingCompletionInformation.select_id == selectQuery.id
+        ).delete()    
+    
+    #delete the select
+    Select.query.filter_by(id=selectQuery.id).delete()
+
+    db.session.commit() #only commit when all deletes are done
+    return True
+    
+
+def createExcelSheet(businessId):
+    return create_excel_sheet(businessId)
 
 
 def logData(num, msg, userId):

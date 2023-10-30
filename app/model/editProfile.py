@@ -155,7 +155,7 @@ def deleteProfile(user):
         selectEntry = Select.query.filter_by(mentee_id=user.id).first()
 
         ProgressMeetingCompletionInformation.query.filter(
-            ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
+            #ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
             ProgressMeetingCompletionInformation.select_id == selectEntry.id
         ).delete()
 
@@ -164,7 +164,7 @@ def deleteProfile(user):
         selectEntry = Select.query.filter_by(mentor_id=user.id).first()
 
         ProgressMeetingCompletionInformation.query.filter(
-            ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
+            #ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
             ProgressMeetingCompletionInformation.select_id == selectEntry.id
         ).delete()
 

@@ -1,5 +1,5 @@
 #This file is the python flask backend
-from flask import request, render_template, flash, redirect, url_for, session, make_response, send_from_directory
+from flask import request, render_template, flash, redirect, url_for, session, make_response, send_file
 from app import app, db#, s3_client#, oauth
 #import lm as well?^
 from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm
@@ -27,6 +27,7 @@ from datetime import timedelta
 from flask import jsonify
 #from requests_oauthlib import OAuth2Session
 import json
+import io
 
 import app.model.admin as admin
 import app.model.progress as progressFuncs
@@ -62,11 +63,11 @@ def portal():
     return render_template('portal.html', userID=session.get('userID'))
 
 
-@app.route("/admin-cac68d5c-70dd-426a-ae05-195b2565b966", methods = ['GET'])
+@app.route("/admin", methods = ['GET'])
 def admin_login():
     return render_template("admin_login.html")
 
-@app.route("/admin-cac68d5c-70dd-426a-ae05-195b2565b966", methods = ['POST'])
+@app.route("/admin", methods = ['POST'])
 def admin_login_post():
     # check to see if the login credentials are correct, then
     #if username and password match...
@@ -225,6 +226,96 @@ def admin_get_events_exceptions():
                 "timestamp":e.timestamp
             } 
                 for e in admin.get_events(action, startTime, endTime)])
+
+
+@app.route("/admin-lookup-user-feed", methods = ['GET'])
+def admin_lookup_user_feed():
+    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return
+
+    userId = request.args.get("userid")
+    matches = admin.get_potential_matches(userId)
+    jsonRtn = {
+        "userId":matches.userId,
+        "matches":
+        [
+            {
+                "mentor": m.mentor.id,
+                "mentorInterestMatches": m.mentorInterestMatches,
+                "mentorCareerMatches": m.mentorCareerMatches,
+                "mentorEducationMatches": m.mentorEducationMatches,
+                "score": m.score
+            }
+            for m in matches.matches
+        ]
+    }
+
+
+    return jsonify(jsonRtn)
+
+
+@app.route("/admin-lookup-user-feed-all", methods = ['GET'])
+def admin_lookup_user_feed_all():
+    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return
+
+    userId = request.args.get("userid")
+    allMatches = admin.get_all_matches(userId)
+    jsonRtn = {
+        "userId":allMatches.userId,
+        "matches":
+        [
+            {
+                "mentor": m.mentor.id,
+                "mentorInterestMatches": m.mentorInterestMatches,
+                "mentorCareerMatches": m.mentorCareerMatches,
+                "mentorEducationMatches": m.mentorEducationMatches,
+                "score": m.score
+            }
+            for m in allMatches.matches
+        ]
+    }
+
+    return jsonify(jsonRtn)
+
+@app.route("/admin-delete-match", methods = ['POST'])
+def admin_delete_match():
+    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return
+
+    menteeId = request.form.get("menteeId")
+    mentorId = request.form.get("mentorId")
+
+    if menteeId is None or mentorId is None:
+        return jsonify({"success":False})
+
+    success = admin.deleteMatch(menteeId, mentorId)
+
+    return jsonify({"success":success})
+
+
+@app.route("/business-excel")
+def admin_get_business_excel():
+    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+        return
+
+    businessId = request.args.get("businessId")
+    filename = admin.createExcelSheet(businessId)
+
+    print("filename:",filename)
+
+    return_data = io.BytesIO()
+    with open(filename, 'rb') as fo:
+        return_data.write(fo.read())
+    # (after writing, cursor will be at last byte, so move it to start)
+    return_data.seek(0)
+
+    os.remove(filename)
+
+    return send_file(return_data, 
+            attachment_filename=filename, 
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True)
 
 
 @app.route('/mentor')
@@ -1088,7 +1179,7 @@ def getFeed():
 
     userId = session.get('userID')
 
-    dictFeed = feed.feedMentee(userId)
+    dictFeed = feed.feedMenteeOld(userId)
     if dictFeed == None:
         return None
     return jsonify(dictFeed)
