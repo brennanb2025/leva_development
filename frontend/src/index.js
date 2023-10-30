@@ -15,8 +15,18 @@ const router = createBrowserRouter([
     element: <App />,
   },
   {
-    path: "/react-test/react-routing-test",
+    path: "/react-routing-test",
     element: <div>Wow this worked</div>
+  },
+  {
+    path: "*",
+    element:
+      <div style={{ textAlign: 'center' }}>
+        <br /><br />
+        <h1 style={{ color: "#621ae7" }}>404</h1>
+        <h1>Page not found.</h1><br />
+        <a href="/">Home Page</a>
+      </div>
   }
 ]);
 

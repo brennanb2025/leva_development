@@ -2597,11 +2597,13 @@ def size_error(e):
 # inbuilt function which takes error as parameter
 def not_found(e):
     # defining function
-    dictLog = {}
-    dictLog['code'] = 404
-    dictLog['desc'] = "404 error"
-    logData(16, json.dumps(dictLog))
-    return render_template("404_error.html")
+    # dictLog = {}
+    # dictLog['code'] = 404
+    # dictLog['desc'] = "404 error"
+    # logData(16, json.dumps(dictLog))
+    # return render_template("404_error.html")
+
+    return send_from_directory("../frontend/build", 'index.html')
 
 
 """
