@@ -605,12 +605,23 @@ input:focus{
         display: inline-block;
     }
 
+    .home .description-text{
+        width: 80%;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
     .home h3{
-        font-size: 3.9vw;
+        font-size: 6vw;
+       
     }
 
     .home .header-text{
         font-size: 10vw;
+    }
+
+    .launch a{
+        font-size: 2.5vw;
     }
 
     .launch-box .launch{
@@ -644,7 +655,7 @@ input:focus{
 
     .about{
         flex-direction: column;
-        height: 100%;
+        min-height: 100%;
     }
 
     .about .half{
@@ -665,19 +676,24 @@ input:focus{
     }
 
     .head1{
-        font-size: 2.4vw;
+        font-size: 4vw;
     }
 
     .head2{
-        font-size: 3.3vw;
+        font-size: 5vw;
     }
 
     .text1{
-        font-size: 2.4vw;
+        font-size: 5vw;
+        line-height: 6vw;
     }
 
     .register-box .register{
         height: 10vw;
-        min-width: 11vw;
+        min-width: 15vw;
+    }
+
+    .step-image{
+        width: 100%;
     }
   }

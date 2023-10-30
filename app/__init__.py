@@ -3,10 +3,12 @@ import os
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_cors import CORS
 #from authlib.integrations.flask_client import OAuth
 
 application = app = Flask(__name__)
 app.config.from_object(Config)
+CORS(app)
 
 #csrf protection
 from flask_wtf.csrf import CSRFProtect

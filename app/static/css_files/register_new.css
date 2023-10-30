@@ -257,3 +257,59 @@ input{
        background: white;
    }
 }
+
+@media (max-width: 425px) {
+    .register-box .register{
+        width: 20vw;
+        height: 8vw;
+    }
+
+    .registration-container .content{
+        width: 90%;
+    }
+
+    input{
+        height: 8vw;
+        font-size: 4vw;
+    }
+
+    label{
+        font-size: 4vw;
+    }
+
+    .regtext{
+        padding-left: 8vw;
+        height: 6vw;
+        font-size: 4vw;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .decoration-container{
+        display: none;
+    }
+
+    .registration-container{
+        flex-basis: 100%;
+    }
+
+    .checkmark {
+        height: 6vw;
+        width: 6vw;
+      }
+
+    .regtext .checkmark:after {
+        top: 1.6vw;
+       left: 1.6vw;
+       width: 2.8vw;
+       height: 2.8vw;
+       border-radius: 50%;
+       background: white;
+   }
+
+   .bio textarea{
+        font-size: 4vw;
+   }
+
+}
