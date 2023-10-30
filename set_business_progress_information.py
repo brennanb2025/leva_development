@@ -23,7 +23,8 @@ def get_progress_meetings(business_id): #returns the progress meetings from a gi
 #print(Select.query.all())
 
 
-business_name = "test_business"
+business_name = "SWE"
+#business_name = "test_progress_meetings_business"
 business_id = Business.query.filter_by(name=business_name).first().id
 
 progressMeetings = get_progress_meetings(business_id)
@@ -47,33 +48,35 @@ for pm in progressMeetings:
 
 businessID = Business.query.filter_by(name=business_name).first().id
 
-titles = []
-titles.append("Initial progress meeting")
-
-titles.append("Meeting 2")
-titles.append("Meeting 3")
-titles.append("title3")
-titles.append("title4")
-
-
-content_descriptions = []
-content_descriptions.append("""
-    Topics To Guide Your First Meeting:\n
-    ∙ Establish your goals for the mentorship program. Be clear about what you are looking for and how you can help each other. \n
-    ∙ Discuss female empowerment in the workplace, what that looks like to you, and how both the mentee and the mentor can actively support women.  \n
-    ∙ Learn about career history and personal interests.  \n
-    ∙ Coordinate another time to meet that works for both of you.
-""")
+#titles = []
+#titles.append...
+titleNovember = "Getting to Know Your Mentor/Mentee" #November
+titleDecember = "Final Exams Prep and Advice" #December
+titleJanuary = "Choosing a Major and Academic Opportunities at NU" 
+titleFebruary = "Finding Your Path at NU (Clubs, Social Groups, Sports, Study Abroad, etc)"
+titleMarch = "Careers, Internships, Research, and Fellowships"
+titleApril = "General Advice from Mentors - \"I wish I had...\""
+titleMay = "Summer Plans and Plans for Next Year"
+titleJune = "Finals and Goodbyes!"
 
 
-content_descriptions.append("Meeting 2 description!")
-content_descriptions.append("Meeting 3 description")
-content_descriptions.append("description3")
-content_descriptions.append("description4")
+#content_descriptions = []
+#content_descriptions.append(...)
 
 
-contentList = []
-contentList.append("""
+#contentList = []
+#contentList.append("""
+
+contentNovember = """After you have interacted with your mentor/mentee at least once, please complete this mandatory 10-question survey about your initial experience. \n
+https://forms.gle/BADUhCdxwLCJXHqeA
+"""
+
+contentDecember = """After you have interacted with your mentor/mentee at least once, please complete this mandatory 10-question survey about your initial experience. \n
+https://forms.gle/BADUhCdxwLCJXHqeA
+"""
+
+
+"""
 Sample Agenda \n
 \n
 Example Questions for Mentors\n
@@ -93,15 +96,17 @@ Example Questions for Mentees\n
 ∙ What aspects of your career have given you fulfillment?\n
 ∙ How have past mentorship relationships impacted you?\n
 ∙ What advice do you have for me at my stage of career?\n
-""")
+"""
 
+"""
 contentList.append("Meeting 2 content!")
 contentList.append("Meeting 3 content!")
 contentList.append("content3")
-contentList.append("content4")
+contentList.append("content4")"""
 
 #Create the meetings:
 
+"""
 first_meeting_date = datetime.datetime(2022, 10, 26) #10/26/22
 numMeetings = 4
 timeBetweenMeeting = 10 #days
@@ -115,6 +120,80 @@ for i in range(numMeetings):
             content_description=content_descriptions[i],
             content=contentList[i])
     db.session.add(newMeeting)
+"""
+
+novemberDate = datetime.datetime(2022,11,30)
+decemberDate = datetime.datetime(2022,12,31)
+januaryDate = datetime.datetime(2023,1,31)
+februaryDate = datetime.datetime(2023,2,28)
+marchDate = datetime.datetime(2023,3,31)
+aprilDate = datetime.datetime(2023,4,30)
+mayDate = datetime.datetime(2023,5,31)
+juneDate = datetime.datetime(2023,6,30)
+
+meetingNovember = ProgressMeeting(business_ID=businessID,
+        completion_date=novemberDate,
+        num_meeting = 1,
+        title=titleNovember,
+        content_description="",
+        content=contentNovember)
+db.session.add(meetingNovember)
+
+meetingDecember = ProgressMeeting(business_ID=businessID,
+        completion_date=decemberDate,
+        num_meeting = 2, 
+        title=titleDecember,
+        content_description="",
+        content=contentDecember)
+db.session.add(meetingDecember)
+
+meetingJanuary = ProgressMeeting(business_ID=businessID,
+        completion_date=januaryDate,
+        num_meeting = 3, 
+        title=titleJanuary,
+        content_description="",
+        content="")
+db.session.add(meetingJanuary)
+
+meetingFebruary = ProgressMeeting(business_ID=businessID,
+        completion_date=februaryDate,
+        num_meeting = 4, 
+        title=titleFebruary,
+        content_description="",
+        content="")
+db.session.add(meetingFebruary)
+
+meetingMarch = ProgressMeeting(business_ID=businessID,
+        completion_date=marchDate,
+        num_meeting = 5, 
+        title=titleMarch,
+        content_description="",
+        content="")
+db.session.add(meetingMarch)
+
+meetingApril = ProgressMeeting(business_ID=businessID,
+        completion_date=aprilDate,
+        num_meeting = 6, 
+        title=titleApril,
+        content_description="",
+        content="")
+db.session.add(meetingApril)
+
+meetingMay = ProgressMeeting(business_ID=businessID,
+        completion_date=mayDate,
+        num_meeting = 7, 
+        title=titleMay,
+        content_description="",
+        content="")
+db.session.add(meetingMay)
+
+meetingJune = ProgressMeeting(business_ID=businessID,
+        completion_date=juneDate,
+        num_meeting = 8, 
+        title=titleJune,
+        content_description="",
+        content="")
+db.session.add(meetingJune)
 
 
 

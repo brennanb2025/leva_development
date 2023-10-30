@@ -805,6 +805,7 @@ def editProfilePost():
             if resp.careerInterestError:
                 flash(u''+resp.careerInterestErrorMessage, 'careerInterestError')
     
+        
     changedPersonalitySuccess = False
     if form.get("personality1") != u.personality_1 or form.get("personality2") != u.personality_2 or form.get("personality3") != u.personality_3: #changed --> check it
         changedPersonalitySuccess=editProfileFuncs.checkPersonality(form.get("personality1"), form.get("personality2"), form.get("personality3"))

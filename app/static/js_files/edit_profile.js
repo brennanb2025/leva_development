@@ -3,6 +3,8 @@ const maxRows = 10;
 let rowArrCint = [];
 let rowArrEdu = [];
 let rowArrTag = [];
+let formProfileSubmit;
+let formPwdSubmit;
 
 let cropper;
 
@@ -22,7 +24,7 @@ function post_image() {
     if(originalPicture.value === "") {
         errorNoPictureSelected();
     } else {
-        let formData = new FormData();
+        let formData = new FormData(); //create new form to submit (with just the cropped image)
         if(croppedImg.value === "") {
             alert("No new image found. Please click on the cropped image before applying changes.");
         } else {
@@ -173,7 +175,7 @@ function init(contact_method) {
     //document.getElementById("imgStuff").style.display = "none"; //hide all image back
     //document.getElementById("vidStuff").style.display = "none"; //hide all video back
 
-    if(contact_method === "True") {
+    if(contact_method) {
         document.getElementById("phoneNum").style.display = "none"; //hide input for phone number div
     }
 
@@ -273,6 +275,139 @@ if(inputFileResume) { //ensure not null
     console.log("Null");
 }
 
+//window ready
+window.addEventListener('load', function() {
+    formProfileSubmit = document.getElementById("editProfileForm")
+    formPwdSubmit = document.getElementById("submitPwdForm")
+})
+
+function validate_then_submit() {
+    deleteErrorMessages()
+    errors = client_validate_everything()
+    if(Object.keys(errors).length == 0) { //validate passes --> submit
+        formProfileSubmit.submit()
+    } else {
+        show_validation_errors(errors)
+    }
+}
+
+function validate_password_then_submit() {
+    deleteErrorMessages()
+    errors = client_validate_password()
+    if(Object.keys(errors).length == 0) { //validate passes --> submit
+        formPwdSubmit.submit()
+    } else {
+        show_validation_errors(errors)
+    }
+}
+
+function deleteErrorMessages() {
+    $('.error').remove();
+}
+
+function show_validation_errors(errors, stage) { //errors is a dictionary of errors that happened during server-side validation
+    if(errors === null || errors === undefined || Object.keys(errors).length === 0) {
+        //let errors = document.getElementById(stage).getElementsByClassName("error");
+        //console.log(errors)
+        return
+    }
+    for (const [key, value] of Object.entries(errors)) {
+        //console.log(document.getElementById(key).childNodes)
+        let input = document.getElementById(key);
+        input.style.borderColor = "red"
+        setTimeout(() => {
+            document.getElementById(key).style = ""
+        }, 3000)
+        let error_node = document.createElement("span");
+        error_node.className = "error"
+        error_node.style.color = "red";
+        error_node.innerHTML = value;
+        input.parentNode.appendChild(error_node)
+    }
+    alert("Please fix the registration errors on this page!")
+}
+
+
+function client_validate_password() {
+    var errors = {}
+    success = true
+
+    if(formPwdSubmit.password.value === '') {
+        errors["password"] = 'Please enter a password.'
+        success = false
+    }
+    if(formPwdSubmit.password2.value === '') {
+        errors["password2"] = 'Please reenter your password.'
+        success = false
+    }
+    if(success) { //everything correct up to this point
+        if(formPwdSubmit.password.value != formPwdSubmit.password2.value) { //passwords don't match
+            errors["password2"] = 'Passwords do not match.'
+        }
+    }
+
+    return errors
+}
+
+function client_validate_everything() {
+    var errors = {}
+    success = true
+
+    if(document.getElementById("first_name").value === '') {
+        errors["first_name"] = 'Please enter a first name.'
+        success = false
+    }
+    if(document.getElementById("last_name").value === '') {
+        errors["last_name"] = 'Please enter a last name.'
+        success = false
+    }
+
+    if(!($(document.getElementById("emailBtn")).is(':checked') && $(document.getElementById("emailBtn")).val() == 'Email') && document.getElementById("phoneNumber").value === "") { 
+        //user chose to be contacted by phone
+        errors["phoneNumber"] = 'Your phone number cannot be empty.'
+    }
+
+
+    //location
+    if(document.getElementById("city_name").value === '') {
+        errors['city_name'] = 'Please enter a city.'
+    }
+
+    //bio
+    if(document.getElementById("bio").value === "") {
+        errors['bio'] = 'Your bio cannot be empty.'
+    }
+
+    // Commented out for beta test
+    // if(document.getElementById("personality1").value === "" || document.getElementById("personality2").value === "" ||
+    //         document.getElementById("personality3").value === "") {
+    //     errors['personality'] = "Please enter three words or phrases that describe you."
+    // }
+
+
+    //division
+    if(document.getElementById("division").value === '') {
+        errors['division'] = 'Please enter your division within the company.'
+    }
+
+    // if(document.getElementById("current_occupation").value === "") {
+    //     errors['current_occupation'] = 'Please enter your current occupation.'
+    // }
+
+    //validate matching attributes
+    if(document.getElementById("num_tags").value === "0") {
+        errors['num_tags'] = 'Please enter at least one interest.'
+    }
+
+    if(document.getElementById("num_career_interests").value === "0") {
+        errors['num_career_interests'] = 'Please enter at least one career interest.'
+    }
+
+    if(document.getElementById("num_education_listings").value === "0") {
+        errors['num_education_listings'] = 'Please enter at least one school.'
+    }
+    return errors
+}
 
 
 function setPreexistingAttributes(dataInterest, dataCareerInterest, dataEducation) {
