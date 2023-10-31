@@ -1,6 +1,6 @@
 from decimal import DivisionByZero
-import xlwt
 from xlwt import Workbook
+from io import BytesIO
 from app import db
 from app.input_sets.models import Business, Select, User, \
         ProgressMeeting, Tag, CareerInterest, School, ProgressMeetingCompletionInformation
@@ -28,13 +28,14 @@ EDUCATION = 18
 
 
 
-def get_business_name():
-    name = input("Business name: ")
-    name = str(name)
-    if Business.query.filter_by(name=name).first() == None:
-        print("Failure - business with that name does not exist.")
+def create_excel_sheet(id):
+    business = Business.query.filter_by(id=id).first()
+    if business is not None:
+        filename = print_to_sheet(business)
+        return filename
     else:
-        print_to_sheet(name)
+        print("Business with that id does not exist.")
+        return None
 
 
 
@@ -64,15 +65,14 @@ def write_col_guide(sheet):
     sheet.write(0, CAREER_INTERESTS_EXPERIENCE, "Career interests/experience")
     sheet.write(0, EDUCATION, "Education")
 
-def print_to_sheet(name):
+def print_to_sheet(business):
+
     # Create workbook
     wb = Workbook()
-    
+
     # Create sheet
     sheet1 = wb.add_sheet('Sheet 1')
     write_col_guide(sheet1)
-
-    business = Business.query.filter_by(name=name).first()
 
     users = User.query.filter_by(business_id=business.id)
     cnt = 1
@@ -193,9 +193,12 @@ def print_to_sheet(name):
 
         cnt+=1
     
-    wb.save("excel_spreadsheets/" + name.replace(" ", "_") + \
-        "_spreadsheet_(" + datetime.today().strftime('%Y-%m-%d') + ").xls") #format datetime into month/day/year
-    print("Success!")
+    filename = "excel_spreadsheets/" + business.name.replace(" ", "_") + \
+        "_spreadsheet_(" + datetime.today().strftime('%Y-%m-%d') + ").xls"
+    #format datetime into month/day/year
+    wb.save(filename) 
+
+    return filename
 
 
 def write_meeting_info(sheet1, business_id, role, select, cnt):
@@ -229,8 +232,9 @@ def write_meeting_info(sheet1, business_id, role, select, cnt):
         sheet1.write(cnt, LAST_MEETING_NUMBER, "0") #meeting number
 
 
+
 #call starter function
-get_business_name()
+#get_business_name()
 
 """
 if __name__ == '__main__':

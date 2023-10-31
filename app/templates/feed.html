@@ -88,8 +88,8 @@
     <script type="text/javascript">
         $(document).ready(function(){
 
-            if("{{find_match}}" == "True") {
-                init("{{isStudent}}");
+            if({{find_match|tojson}} == true) {
+                init({{isStudent|tojson}});
                 get_new_users(function() { //callback: pass this function as an argument to the get_new_users function.
 
                     async function waitThenShowSlides() { //show the slide

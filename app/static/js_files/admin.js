@@ -149,6 +149,77 @@ function user_matches() { //get new users and set document
 }
 
 
+function feed_for_user() { //get new users and set document
+    $.ajax({
+        url: Flask.url_for("admin_lookup_user_feed"), 
+        type:'GET',
+        data: {
+            "userid" : document.getElementById("userid").value
+        },
+        success: function(data) {
+            //do something here based on data)
+            document.getElementById("user-display").innerHTML = JSON.stringify(data)
+        }
+    });
+}
+
+
+function get_all_user_matches() { //get new users and set document
+    $.ajax({
+        url: Flask.url_for("admin_lookup_user_feed_all"), 
+        type:'GET',
+        data: {
+            "userid" : document.getElementById("userid").value
+        },
+        success: function(data) {
+            //do something here based on data)
+            document.getElementById("user-display").innerHTML = JSON.stringify(data)
+        }
+    });
+}
+
+
+function unmatch_users() { //unmatch two users
+    $.ajax({
+        url: Flask.url_for("admin_delete_match"), 
+        type:'POST',
+        data: {
+            "menteeId" : document.getElementById("menteeid").value,
+            "mentorId" : document.getElementById("mentorid").value
+        },
+        success: function(data) {
+            //do something here based on data)
+            document.getElementById("match-display").innerHTML = JSON.stringify(data)
+        }
+    });
+}
+
+
+function get_excel_sheet() { //get new users and set document
+
+    fetch(Flask.url_for("admin_get_business_excel") + 
+            `?businessId=${document.getElementById("businessid").value}`)
+        .then(res=>{
+            return res.blob();
+            //return new Blob(res, { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        }).then(blob=>{
+
+            console.log(blob);
+            //download(blob)
+            let el = document.createElement("a"); 
+            // creates anchor element but doesn't add it to the DOM
+            el.setAttribute("download", ["user-statuses.xslx"]) 
+
+            // make the link downloadable on click
+            let url = window.URL.createObjectUrl(blob); 
+            // creates a url to the retrieved file
+
+            el.href = url; // set the href attribute attribute
+            el.click(); 
+        }).catch(err=>console.log(err));
+}
+
+
 function business_query() { //get new users and set document
     $.ajax({
         url: Flask.url_for("admin_lookup_business"), 

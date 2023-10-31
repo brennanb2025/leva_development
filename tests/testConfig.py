@@ -12,7 +12,7 @@ class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'th1515453cr3tk37'
     #generates a hidden field that includes a token that is used to protect the form against CSRF attacks
     
-    #running from external database
+    #running from external database (never in tests)
     #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     
     #running locally
@@ -22,6 +22,7 @@ class Config(object):
     #configure app.db database, store it in basedir.
     
     TEMPLATES_AUTO_RELOAD=True
+
 
 
     #MATCHING FLAGS
@@ -38,7 +39,9 @@ class Config(object):
     ACL = os.environ.get('ACL')
     UPLOAD_EXTENSIONS = os.environ.get('UPLOAD_EXTENSIONS')
     UPLOAD_EXTENSIONS_RESUME = os.environ.get('UPLOAD_EXTENSIONS_RESUME')
-    LOG_DATA = os.environ.get('LOG_DATA')
+
+    LOG_DATA = False #set log data to false for all tests
+    
     MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH'))
 
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")

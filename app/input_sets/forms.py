@@ -62,7 +62,10 @@ class EditPersonalityForm(FlaskForm):
     submit = SubmitField('Update personality traits')
 
 class EditDivisionForm(FlaskForm):
-    division = StringField('Change division')
+    # Changed from "Division" to "Year" for the beta test, changed from free text to selector
+    #division = StringField('Change division')
+    year_choices = [("Freshman", "Freshman"), ("Sophomore", "Sophomore"), ("Junior", "Junior"), ("Senior", "Senior")]
+    division = SelectField("Year", choices=year_choices)
     submit = SubmitField('Change division')
 
 class EmptyForm(FlaskForm):
