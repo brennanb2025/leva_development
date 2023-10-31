@@ -119,6 +119,11 @@ html, body{
         text-align: center;
         padding-left: 0;
     }
+
+    .profile button{
+        margin-top: 4vw;
+        margin-bottom: 4vw;
+    }
 }
 
 /* Mentor page styling */
@@ -235,6 +240,21 @@ html, body{
 
     #noFound{
         font-size: 2vw;
+    }
+}
+
+@media (max-width: 425px){
+    
+    .register{
+        margin-top: 10px;
+    }
+
+    .answer{
+        font-size: 5vw;
+    }
+
+    #noFound{
+        font-size: 4vw;
     }
 }
 

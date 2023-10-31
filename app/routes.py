@@ -1,10 +1,10 @@
 #This file is the python flask backend
-from flask import request, render_template, flash, redirect, url_for, session, make_response, send_file
+from flask import request, render_template, flash, redirect, url_for, session, make_response, send_file, send_from_directory
 from app import app, db#, s3_client#, oauth
 #import lm as well?^
 from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
-        CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation
+    CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import datetime
@@ -40,23 +40,26 @@ import app.model.view as viewFuncs
 
 #TODO: ADD  and form.validate():   to protect forms
 
-#session timeout
+# session timeout
+
+
 @app.before_request
 def make_session_permanent():
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(hours=10) #10 hours until need to resign in
+    app.permanent_session_lifetime = timedelta(
+        hours=10)  # 10 hours until need to resign in
 
-#different urls that application implements
-#@'s are decorators, modifies function that follows it. Creates association between URL and function.
+# different urls that application implements
+# @'s are decorators, modifies function that follows it. Creates association between URL and function.
 
 
-
-#index page GET.
+# index page GET.
 @app.route('/', methods=['GET'])
-@app.route('/index', methods=['GET']) 
+@app.route('/index', methods=['GET'])
 def index():
     return render_template('index1.html', userID=session.get('userID'))
-    #return render_template('index.html', userID=session.get('userID')) (old)
+    # return render_template('index.html', userID=session.get('userID')) (old)
+
 
 @app.route('/portal')
 def portal():
@@ -77,16 +80,19 @@ def admin_login_post():
     return redirect(url_for("index"))
 
 
-@app.route("/admin-data", methods = ['GET'])
+@app.route("/admin-data", methods=['GET'])
 def admin_data():
-    if session["userID"] == str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+    # This will only be true if they went through the admin login
+    if session["userID"] == str(app.config['ADMIN_USERNAME']):
         return render_template("admin.html")
     else:
         return redirect(url_for("index"))
 
-@app.route("/admin-lookup-user", methods = ['GET'])
+
+@app.route("/admin-lookup-user", methods=['GET'])
 def admin_lookup_user():
-    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+    # This will only be true if they went through the admin login
+    if session["userID"] != str(app.config['ADMIN_USERNAME']):
         return
 
     userId = request.args.get("userId")
@@ -100,9 +106,11 @@ def admin_lookup_user():
             "name":u.first_name + " " + u.last_name}
         for u in users])
 
-@app.route("/admin-lookup-users-in-business", methods = ['GET'])
+
+@app.route("/admin-lookup-users-in-business", methods=['GET'])
 def admin_lookup_users_in_business():
-    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+    # This will only be true if they went through the admin login
+    if session["userID"] != str(app.config['ADMIN_USERNAME']):
         return
 
     businessId = request.args.get("businessId")
@@ -113,49 +121,54 @@ def admin_lookup_users_in_business():
                     "mentor_or_mentee": "mentee" if u.is_student else "mentor"
                     } for u in admin.admin_lookup_users_in_business(businessId)])
 
-#TODO: test this
-@app.route("/admin-selects-info", methods = ['GET'])
-def admin_selects_info(): #mentees true = search for mentees, false = mentors
-    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+# TODO: test this
+
+
+@app.route("/admin-selects-info", methods=['GET'])
+def admin_selects_info():  # mentees true = search for mentees, false = mentors
+    # This will only be true if they went through the admin login
+    if session["userID"] != str(app.config['ADMIN_USERNAME']):
         return
-    
+
     businessId = request.args.get("businessId")
     
     unmatchedUsers, arrInfo = admin.selects_info(businessId)
     
     dictRtn = {
-        "unmatchedUsers":[{ "id":u.id,
-                            "name":u.first_name+ " " + u.last_name,
-                            "email":u.email,
+        "unmatchedUsers": [{"id": u.id,
+                            "name": u.first_name + " " + u.last_name,
+                            "email": u.email,
                             "mentor_or_mentee": "mentee" if u.is_student else "mentor"
-                        } for u in unmatchedUsers],
-        "matchesInfo":[{
-                    "Select": {
+                            } for u in unmatchedUsers],
+        "matchesInfo": [{
+            "Select": {
                         "id": select.id,
-                        "current_meeting_number_mentor":select.current_meeting_number_mentor,
-                        "current_meeting_number_mentee":select.current_meeting_number_mentee
-                    },
-                    "mentee": {
-                        "id":mentee.id,
-                        "name":mentee.first_name+ " " + mentee.last_name,
-                        "email":mentee.email
-                    },
-                    "mentor": {
-                        "id":mentor.id,
-                        "name":mentor.first_name+ " " + mentor.last_name,
-                        "email":mentor.email
-                    }
-                } for (select, mentee, mentor) in arrInfo]
+                        "current_meeting_number_mentor": select.current_meeting_number_mentor,
+                        "current_meeting_number_mentee": select.current_meeting_number_mentee
+                        },
+            "mentee": {
+                "id": mentee.id,
+                "name": mentee.first_name + " " + mentee.last_name,
+                "email": mentee.email
+            },
+            "mentor": {
+                "id": mentor.id,
+                "name": mentor.first_name + " " + mentor.last_name,
+                "email": mentor.email
+            }
+        } for (select, mentee, mentor) in arrInfo]
     }
 
     return jsonify(dictRtn)
 
-#TODO: Test this
-@app.route("/admin-user-matches", methods = ['GET'])
-def admin_user_matches(): #mentees true = search for mentees, false = mentors
-    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
-        return
+# TODO: Test this
 
+
+@app.route("/admin-user-matches", methods=['GET'])
+def admin_user_matches():  # mentees true = search for mentees, false = mentors
+    # This will only be true if they went through the admin login
+    if session["userID"] != str(app.config['ADMIN_USERNAME']):
+        return
 
     businessId = request.args.get("businessId")
 
@@ -163,22 +176,24 @@ def admin_user_matches(): #mentees true = search for mentees, false = mentors
 
     return jsonify([
         {
-            "mentee id":u.id,
-            "mentee email":u.email,
-            "mentors":[
+            "mentee_id": u.id,
+            "mentee_email": u.email,
+            "mentors": [
                 {
-                    "mentor id":m.id,
-                    "mentor email":m.email
+                    "mentor_id": m.id,
+                    "mentor_email": m.email
                 }
                 for m in dictMenteeToMentor[u]
             ]
-        } 
+        }
         for u in dictMenteeToMentor.keys()
     ])
 
-@app.route("/admin-lookup-business", methods = ['GET'])
+
+@app.route("/admin-lookup-business", methods=['GET'])
 def admin_lookup_business():
-    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+    # This will only be true if they went through the admin login
+    if session["userID"] != str(app.config['ADMIN_USERNAME']):
         return
 
     data = request.args
@@ -187,15 +202,17 @@ def admin_lookup_business():
     
     return jsonify(
         {
-            "id":business.id, 
-            "name":business.name, 
-            "number_employees_maximum":business.number_employees_maximum, 
-            "number_employees_currently_registered":business.number_employees_currently_registered
+            "id": business.id,
+            "name": business.name,
+            "number_employees_maximum": business.number_employees_maximum,
+            "number_employees_currently_registered": business.number_employees_currently_registered
         })
 
-@app.route("/admin-all-businesses", methods = ['GET'])
+
+@app.route("/admin-all-businesses", methods=['GET'])
 def admin_all_businesses():
-    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+    # This will only be true if they went through the admin login
+    if session["userID"] != str(app.config['ADMIN_USERNAME']):
         return
 
     return jsonify([
@@ -212,8 +229,10 @@ def admin_get_events_exceptions():
     if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
         return
 
-    startTime = datetime.datetime.strptime(request.args.get("startTime"), '%Y-%m-%d %H:%M:%S')
-    endTime = datetime.datetime.strptime(request.args.get("endTime"), '%Y-%m-%d %H:%M:%S')
+    startTime = datetime.datetime.strptime(
+        request.args.get("startTime"), '%Y-%m-%d %H:%M:%S')
+    endTime = datetime.datetime.strptime(
+        request.args.get("endTime"), '%Y-%m-%d %H:%M:%S')
     action = request.args.get("action")
 
     print(startTime, endTime)
@@ -327,14 +346,15 @@ def mentor():
     user = User.query.filter_by(id=session.get('userID')).first()
 
     if Select.query.filter_by(mentee_id=user.id).first() != None or Select.query.filter_by(mentor_id=user.id).first() != None:
-        #user already selected a mentor
+        # user already selected a mentor
         return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=False)
-    
+
     return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=True)
+
 
 @app.route('/progress', methods=['GET'])
 def progress():
-    
+
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
@@ -354,6 +374,7 @@ def progress():
                 select_mentor_mentee.id: {"prev_meeting_info":prevMeetingInfo, "curr_meeting_info":currMeetingInfo, "progress_done":progressDone}})
             #currMeetingInfo=currMeetingInfo, prevMeetingInfo=prevMeetingInfo, futureMeetingInfo=futureMeetingInfo)
 
+
 @app.route('/progress', methods=['POST'])
 def currentMeetingSetDone():
     if not(userLoggedIn()):
@@ -366,24 +387,25 @@ def currentMeetingSetDone():
 
     progressFuncs.set_current_info_meeting_done(user, meetingNotes)
 
-    return progress() #send to progress page
+    return progress()  # send to progress page
 
 
-
-#sign-in page GET.
+# sign-in page GET.
 @app.route('/sign-in', methods=['GET'])
 def sign_in():
 
-    if userLoggedIn(): #valid session token -- user already logged in
+    if userLoggedIn():  # valid session token -- user already logged in
         return redirect(url_for('view', id=session['userID']))
 
     form = LoginForm()
-    title="Sign in"
+    title = "Sign in"
 
     return render_template('sign_in.html', form=form, title=title)
 
-#sign-in page POST. Checks each input from the form. 
+# sign-in page POST. Checks each input from the form.
 # If the user correctly inputs their information, makes a new cookie and adds the user to the session. Then sends them to the view GET.
+
+
 @app.route('/sign-in', methods=['POST'])
 def sign_inPost():
 
@@ -403,7 +425,8 @@ def sign_inPost():
     if success: 
         user = User.query.filter_by(email=form1.get('email')).first()
         id = user.id
-        resp = make_response(redirect(url_for('view', id=id))) #get view should send to main page
+        # get view should send to main page
+        resp = make_response(redirect(url_for('view', id=id)))
         resp.set_cookie('userID', str(id))
 
         session["userID"] = id
@@ -420,7 +443,7 @@ def sign_inPost():
 @app.route('/register', methods=['GET'])
 def register():
 
-    #publicVisitorIP = request.remote_addr #no host proxy
+    # publicVisitorIP = request.remote_addr #no host proxy
 
     # Attempts to register an email/password pair.
     form = RegistrationForm()
@@ -430,18 +453,19 @@ def register():
 
     interestTags, careerInterests, schools = registerFuncs.get_popular_tags()
 
-    resp = make_response(render_template('register1.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
-            interestList=list(), educationList=list(), careerInterestList=list(), form=form))
-    #return render_template('register_first_access.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=form)
+    resp = make_response(render_template('register1.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools,
+                                         interestList=list(), educationList=list(), careerInterestList=list(), form=form))
+    # return render_template('register_first_access.html', interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=form)
 
-    resp.set_cookie('initialTimestampGET', str(datetime.datetime.utcnow())) #record the current time as a string
+    # record the current time as a string
+    resp.set_cookie('initialTimestampGET', str(datetime.datetime.utcnow()))
 
     admin.logData(session.get('userId'),0,"") #log data: register get
 
-    return resp #return the template with the cookie
+    return resp  # return the template with the cookie
 
 
-#post register page 1
+# post register page 1
 @app.route('/register/validate/1', methods=['POST'])
 def registerValidate1():
     #email checking
@@ -450,12 +474,12 @@ def registerValidate1():
     success, errors = registerFuncs.registerValidate1(email)
 
     return json.dumps({
-            'success':success,
-            'errors':json.dumps(errors)
-        })
+        'success': success,
+        'errors': json.dumps(errors)
+    })
 
 
-#post register page 2
+# post register page 2
 @app.route('/register/validate/2', methods=['POST'])
 def registerValidate2():
     #email checking
@@ -464,9 +488,9 @@ def registerValidate2():
     success, errors = registerFuncs.registerValidate1(business)
 
     return json.dumps({
-            'success':success,
-            'errors':json.dumps(errors)
-        })
+        'success': success,
+        'errors': json.dumps(errors)
+    })
 
 #register POST. Checks form input. If it is correctly input, creates a new user. Then sends them to the sign-in page.
 #Current file size limited to 5 MB.
@@ -486,14 +510,16 @@ def registerPost():
     
     if success:
 
-        timeDiff = str(datetime.datetime.utcnow() - datetime.datetime.strptime(request.cookies.get('initialTimestampGET'), "%Y-%m-%d %H:%M:%S.%f"))
+        timeDiff = str(datetime.datetime.utcnow() - datetime.datetime.strptime(
+            request.cookies.get('initialTimestampGET'), "%Y-%m-%d %H:%M:%S.%f"))
         dataDict = {}
         dataDict["registerTimeDiff"] = timeDiff
         admin.logData(session.get('userId'),2, json.dumps(dataDict))
 
-        resp = make_response(redirect(url_for('sign_in'))) #success: get request to sign_in page
+        # success: get request to sign_in page
+        resp = make_response(redirect(url_for('sign_in')))
 
-        resp.set_cookie('initialTimestampGET', '', expires=0) #delete cookie
+        resp.set_cookie('initialTimestampGET', '', expires=0)  # delete cookie
 
         return resp
     else:
@@ -517,7 +543,7 @@ def registerPreviouslyFilledOut(form, resp, request):
     current_occupation = form.get("current_occupation")
     division = form.get("division")
 
-    if "email" in errors: #if error - make it blank.
+    if "email" in errors:  # if error - make it blank.
         email = ""
     elif "first name" in errors:
         first_name = ""
@@ -532,13 +558,12 @@ def registerPreviouslyFilledOut(form, resp, request):
         if "first name" in errors:
             first_last_error = True
 
-
-    register_type = form.get("radio_mentor_mentee") #student or mentor
-    #^v will be none if somehow they messed with it
+    register_type = form.get("radio_mentor_mentee")  # student or mentor
+    # ^v will be none if somehow they messed with it
     if form.get('radio_contact') == 'Phone number':
         email_or_phone = "phone"
         phone_num = form.get('phoneNumber')
-    
+
     mentorGenderIdentity = form.get("radio_gender_identity")
     menteeGenderPreference = form.get("radio_gender_preference")
     textPersonality1 = form.get("personality1")
@@ -546,9 +571,7 @@ def registerPreviouslyFilledOut(form, resp, request):
     textPersonality3 = form.get("personality3")
     divisionPreference = form.get("divisionPreference")
 
-
-
-    #get all the input attributes
+    # get all the input attributes
     interestInputs = []
     if not "num_tags" in errors:
         interestInputs = form.getlist("tagName")
@@ -561,7 +584,7 @@ def registerPreviouslyFilledOut(form, resp, request):
     if not "num_education_listings" in errors:
         carIntInputs = form.getlist("careerInterestName")
 
-    #v load the register page
+    # v load the register page
     formNew = RegistrationForm()
 
     if userLoggedIn():
@@ -578,16 +601,18 @@ def registerPreviouslyFilledOut(form, resp, request):
     interestTags, careerInterests, schools = get_popular_tags()
 
     resp = make_response(render_template('register1.html', email=email, first_name=first_name, last_name=last_name, first_last_error=first_last_error,
-                bio=bio, email_or_phone=email_or_phone, city_name=city_name, current_occupation=current_occupation,
-                division=division, phone_num=phone_num, register_type=register_type,
-                interestList=interestInputs, educationList=eduInputs, careerInterestList=carIntInputs,
-                interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=formNew,
-                mentorGenderIdentity=mentorGenderIdentity, menteeGenderPreference=menteeGenderPreference, textPersonality1=textPersonality1,
-                textPersonality2=textPersonality2, textPersonality3=textPersonality3, divisionPreference=divisionPreference))
-    
-    resp.set_cookie('initialTimestampGET', request.cookies.get('initialTimestampGET')) #return with the initial time
+                                         bio=bio, email_or_phone=email_or_phone, city_name=city_name, current_occupation=current_occupation,
+                                         division=division, phone_num=phone_num, register_type=register_type,
+                                         interestList=interestInputs, educationList=eduInputs, careerInterestList=carIntInputs,
+                                         interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=formNew,
+                                         mentorGenderIdentity=mentorGenderIdentity, menteeGenderPreference=menteeGenderPreference, textPersonality1=textPersonality1,
+                                         textPersonality2=textPersonality2, textPersonality3=textPersonality3, divisionPreference=divisionPreference))
 
-    timeDiff = str(datetime.datetime.utcnow() - datetime.datetime.strptime(request.cookies.get('initialTimestampGET'), "%Y-%m-%d %H:%M:%S.%f"))
+    resp.set_cookie('initialTimestampGET', request.cookies.get(
+        'initialTimestampGET'))  # return with the initial time
+
+    timeDiff = str(datetime.datetime.utcnow() - datetime.datetime.strptime(
+        request.cookies.get('initialTimestampGET'), "%Y-%m-%d %H:%M:%S.%f"))
     dataDict = {}
     dataDict["registerTimeDiff"] = timeDiff
     dataDict["errors"] = errors
@@ -595,13 +620,13 @@ def registerPreviouslyFilledOut(form, resp, request):
     
 
     return resp
-    
+
 
 
 
 
 # edit-profile GET. Readies edit profile forms and user information.
-@app.route('/edit-profile', methods = ['GET'])
+@app.route('/edit-profile', methods=['GET'])
 def editProfile():
 
     if not userLoggedIn():
@@ -635,6 +660,7 @@ def editProfile():
             genderIdentity=readyProfileResp.genderIdentity,
             formPwd=formPwd, 
             user=user, userID=session.get('userID'))
+
 
 """@app.route('/edit-profile-test', methods=['GET'])
 def editProfileTest():
@@ -720,7 +746,8 @@ def editProfileTest():
             formPwd=formPwd, 
             user=user, userID=session.get('userID'))"""
 
-@app.route('/edit-profile', methods = ['POST'])
+
+@app.route('/edit-profile', methods=['POST'])
 def editProfilePost():
 
     if not userLoggedIn():
@@ -728,7 +755,7 @@ def editProfilePost():
 
     form = request.form
 
-    if form.get("submitBtn") == "editResume": #different types of submissions
+    if form.get("submitBtn") == "editResume":  # different types of submissions
         editProfResume()
     elif form.get("submitBtn") == "deleteResume":
         deleteResume()
@@ -839,7 +866,7 @@ def editProfilePost():
             flash(u'Your phone number cannot be empty.', 'phoneError')
 
     if success:
-        #set here
+        # set here
         if changedFnSuccess:
             u.set_first_name(form.get("first_name"))
         if changedLnSuccess:
@@ -857,17 +884,18 @@ def editProfilePost():
         if changedInputsSuccess:
             editProfileFuncs.changeAttributes(form.getlist("tagName"), form.getlist("educationName"), form.getlist("careerInterestName"), u)
         if changedPersonalitySuccess:
-            u.set_personality(form.get('personality1').strip(), form.get('personality2').strip(), form.get('personality3').strip())
+            u.set_personality(form.get('personality1').strip(), form.get(
+                'personality2').strip(), form.get('personality3').strip())
         if changedDivisionSuccess:
             u.set_division(form.get("division").strip())
         if changedDivisionPreferenceSuccess:
             u.set_division_preference(form.get("divisionPreference"))
         if changedContactMethodSuccess:
-            if form.get('radio_contact') == 'Email': #checked the email box
+            if form.get('radio_contact') == 'Email':  # checked the email box
                 u.remove_phone()
             if form.get('radio_contact') == 'Phone number':
                 u.set_phone(form.get('phoneNumber'))
-        
+
         db.session.commit()
 
         dataChangedDict = {}
@@ -887,7 +915,7 @@ def editProfilePost():
         admin.logData(session.get('userId'),7,json.dumps(dataChangedDict)) #log data edit profile success
 
         return redirect(url_for('view', id=session.get('userID')))
-    else: 
+    else:
         dataChangedDict = {}
         dataChangedDict["fn"] = changedFnSuccess
         dataChangedDict["ln"] = changedLnSuccess
@@ -912,7 +940,7 @@ def editProfilePassword():
 
     if not userLoggedIn():
         return redirect(url_for('sign_in'))
-    
+
     form = request.form
 
     resp = editProfileFuncs.editPassword(form.get('password'), form.get('password2'), session['userID'])
@@ -926,6 +954,7 @@ def editProfilePassword():
             flash(u''+resp.password2ErrorMessage, 'password2Error')
 
         return redirect(url_for('editProfile'))
+
 
 @app.route('/edit-profile-picture', methods=['POST'])
 def editProfPic():
@@ -957,11 +986,12 @@ def deleteProfPic():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
-    
+
     user = User.query.filter_by(id=session.get('userID')).first()
     AWS.delete_profile_picture(user)
 
     return redirect(url_for('editProfile'))
+
 
 """
 @app.route('/delete-intro-video', methods=['POST'])
@@ -976,17 +1006,20 @@ def deleteIntroVid():
     return redirect(url_for('editProfile'))
 """
 
-#@app.route('/delete-resume', methods=['POST'])
+# @app.route('/delete-resume', methods=['POST'])
+
+
 def deleteResume():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
-    
+
     user = User.query.filter_by(id=session.get('userID')).first()
 
     AWS.delete_resume(user)
 
     return redirect(url_for('editProfile'))
+
 
 """
 @app.route('/edit-video', methods=['POST'])
@@ -1032,7 +1065,9 @@ def editVideo():
     return redirect(url_for('editProfile'))
 """
 
-#@app.route('/edit-profile-resume', methods=['POST'])
+# @app.route('/edit-profile-resume', methods=['POST'])
+
+
 def editProfResume():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
@@ -1040,7 +1075,7 @@ def editProfResume():
 
     user = User.query.filter_by(id=session.get('userID')).first()
 
-    #resume pdf
+    # resume pdf
     if "resume" in request.files and request.files["resume"]:
         resume = request.files["resume"]
         resp = editProfileFuncs.editProfileResume(user, resume)
@@ -1068,15 +1103,18 @@ def editProfResume():
 
     return redirect(url_for('editProfile'))
 
-@app.route('/view', methods=['GET']) #takes one arg = user.id. This is the user that the person logged in is viewing. Doesn't have to be the same user.
+
+# takes one arg = user.id. This is the user that the person logged in is viewing. Doesn't have to be the same user.
+@app.route('/view', methods=['GET'])
 def view():
-    #sessionID1 = request.cookies.get("user") #get the session token from the previous page cookies
+    # sessionID1 = request.cookies.get("user") #get the session token from the previous page cookies
 
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
 
-    if request.args.get("id") == None: #they went to view get without a user id in the request args
+    # they went to view get without a user id in the request args
+    if request.args.get("id") == None:
         return redirect(url_for('index'))
 
     id = request.args.get("id")
@@ -1088,7 +1126,7 @@ def view():
     this_user_is_logged_in = (user.id == session.get('userID'))
     #^if the user looking at this person's profile page is the one who is currently logged in, 
     # let them logout from or delete their account.
-    title="Profile Page"
+    title = "Profile Page"
 
     if this_user_is_logged_in:
         admin.logData(session.get('userId'),9,"")
@@ -1112,19 +1150,20 @@ def view():
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    #sessionID1 = request.cookies.get('user') #get the session token
-    #means they hit logout btn
-    if session.get('userID'): #valid session token -- user already logged in
+    # sessionID1 = request.cookies.get('user') #get the session token
+    # means they hit logout btn
+    if session.get('userID'):  # valid session token -- user already logged in
         session.pop('userID', None)
-        #db.session.commit() #remove this user's session token from the dict
+        # db.session.commit() #remove this user's session token from the dict
 
     admin.logData(session.get('userId'),11,"")
 
     return redirect(url_for('index'))
 
-@app.route('/deleteProfile', methods=['POST']) #need to check security
+
+@app.route('/deleteProfile', methods=['POST'])  # need to check security
 def deleteProfile():
-    
+
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
@@ -1167,6 +1206,8 @@ def feed():
 """
 
 # method called in the feed js script
+
+
 @app.route('/getFeed', methods=['GET'])
 def getFeed():
     if not(userLoggedIn()):
@@ -1188,7 +1229,7 @@ def getFeed():
 
 @app.route('/mentor', methods=['POST'])
 def feedPost():
-    #A mentee chose a mentor --> post the form with the mentor information
+    # A mentee chose a mentor --> post the form with the mentor information
 
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
@@ -1199,7 +1240,7 @@ def feedPost():
     if form.get('userID') == None:
         flash(u'Something went wrong.', 'feedError')
         return redirect(url_for('mentor'))
-    
+
     userMatchID = form.get('userID')
 
     if not feed.feedPost(session.get('userId'), userMatchID):
@@ -1213,6 +1254,26 @@ def feedPost():
     admin.logData(session.get('userId'),14,json.dumps(dictLog))
 
     return redirect(url_for("progress"))
+
+@app.route('/react-test/<path:path>')
+def react_test_static(path):
+    return send_from_directory("../frontend/build", path)
+
+@app.route('/react-test')
+def react_test():
+    return send_from_directory("../frontend/build", 'index.html')
+
+# @app.route('/react-routing-test')
+# def react_test():
+#     return send_from_directory("../frontend/build", 'index.html')
+
+@app.route("/test-endpoint", methods=["GET"])
+def test_endpoint():
+    res = {
+        "status": "SUCCESS",
+        "message": "send help"
+    }
+    return res
 
 """ NO LONGER IN USE
 @app.route('/my-connections', methods=['GET'])
@@ -1239,16 +1300,18 @@ def my_connections():
     return render_template('my_network.html', isMentee=isMentee, selectUser=selectUser, userID=session.get('userID'))
 """
 
+
 def userLoggedIn():
-    
-    #Checks if the user is actually logged in -- commented out for easier testing
+
+    # Checks if the user is actually logged in -- commented out for easier testing
     #userID = SessionTokens.query.filter_by(sessionID=sessionID1).first()
-    if session.get('userID'): #valid session token -- user already logged in
+    if session.get('userID'):  # valid session token -- user already logged in
         if User.query.filter_by(id=session['userID']).first() == None:
             return False
         return True
 
     return False
+
 
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
@@ -1266,6 +1329,7 @@ This might be fixed in the future?
 This should be handled client-side, since there is already a bit of code in my js file to gaurd against big files.
 """
 
+
 @app.errorhandler(413)
 def size_error(e):
     print("logging error 413")
@@ -1278,11 +1342,15 @@ def size_error(e):
 # inbuilt function which takes error as parameter
 def not_found(e):
     # defining function
-    dictLog = {}
-    dictLog['code'] = 404
-    dictLog['desc'] = "404 error"
-    admin.logData(session.get('userId'),16,json.dumps(dictLog))
-    return render_template("404_error.html")
+    # dictLog = {}
+    # dictLog['code'] = 404
+    # dictLog['desc'] = "404 error"
+    # logData(16, json.dumps(dictLog))
+    # return render_template("404_error.html")
+
+    return send_from_directory("../frontend/build", 'index.html')
+
+
 """
 @app.errorhandler(Exception)
 # inbuilt function which takes error as parameter

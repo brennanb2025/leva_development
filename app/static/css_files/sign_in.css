@@ -81,3 +81,42 @@
         width: 80%;
     }
 }
+
+@media (max-width: 425px){
+    .launch-box .launch{
+        font-size: 4vw;
+        width: 100%;
+    }
+
+    .detail-container{
+        padding-top: 7%;
+        padding-bottom: 7%;
+    }
+
+    .input-container{
+        margin-bottom: 5px;
+    }
+
+    .head2{
+        font-size: 7vw;
+        margin-bottom: 8vw;
+        margin-top: 5vw;
+        text-align: center;
+    }
+
+    .input-container input{
+        height: 8vw;
+    }
+    
+    .register-container{
+        font-size: 3.3vw;
+    }
+
+    .detail-container{
+        width: 80%;
+    }
+
+    label{
+        font-size: 6vw;
+    }
+}

@@ -1,0 +1,100 @@
+body{
+    font-family: "Work Sans";
+}
+
+.business-option-container{
+    display: flex;
+    flex-direction: row;
+}
+
+.business-option-container button{
+    margin-left: 20px;
+}
+
+.business-option-container button:first-child{
+    margin-left: 0;
+}
+
+#events-table{
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#events-table td, #events-table th{
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#events-table th{
+    background-color: rgb(33, 48, 74);
+    color: white;
+}
+
+.input-container{
+    margin-bottom: 0;
+}
+
+/* Source: W3Schools */
+
+.regtext {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    font-size: 15px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+  
+  /* Hide the browser's default radio button */
+  .regtext input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* Create a custom radio button */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: #eee;
+  border-radius: 50%;
+}
+
+/* On mouse-over, add a grey background color */
+.regtext:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the radio button is checked, add a blue background */
+.regtext input:checked ~ .checkmark {
+  background-color: rgb(158, 63, 253);
+}
+
+/* Create the indicator (the dot/circle - hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the indicator (dot/circle) when checked */
+.regtext input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the indicator (dot/circle) */
+.regtext .checkmark:after {
+ 	top: 5px;
+	left: 5px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: white;
+}
