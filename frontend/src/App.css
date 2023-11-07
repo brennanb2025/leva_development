@@ -49,3 +49,15 @@
 .matchmaking-text {
   @apply text-lg
 }
+
+.option-button {
+  @apply ml-4 hover:text-purple-300 duration-300
+}
+
+.entry-label {
+  @apply text-center text-gray-500
+}
+
+.pfp-image {
+  @apply w-8 h-8 rounded-full content-center object-contain mr-2
+}

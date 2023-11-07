@@ -79,12 +79,15 @@ def admin_login_post():
         return redirect(url_for("admin_data"))
     return redirect(url_for("index"))
 
+@app.route('/admin-data/<path:path>')
+def admin_data_static(path):
+    return send_from_directory("../frontend/build", path)
 
 @app.route("/admin-data", methods=['GET'])
 def admin_data():
     # This will only be true if they went through the admin login
     if session["userID"] == str(app.config['ADMIN_USERNAME']):
-        return render_template("admin.html")
+        return send_from_directory("../frontend/build", 'index.html')
     else:
         return redirect(url_for("index"))
 
@@ -1255,25 +1258,13 @@ def feedPost():
 
     return redirect(url_for("progress"))
 
-@app.route('/react-test/<path:path>')
-def react_test_static(path):
-    return send_from_directory("../frontend/build", path)
+# @app.route('/react-test/<path:path>')
+# def react_test_static(path):
+#     return send_from_directory("../frontend/build", path)
 
-@app.route('/react-test')
-def react_test():
-    return send_from_directory("../frontend/build", 'index.html')
-
-# @app.route('/react-routing-test')
+# @app.route('/react-test')
 # def react_test():
 #     return send_from_directory("../frontend/build", 'index.html')
-
-@app.route("/test-endpoint", methods=["GET"])
-def test_endpoint():
-    res = {
-        "status": "SUCCESS",
-        "message": "send help"
-    }
-    return res
 
 """ NO LONGER IN USE
 @app.route('/my-connections', methods=['GET'])
