@@ -1,8 +1,24 @@
 from requests import delete
 from app import db
-from app.input_sets.models import Event, Select, Business, User, ProgressMeetingCompletionInformation
+from app.input_sets.models import Event, Select, Business, User, ProgressMeetingCompletionInformation, AdminUser
 
 #from app.routes import delete_intro_video, delete_profile_picture, delete_resume, delete_user_attributes, logData
+
+
+"""
+u = AdminUser(
+    email="adminTest1@test.com",
+    first_name="adminTest1First",
+    last_name="adminTest1Last",
+    business_id=1
+)
+
+db.session.add(u) #add to database
+u.set_password("adminTest1") #must set pwd w/ hashing method
+db.session.commit()
+
+print("All admin users:",AdminUser.query.all())
+"""
 
 
 """for b in Business.query.all():
@@ -72,7 +88,6 @@ print(Event.query.filter_by(action=18).all())
 print(str(len(Event.query.all())))
 """
 
-from app.routes import delete_intro_video, delete_profile_picture, delete_resume, delete_user_attributes, logData
 
 """
 for b in Business.query.all():
@@ -85,6 +100,8 @@ for u in User.query.all():
 =========
     print(u)
 >>>>>>>>> Temporary merge branch 2
+
+"""
 
 """
 Event.query.filter_by(action=16).delete()

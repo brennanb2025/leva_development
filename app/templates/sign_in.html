@@ -80,15 +80,17 @@
             </div>
 
             <div class="register-box">
-                
-                    <button class="register">
-                        <a href="{{ url_for('sign_in') }}">
-                            Log in
-                        </a>
-                    </button>
-                
+                <button class="register me-3">
+                    <a href="{{ url_for('admin_login') }}">
+                        Admin log in
+                    </a>
+                </button>
+                <button class="register">
+                    <a href="{{ url_for('sign_in') }}">
+                        Log in
+                    </a>
+                </button>
             </div>
-
         </div>
 
         <!--Actual login contents below:-->
@@ -99,7 +101,7 @@
 
                 <div class="head2">Login</div>
 
-                <form action="/sign-in" method="POST">
+                <form action="{{ url_for('sign_in_post') }}" method="POST">
                     <!--I'm fairly certain this portion is for indictating that there is an error-->
                     {{ form.hidden_tag() }}
                     

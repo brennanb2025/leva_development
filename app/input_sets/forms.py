@@ -20,6 +20,11 @@ class LoginForm(FlaskForm): #these have csrf validators but I turned them off be
     email = StringField('Email')
     password = PasswordField('Password')
     submit = SubmitField('Sign In')
+
+class AdminLoginForm(FlaskForm): #these have csrf validators but I turned them off because I'm doing it manually
+    email = StringField('Email')
+    password = PasswordField('Password')
+    submit = SubmitField('Sign In')
         
 class RegistrationForm(FlaskForm):
     first_name = StringField('First')

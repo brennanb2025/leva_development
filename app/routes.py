@@ -2,9 +2,10 @@
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_file, send_from_directory
 from app import app, db#, s3_client#, oauth
 #import lm as well?^
-from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm
+from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm, AdminLoginForm
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
-    CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation
+    CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation, \
+    AdminUser
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import datetime
@@ -69,28 +70,24 @@ def portal():
 
 @app.route("/admin-login", methods = ['GET'])
 def admin_login():
-    return render_template("admin_login.html")
+    if adminUserLoggedIn():
+        return redirect(url_for('admin_data'))
+    
+    form = AdminLoginForm()
 
-@app.route("/admin-login", methods = ['POST'])
-def admin_login_post():
-    # check to see if the login credentials are correct, then
-    #if username and password match...
-    if admin.admin_validate_login(request.form.get("username"), request.form.get("password")):
-        session["userID"] = request.form.get("username") #put the username in the session
-        return redirect(url_for("admin_data"))
-    return redirect(url_for("index"))
+    return render_template("admin_login.html", form=form)
 
 @app.route('/admin-data/<path:path>')
 def admin_data_static(path):
     return send_from_directory("../frontend/build", path)
 
-"""
-@app.route('/admin-sign-in', methods=['POST'])
-def admin_sign_inPost():
+
+@app.route('/admin-login', methods=['POST'])
+def admin_login_post():
 
     form1 = request.form 
     
-    success, response = login.admin_sign_in_post(form1.get('email'), form1.get('password'))
+    success, response = login.admin_login_post(form1.get('email'), form1.get('password'))
     if response.email_not_entered:
         flash(u'Please enter an email', 'emailError')
     if response.password_not_entered:
@@ -100,36 +97,43 @@ def admin_sign_inPost():
     if response.incorrect_password:
         flash(u'Incorrect password', 'passwordError')
 
-    #TODO: Check logic separation here
     if success: 
         user = AdminUser.query.filter_by(email=form1.get('email')).first()
         id = user.id
         # get view should send to main page
-        resp = make_response(redirect(url_for('admin_data'))) #Jay change TODO
-        resp.set_cookie('userID', str(id))
+        resp = make_response(redirect(url_for('admin_data')))
+        #resp.set_cookie('userID', str(id) + "isAdmin")
 
-        session["userID"] = id
+        session["adminId"] = id
         #newToken = SessionTokens(sessionID=sessionToken) #make a new token
         #db.session.add(newToken) #add to database
         return resp
     else:
-        return redirect(url_for('admin_sign_in')) #failure
-"""
+        return redirect(url_for('admin_login')) #failure
 
 
 @app.route("/admin-data", methods=['GET'])
 def admin_data():
     # This will only be true if they went through the admin login
-    if session["userID"] == str(app.config['ADMIN_USERNAME']):
+    if adminUserLoggedIn():
         return send_from_directory("../frontend/build", 'index.html')
     else:
         return redirect(url_for("index"))
 
 
+@app.route("/get-admin-user", methods=['POST'])
+def get_admin_user():
+    if adminUserLoggedIn():
+        adminUser = AdminUser.query.filter_by(id=session.get("adminId")).first()
+        return jsonify({
+            "first_name": adminUser.first_name,
+            "last_name": adminUser.last_name,
+            "email": adminUser.email
+        })
+
 @app.route("/admin-lookup-user", methods=['GET'])
 def admin_lookup_user():
-    # This will only be true if they went through the admin login
-    if session["userID"] != str(app.config['ADMIN_USERNAME']):
+    if not adminUserLoggedIn():
         return
 
     userId = request.args.get("userId")
@@ -143,8 +147,7 @@ def admin_lookup_user():
 
 @app.route("/admin-lookup-users-in-business", methods=['GET'])
 def admin_lookup_users_in_business():
-    # This will only be true if they went through the admin login
-    if session["userID"] != str(app.config['ADMIN_USERNAME']):
+    if not adminUserLoggedIn():
         return
 
     businessId = request.args.get("businessId")
@@ -156,8 +159,7 @@ def admin_lookup_users_in_business():
 
 @app.route("/admin-selects-info", methods=['GET'])
 def admin_selects_info():  # mentees true = search for mentees, false = mentors
-    # This will only be true if they went through the admin login
-    if session["userID"] != str(app.config['ADMIN_USERNAME']):
+    if not adminUserLoggedIn():
         return
 
     businessId = request.args.get("businessId")
@@ -188,8 +190,7 @@ def admin_selects_info():  # mentees true = search for mentees, false = mentors
 
 @app.route("/admin-user-matches", methods=['GET'])
 def admin_user_matches():  # mentees true = search for mentees, false = mentors
-    # This will only be true if they went through the admin login
-    if session["userID"] != str(app.config['ADMIN_USERNAME']):
+    if not adminUserLoggedIn():
         return
 
     businessId = request.args.get("businessId")
@@ -208,8 +209,7 @@ def admin_user_matches():  # mentees true = search for mentees, false = mentors
 
 @app.route("/admin-lookup-business", methods=['GET'])
 def admin_lookup_business():
-    # This will only be true if they went through the admin login
-    if session["userID"] != str(app.config['ADMIN_USERNAME']):
+    if not adminUserLoggedIn():
         return
 
     data = request.args
@@ -227,8 +227,7 @@ def admin_lookup_business():
 
 @app.route("/admin-all-businesses", methods=['GET'])
 def admin_all_businesses():
-    # This will only be true if they went through the admin login
-    if session["userID"] != str(app.config['ADMIN_USERNAME']):
+    if not adminUserLoggedIn():
         return
 
     return jsonify([
@@ -242,7 +241,7 @@ def admin_all_businesses():
 
 @app.route("/admin-events-exceptions", methods = ['GET'])
 def admin_get_events_exceptions():
-    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+    if not adminUserLoggedIn():
         return
 
     startTime = datetime.datetime.strptime(
@@ -265,7 +264,7 @@ def admin_get_events_exceptions():
 
 @app.route("/admin-lookup-user-feed", methods = ['GET'])
 def admin_lookup_user_feed():
-    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+    if not adminUserLoggedIn():
         return
 
     userId = request.args.get("userid")
@@ -293,7 +292,7 @@ def admin_lookup_user_feed():
 
 @app.route("/admin-lookup-user-feed-all", methods = ['GET'])
 def admin_lookup_user_feed_all():
-    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+    if not adminUserLoggedIn():
         return
 
     userId = request.args.get("userid")
@@ -319,7 +318,7 @@ def admin_lookup_user_feed_all():
 
 @app.route("/admin-delete-match", methods = ['POST'])
 def admin_delete_match():
-    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+    if not adminUserLoggedIn():
         return
 
     menteeId = request.form.get("menteeId")
@@ -335,7 +334,7 @@ def admin_delete_match():
 
 @app.route("/business-excel")
 def admin_get_business_excel():
-    if session["userID"] != str(app.config['ADMIN_USERNAME']): #This will only be true if they went through the admin login
+    if not adminUserLoggedIn():
         return
 
     businessId = request.args.get("businessId")
@@ -427,7 +426,7 @@ def sign_in():
 
 
 @app.route('/sign-in', methods=['POST'])
-def sign_inPost():
+def sign_in_post():
 
     form1 = request.form 
     
@@ -447,7 +446,7 @@ def sign_inPost():
         id = user.id
         # get view should send to main page
         resp = make_response(redirect(url_for('view', id=id)))
-        resp.set_cookie('userID', str(id))
+        #resp.set_cookie('userID', str(id)) TODO CHECK THIS
 
         session["userID"] = id
         #newToken = SessionTokens(sessionID=sessionToken) #make a new token
@@ -1314,8 +1313,19 @@ def userLoggedIn():
     # Checks if the user is actually logged in -- commented out for easier testing
     #userID = SessionTokens.query.filter_by(sessionID=sessionID1).first()
     if session.get('userID'):  # valid session token -- user already logged in
-        if User.query.filter_by(id=session['userID']).first() == None:
-            return False
+        #if User.query.filter_by(id=session['userID']).first() == None:
+        #return False
+        return True
+
+    return False
+
+def adminUserLoggedIn():
+
+    # Checks if the user is actually logged in and is an admin
+    if session.get('adminId'):
+        # valid session token -- user already logged in
+        #if User.query.filter_by(id=session['userID']).first() == None:
+            #return False
         return True
 
     return False

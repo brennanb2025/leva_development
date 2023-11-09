@@ -309,7 +309,10 @@ def registerPost(form, resume, img):
             gender_identityForm = None #if mentee, this should not be entered.
 
         #changed division form to be 1:Freshman, 2:Sophomore, etc.
+        #TODO undid this change
+        
         division_set = form.get('division').strip()
+        """
         if division_set == "1":
             division_set = "Freshman"
         elif division_set == "2":
@@ -318,6 +321,7 @@ def registerPost(form, resume, img):
             division_set = "Junior"
         else:
             division_set = "Senior"
+        """
 
         division_preference_set = form.get("divisionPreference")
         if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "False":
