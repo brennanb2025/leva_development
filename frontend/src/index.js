@@ -11,7 +11,7 @@ import {
 
 const router = createBrowserRouter([
   {
-    path: "/react-test",
+    path: "/admin-data",
     element: <App />,
   },
   {
