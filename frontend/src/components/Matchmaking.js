@@ -100,7 +100,7 @@ function Matchmaking() {
 
 
     return (
-        <div className="h-full w-full px-8 flex flex-col">
+        <div className="admin-parent-container">
 
             <section className='w-full p-3 flex flex-row justify-around border-b mb-2'>
 

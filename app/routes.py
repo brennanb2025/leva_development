@@ -318,6 +318,7 @@ def admin_lookup_user_feed_all():
 
 @app.route("/admin-delete-match", methods = ['POST'])
 def admin_delete_match():
+    print("Got here")
     if not adminUserLoggedIn():
         return
 

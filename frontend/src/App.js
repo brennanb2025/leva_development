@@ -1,10 +1,11 @@
 import './App.css';
 import { useState, useEffect, memo } from 'react'
 import Matchmaking from './components/Matchmaking'
+import Statistics from './components/Statistics';
 
 function App() {
 
-  const [isMatch, setIsMatch] = useState(true)
+  const [isMatch, setIsMatch] = useState(false)
 
   return (
     <div className='flex flex-col w-full h-screen'>
@@ -16,7 +17,7 @@ function App() {
         </div>
       </section>
       <div className="flex-grow overflow-y-hidden">
-        {isMatch ? <Matchmaking /> : <div>SOmething</div>}
+        {isMatch ? <Matchmaking /> : <Statistics />}
       </div>
     </div>
   )
