@@ -37,6 +37,7 @@ import app.model.editProfile as editProfileFuncs
 import app.model.feed as feed
 import app.model.AWS as AWS
 import app.model.view as viewFuncs
+import app.model.userUtilities as userUtils
 
 #TODO: ADD  and form.validate():   to protect forms
 
@@ -66,11 +67,11 @@ def portal():
     return render_template('portal.html', userID=session.get('userID'))
 
 
-@app.route("/admin", methods = ['GET'])
+@app.route("/admin-login", methods = ['GET'])
 def admin_login():
     return render_template("admin_login.html")
 
-@app.route("/admin", methods = ['POST'])
+@app.route("/admin-login", methods = ['POST'])
 def admin_login_post():
     # check to see if the login credentials are correct, then
     #if username and password match...
@@ -78,6 +79,39 @@ def admin_login_post():
         session["userID"] = request.form.get("username") #put the username in the session
         return redirect(url_for("admin_data"))
     return redirect(url_for("index"))
+
+
+"""
+@app.route('/admin-sign-in', methods=['POST'])
+def admin_sign_inPost():
+
+    form1 = request.form 
+    
+    success, response = login.admin_sign_in_post(form1.get('email'), form1.get('password'))
+    if response.email_not_entered:
+        flash(u'Please enter an email', 'emailError')
+    if response.password_not_entered:
+        flash(u'Please enter a password', 'passwordError')
+    if response.email_not_found:
+        flash(u'Admin user does not exist.', 'emailError')
+    if response.incorrect_password:
+        flash(u'Incorrect password', 'passwordError')
+
+    #TODO: Check logic separation here
+    if success: 
+        user = AdminUser.query.filter_by(email=form1.get('email')).first()
+        id = user.id
+        # get view should send to main page
+        resp = make_response(redirect(url_for('admin_data'))) #Jay change TODO
+        resp.set_cookie('userID', str(id))
+
+        session["userID"] = id
+        #newToken = SessionTokens(sessionID=sessionToken) #make a new token
+        #db.session.add(newToken) #add to database
+        return resp
+    else:
+        return redirect(url_for('admin_sign_in')) #failure
+"""
 
 
 @app.route("/admin-data", methods=['GET'])
@@ -101,10 +135,7 @@ def admin_lookup_user():
     email = request.args.get("email")
 
     users = admin.admin_lookup_user(userId, firstName, lastName, email)
-    return jsonify([{"id":u.id,
-            "email":u.email,
-            "name":u.first_name + " " + u.last_name}
-        for u in users])
+    return jsonify([userUtils.format_user_as_json(u) for u in users])
 
 
 @app.route("/admin-lookup-users-in-business", methods=['GET'])
@@ -115,11 +146,7 @@ def admin_lookup_users_in_business():
 
     businessId = request.args.get("businessId")
 
-    return jsonify([{"id":u.id,
-                    "name":u.first_name+ " " + u.last_name,
-                    "email":u.email,
-                    "mentor_or_mentee": "mentee" if u.is_student else "mentor"
-                    } for u in admin.admin_lookup_users_in_business(businessId)])
+    return jsonify([userUtils.format_user_as_json(u) for u in admin.admin_lookup_users_in_business(businessId)])
 
 # TODO: test this
 
@@ -135,11 +162,7 @@ def admin_selects_info():  # mentees true = search for mentees, false = mentors
     unmatchedUsers, arrInfo = admin.selects_info(businessId)
     
     dictRtn = {
-        "unmatchedUsers": [{"id": u.id,
-                            "name": u.first_name + " " + u.last_name,
-                            "email": u.email,
-                            "mentor_or_mentee": "mentee" if u.is_student else "mentor"
-                            } for u in unmatchedUsers],
+        "unmatchedUsers": [userUtils.format_user_as_json(u) for u in unmatchedUsers],
         "matchesInfo": [{
             "Select": {
                         "id": select.id,
@@ -147,14 +170,10 @@ def admin_selects_info():  # mentees true = search for mentees, false = mentors
                         "current_meeting_number_mentee": select.current_meeting_number_mentee
                         },
             "mentee": {
-                "id": mentee.id,
-                "name": mentee.first_name + " " + mentee.last_name,
-                "email": mentee.email
+                userUtils.format_user_as_json(mentee)
             },
             "mentor": {
-                "id": mentor.id,
-                "name": mentor.first_name + " " + mentor.last_name,
-                "email": mentor.email
+                userUtils.format_user_as_json(mentor)
             }
         } for (select, mentee, mentor) in arrInfo]
     }
@@ -174,20 +193,14 @@ def admin_user_matches():  # mentees true = search for mentees, false = mentors
 
     dictMenteeToMentor = admin.user_matches(businessId)
 
-    return jsonify([
-        {
-            "mentee_id": u.id,
-            "mentee_email": u.email,
-            "mentors": [
-                {
-                    "mentor_id": m.id,
-                    "mentor_email": m.email
-                }
-                for m in dictMenteeToMentor[u]
-            ]
-        }
-        for u in dictMenteeToMentor.keys()
-    ])
+    return jsonify(
+        [
+            {
+                "user": userUtils.format_user_as_json(u),
+                "mentors": [userUtils.format_user_as_json(m) for m in dictMenteeToMentor[u]]
+            } for u in dictMenteeToMentor.keys()
+        ]
+    )
 
 
 @app.route("/admin-lookup-business", methods=['GET'])
@@ -254,12 +267,14 @@ def admin_lookup_user_feed():
 
     userId = request.args.get("userid")
     matches = admin.get_potential_matches(userId)
+    if matches is None:
+        return jsonify("No matches found")
     jsonRtn = {
         "userId":matches.userId,
         "matches":
         [
             {
-                "mentor": m.mentor.id,
+                "mentor": userUtils.format_user_as_json(m.mentor),
                 "mentorInterestMatches": m.mentorInterestMatches,
                 "mentorCareerMatches": m.mentorCareerMatches,
                 "mentorEducationMatches": m.mentorEducationMatches,
@@ -280,12 +295,14 @@ def admin_lookup_user_feed_all():
 
     userId = request.args.get("userid")
     allMatches = admin.get_all_matches(userId)
+    if allMatches is None:
+        return jsonify("No matches found")
     jsonRtn = {
         "userId":allMatches.userId,
         "matches":
         [
             {
-                "mentor": m.mentor.id,
+                "mentor": userUtils.format_user_as_json(m.mentor),
                 "mentorInterestMatches": m.mentorInterestMatches,
                 "mentorCareerMatches": m.mentorCareerMatches,
                 "mentorEducationMatches": m.mentorEducationMatches,
