@@ -11,6 +11,8 @@ from app import app, db
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
         CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation
 
+
+#TODO MAKE OBJECT
 def get_progress_info(user):
     isMentee = user.is_student #user.is_mentee
     currentMeetingNumber = -1 #current meeting number
@@ -24,8 +26,11 @@ def get_progress_info(user):
     else:
         selectEntry = Select.query.filter_by(mentor_id=user.id).first()
         if selectEntry != None:
-            select_mentor_mentee = User.query.filter_by(id=selectEntry.mentee_id).first()
+            select_mentor_mentee = User.query.filter_by(id=selectEntry.mentor_id).first()
             currentMeetingNumber = selectEntry.current_meeting_number_mentor
+
+    if not selectEntry:
+        return None, None, None, None, None, None
 
     #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
 
@@ -97,7 +102,7 @@ def getCompletedMeetingInfo(m, isMentee, selectId, currentMeetingNum):
 
 def set_current_meeting_info_done(user, meetingNotes):
 
-    isMentee = user.isMentee
+    isMentee = user.is_student
 
     if isMentee: 
         selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None

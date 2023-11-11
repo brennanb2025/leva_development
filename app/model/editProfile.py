@@ -100,7 +100,7 @@ class editResumeResponse:
     
 def editProfileResume(user, resume):
     
-    success = False
+    success = True
     resp = editResumeResponse()
 
     resumeSize = -1
@@ -131,7 +131,7 @@ def editProfileResume(user, resume):
             editResumeResponse.fileTypeNotAllowed = True
             editResumeResponse.fileTypeError = 'Accepted file type: .pdf. You uploaded a', file_ext + "."
             success = False
-    
+
     if success: 
         resume.seek(0) #I read the file before to check the length so I must put the cursor at the beginning in order to upload it.
         AWS.delete_resume(user)
@@ -154,21 +154,23 @@ def deleteProfile(user):
     if user.is_student: #is mentee
         selectEntry = Select.query.filter_by(mentee_id=user.id).first()
 
-        ProgressMeetingCompletionInformation.query.filter(
-            #ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
-            ProgressMeetingCompletionInformation.select_id == selectEntry.id
-        ).delete()
+        if selectEntry is not None:
+            ProgressMeetingCompletionInformation.query.filter(
+                #ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
+            ).delete()
 
-        Select.query.filter_by(mentee_id=user.id).delete()
+            Select.query.filter_by(mentee_id=user.id).delete()
     else:
         selectEntry = Select.query.filter_by(mentor_id=user.id).first()
 
-        ProgressMeetingCompletionInformation.query.filter(
-            #ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
-            ProgressMeetingCompletionInformation.select_id == selectEntry.id
-        ).delete()
+        if selectEntry is not None:
+            ProgressMeetingCompletionInformation.query.filter(
+                #ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,
+                ProgressMeetingCompletionInformation.select_id == selectEntry.id
+            ).delete()
 
-        Select.query.filter_by(mentor_id=user.id).delete()
+            Select.query.filter_by(mentor_id=user.id).delete()
 
     Business.query.filter_by(id=user.business_id).first().dec_number_employees_currently_registered() 
     #decrease business number registered by 1 because this user has been deleted

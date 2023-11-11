@@ -4,7 +4,7 @@ from app.input_sets.models import Event, Select, Business, User, ProgressMeeting
 
 #from app.routes import delete_intro_video, delete_profile_picture, delete_resume, delete_user_attributes, logData
 
-
+print(User.query.all())
 """
 u = AdminUser(
     email="adminTest1@test.com",

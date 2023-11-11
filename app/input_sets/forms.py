@@ -44,6 +44,8 @@ class EditPasswordForm(FlaskForm):
     password2 = PasswordField('Repeat Password')
     submit = SubmitField('Change Password')
 
+
+#not in use
 class EditFirstNameForm(FlaskForm):
     first_name = StringField('Change first name')
     submit = SubmitField('Change first name')
@@ -68,9 +70,9 @@ class EditPersonalityForm(FlaskForm):
 
 class EditDivisionForm(FlaskForm):
     # Changed from "Division" to "Year" for the beta test, changed from free text to selector
-    #division = StringField('Change division')
-    year_choices = [("Freshman", "Freshman"), ("Sophomore", "Sophomore"), ("Junior", "Junior"), ("Senior", "Senior")]
-    division = SelectField("Year", choices=year_choices)
+    division = StringField('Change division')
+    #year_choices = [("Freshman", "Freshman"), ("Sophomore", "Sophomore"), ("Junior", "Junior"), ("Senior", "Senior")]
+    #division = SelectField("Year", choices=year_choices)
     submit = SubmitField('Change division')
 
 class EmptyForm(FlaskForm):

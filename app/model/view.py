@@ -10,6 +10,7 @@ class readyUserProfileResponse:
         self.careerInterestList = None
         self.educationList = None
         self.user = None
+        self.numMatchesCanMake = None
         self.resumeUrl = None
         self.divisionPreference = None
         self.mentorGenderPreference = None
@@ -70,5 +71,7 @@ def create_user_page(id):
         else:
             genderIdentity = "Prefer not to respond"
     resp.genderIdentity = genderIdentity
+
+    resp.numMatchesCanMake = user.num_pairings_can_make
 
     return resp

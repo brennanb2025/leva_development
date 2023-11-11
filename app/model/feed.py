@@ -30,8 +30,9 @@ class match_suggested_response:
         self.matches = [] #list of match_suggestions
 
 
-#TODO test for >1 pairing
-def feedMentee(userId):
+#OBJECT VERSION (NOT WORKING)
+#TODO test for >1 pairing (changed, not tested)
+def feedMenteeNew(userId):
     """
     Comment about efficiency:
     Right now how this works is it:
@@ -199,8 +200,9 @@ def feedMentee(userId):
     return resp
 
 
-#TODO make work for >1 pairing
-def feedMenteeOld(userId):
+#TESTING, make it work w/ objects!
+#TODO make work for >1 pairing (changed, not tested)
+def feedMentee(userId):
     """
     Comment about efficiency:
     Right now how this works is it:
@@ -215,7 +217,7 @@ def feedMenteeOld(userId):
         I have to look at the interest column in order to determine that.
     """
     
-    user = User.query.filter_by(userId).first()
+    user = User.query.filter_by(id=userId).first()
     if user == None:
         return
 
@@ -232,7 +234,7 @@ def feedMenteeOld(userId):
 
     users = []
     for u in potentialUsers:
-        if not mentorSelected(u.id): #only select users that have not already been chosen.
+        if mentorAvailable(u.id): #only select users that have not already been chosen.
             users.append(u)
 
     for u in users: #initialize user dictionary
@@ -260,26 +262,27 @@ def feedMenteeOld(userId):
                 userDict[u] += heuristicVals["division_pref"]
                 matches["division_pref"] += 1
 
+    #TODO Added u.personality_n and before all to test if None before asking if in. Update the above to do the same.
     #personality
     if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":
         for u in users:
             #match in any personality trait - separate to add to the value per each match.
-            if u.personality_1 in user.personality_1 or user.personality_1 in u.personality_1:
+            if (u.personality_1 and user.personality_1) and (u.personality_1 in user.personality_1 or user.personality_1 in u.personality_1):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-            if u.personality_1 in user.personality_2 or user.personality_2 in u.personality_1:
+            if (u.personality_1 and user.personality_2) and (u.personality_1 in user.personality_2 or user.personality_2 in u.personality_1):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-            if u.personality_1 in user.personality_3 or user.personality_3 in u.personality_1:
+            if (u.personality_1 and user.personality_3) and (u.personality_1 in user.personality_3 or user.personality_3 in u.personality_1):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-            if u.personality_2 in user.personality_2 or user.personality_2 in u.personality_2:
+            if (u.personality_2 and user.personality_2) and (u.personality_2 in user.personality_2 or user.personality_2 in u.personality_2):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-            if u.personality_2 in user.personality_3 or user.personality_3 in u.personality_2:
+            if (u.personality_2 and user.personality_3) and (u.personality_2 in user.personality_3 or user.personality_3 in u.personality_2):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-            if u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3:
+            if (u.personality_3 and user.personality_3) and (u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
     
@@ -417,7 +420,7 @@ def mentorAvailable(mentorId): #if this mentor has free spots for mentees (even 
 
     if mentor.num_pairings_can_make is None: 
         #just in case mentor did not have the option to allow for >1 mentee: can only make 1 
-        return mentorMatches is None
+        return mentorMatches == []
     
     #can have 2 mentees, made 1 match, can make 1 more.
     #can have 2 mentees, made 2 matches, can't make another one.

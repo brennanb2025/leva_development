@@ -106,7 +106,7 @@ def registerPost(form, resume, img):
     else: #== "mentor"
         isMentee = False
 
-    (success, errors, resp) = checkBasicInfo(form)
+    (success, errors, resp) = checkBasicInfo(form, resp)
 
     if int(form.get('num_tags')) == 0:
         success = False
@@ -301,11 +301,11 @@ def registerPost(form, resume, img):
     if success: #success, registering new user
 
         mentor_gender_preferenceForm = form.get("radio_gender_preference")
-        if not isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
+        if not isMentee: #or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
             mentor_gender_preferenceForm = None #if mentor OR gender should not be taken into account, this should not be entered.
 
         gender_identityForm = form.get("radio_gender_identity")
-        if isMentee or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
+        if isMentee: #or str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "False":
             gender_identityForm = None #if mentee, this should not be entered.
 
         #changed division form to be 1:Freshman, 2:Sophomore, etc.
@@ -324,15 +324,15 @@ def registerPost(form, resume, img):
         """
 
         division_preference_set = form.get("divisionPreference")
-        if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "False":
+        #if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "False":
             #if division preference should not be taken into account, set it to None
-            division_preference_set = None
+            #division_preference_set = None
 
         personality_1_set = personality_2_set = personality_3_set = None
-        if str(app.config['MATCHING_FLAG_Personality']) == "True":
-            personality_1_set = form.get("personality1").strip()
-            personality_2_set = form.get("personality2").strip()
-            personality_3_set = form.get("personality3").strip()
+        #if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":
+        personality_1_set = form.get("personality1").strip()
+        personality_2_set = form.get("personality2").strip()
+        personality_3_set = form.get("personality3").strip()
 
         businessRegisteredUnder = Business.query.filter_by(name=form.get('business')).first()
         businessRegisteredUnder.inc_number_employees_currently_registered() #increment number of users registered for this user
@@ -341,6 +341,7 @@ def registerPost(form, resume, img):
                     is_student=isMentee, bio=form.get('bio'), email_contact=True, phone_number=None,
                     city_name=form.get('city_name'), current_occupation=form.get('current_occupation'),
                     business_id=businessRegisteredUnder.id, 
+                    num_pairings_can_make=int(form.get('num_pairings')),
                     mentor_gender_preference=mentor_gender_preferenceForm,
                     gender_identity=gender_identityForm,
                     division_preference=division_preference_set, division=division_set,

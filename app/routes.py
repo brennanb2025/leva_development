@@ -2,7 +2,7 @@
 from flask import request, render_template, flash, redirect, url_for, session, make_response, send_file, send_from_directory
 from app import app, db#, s3_client#, oauth
 #import lm as well?^
-from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm, AdminLoginForm
+from app.input_sets.forms import LoginForm, EditPasswordForm, RegistrationForm, AdminLoginForm, EditDivisionForm
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
     CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation, \
     AdminUser
@@ -384,14 +384,24 @@ def progress():
     selectEntry, select_mentor_mentee, progressDone, currMeetingInfo, prevMeetingInfo, futureMeetingInfo = \
             progressFuncs.get_progress_info(user)
 
-    admin.logData(session.get('userId'),15,"")
+    #admin.logData(session.get('userId'),15,"")
+
+    matchToMeetingInfo = {
+        select_mentor_mentee.id: 
+            {
+                "prev_meeting_info":prevMeetingInfo, 
+                "curr_meeting_info":currMeetingInfo, 
+                "progress_done":progressDone
+            }
+        } if select_mentor_mentee is not None else None
+
+    matchedUsers = [select_mentor_mentee] if select_mentor_mentee else []
     
     #TODO redo this
     return render_template('progress.html', selectEntry=selectEntry, isMentee=user.is_student, \
             #selectMentorMentee=select_mentor_mentee,
-            matchedUsers = [select_mentor_mentee], userID=user.id, progressDone=progressDone, \
-            matchToMeetingInfo={
-                select_mentor_mentee.id: {"prev_meeting_info":prevMeetingInfo, "curr_meeting_info":currMeetingInfo, "progress_done":progressDone}})
+            matchedUsers = matchedUsers, userID=user.id, progressDone=progressDone, \
+            matchToMeetingInfo=matchToMeetingInfo)
             #currMeetingInfo=currMeetingInfo, prevMeetingInfo=prevMeetingInfo, futureMeetingInfo=futureMeetingInfo)
 
 
@@ -405,7 +415,7 @@ def currentMeetingSetDone():
     user = User.query.filter_by(id=session.get('userID')).first()
     meetingNotes = form.get("meetingNotes")
 
-    progressFuncs.set_current_info_meeting_done(user, meetingNotes)
+    progressFuncs.set_current_meeting_info_done(user, meetingNotes)
 
     return progress()  # send to progress page
 
@@ -505,7 +515,7 @@ def registerValidate2():
     #email checking
 
     business = request.json['business'] 
-    success, errors = registerFuncs.registerValidate1(business)
+    success, errors = registerFuncs.registerValidate2(business)
 
     return json.dumps({
         'success': success,
@@ -519,14 +529,16 @@ def registerPost():
 
     form1 = request.form   
     
+    resume = None
     #resume pdf
     if "resume" in request.files and request.files["resume"]:
         resume = request.files["resume"]
 
+    img = None
     if "croppedImgFile" in request.files and request.files.get("croppedImgFile").filename != '':
         img = request.files.get("croppedImgFile")
     
-    success, resp = registerFuncs.registerPost(form1, resume, img)
+    success, errors, resp = registerFuncs.registerPost(form1, resume, img)
     
     if success:
 
@@ -563,7 +575,7 @@ def registerPreviouslyFilledOut(form, resp, request):
     current_occupation = form.get("current_occupation")
     division = form.get("division")
 
-    if "email" in errors:  # if error - make it blank.
+    """if "email" in errors:  # if error - make it blank.
         email = ""
     elif "first name" in errors:
         first_name = ""
@@ -576,6 +588,21 @@ def registerPreviouslyFilledOut(form, resp, request):
     elif "last name" in errors:
         last_name = ""
         if "first name" in errors:
+            first_last_error = True"""
+
+    if resp.emailError_email_taken or resp.emailError_email_not_entered:  # if error - make it blank.
+        email = ""
+    if resp.firstNameError:
+        first_name = ""
+    if resp.cityNameError:
+        city_name = ""
+    if resp.divisionError:
+        division = ""
+    if resp.currentOccupationError:
+        current_occupation = ""
+    if resp.lastNameError:
+        last_name = ""
+        if resp.firstNameError:
             first_last_error = True
 
     register_type = form.get("radio_mentor_mentee")  # student or mentor
@@ -593,15 +620,15 @@ def registerPreviouslyFilledOut(form, resp, request):
 
     # get all the input attributes
     interestInputs = []
-    if not "num_tags" in errors:
+    if not resp.interestError:
         interestInputs = form.getlist("tagName")
 
     eduInputs = []
-    if not "num_education_listings" in errors:
+    if not resp.educationError:
         eduInputs = form.getlist("educationName")
 
     carIntInputs = []
-    if not "num_education_listings" in errors:
+    if not resp.careerInterestError:
         carIntInputs = form.getlist("careerInterestName")
 
     # v load the register page
@@ -618,7 +645,7 @@ def registerPreviouslyFilledOut(form, resp, request):
     if len(interestTags) == 0 or len(careerInterests) == 0 or len(schools) == 0:
         interestTags, careerInterests, schools = get_popular_tags()
     """
-    interestTags, careerInterests, schools = get_popular_tags()
+    interestTags, careerInterests, schools = registerFuncs.get_popular_tags()
 
     resp = make_response(render_template('register1.html', email=email, first_name=first_name, last_name=last_name, first_last_error=first_last_error,
                                          bio=bio, email_or_phone=email_or_phone, city_name=city_name, current_occupation=current_occupation,
@@ -635,7 +662,7 @@ def registerPreviouslyFilledOut(form, resp, request):
         request.cookies.get('initialTimestampGET'), "%Y-%m-%d %H:%M:%S.%f"))
     dataDict = {}
     dataDict["registerTimeDiff"] = timeDiff
-    dataDict["errors"] = errors
+    dataDict["errors"] = [] #TODO temporary (removed error listing)
     admin.logData(session.get('userId'),1, json.dumps(dataDict)) #log data: register post error
     
 
@@ -674,11 +701,11 @@ def editProfile():
             careerInterestList=readyProfileResp.careerInterestList, 
             educationList=readyProfileResp.educationList, 
             personality_1=user.personality_1, personality_2=user.personality_2, personality_3=user.personality_3, 
-            division=user.division, resumeUrl=resumeUrl, 
+            division=user.division, resumeUrl=resumeUrl,
             divisionPreference=readyProfileResp.divisionPreference,
             mentorGenderPreference=readyProfileResp.mentorGenderPreference, 
             genderIdentity=readyProfileResp.genderIdentity,
-            formPwd=formPwd, 
+            formPwd=formPwd,
             user=user, userID=session.get('userID'))
 
 
@@ -776,9 +803,9 @@ def editProfilePost():
     form = request.form
 
     if form.get("submitBtn") == "editResume":  # different types of submissions
-        editProfResume()
+        return editProfResume()
     elif form.get("submitBtn") == "deleteResume":
-        deleteResume()
+        return deleteResume()
 
     id=session['userID']
 
@@ -1143,6 +1170,9 @@ def view():
     if user == None:
         return not_found("404")
 
+    resumeUrl = AWS.create_resume_link(user)
+    print("got resume url:",resumeUrl)
+
     this_user_is_logged_in = (user.id == session.get('userID'))
     #^if the user looking at this person's profile page is the one who is currently logged in, 
     # let them logout from or delete their account.
@@ -1153,10 +1183,12 @@ def view():
     else:
         admin.logData(session.get('userId'),10,"")
 
+    #TODO: is all this necessary? Just saying user. in profile page
     return render_template('profile.html', title=title, profile_picture=user.profile_picture, intro_video=user.intro_video,
                 bio=user.bio, logged_in=this_user_is_logged_in, resumeUrl=resp.resumeUrl,
                 interestList=resp.interestList, careerInterestList=resp.careerInterestList, educationList=resp.educationList, 
                 genderIdentity=resp.genderIdentity, divisionPreference=resp.divisionPreference,
+                numMatchesCanMake=resp.numMatchesCanMake,
                 isStudent=user.is_student, mentorGenderPreference=resp.mentorGenderPreference, user=user, userID=session.get('userID'))
     #user logged in: show profile page.
 
@@ -1241,7 +1273,7 @@ def getFeed():
 
     userId = session.get('userID')
 
-    dictFeed = feed.feedMenteeOld(userId)
+    dictFeed = feed.feedMentee(userId)
     if dictFeed == None:
         return None
     return jsonify(dictFeed)
@@ -1311,7 +1343,7 @@ def my_connections():
 
 def userLoggedIn():
 
-    # Checks if the user is actually logged in -- commented out for easier testing
+    # Checks if the user is actually logged in -- comment out for easier testing
     #userID = SessionTokens.query.filter_by(sessionID=sessionID1).first()
     if session.get('userID'):  # valid session token -- user already logged in
         #if User.query.filter_by(id=session['userID']).first() == None:
@@ -1325,7 +1357,7 @@ def adminUserLoggedIn():
     # Checks if the user is actually logged in and is an admin
     if session.get('adminId'):
         # valid session token -- user already logged in
-        #if User.query.filter_by(id=session['userID']).first() == None:
+        #if AdminUser.query.filter_by(id=session['userID']).first() == None:
             #return False
         return True
 

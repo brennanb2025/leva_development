@@ -237,6 +237,17 @@
                         <!--hide all this if the current user is viewing another user's profile-->
                         {% if logged_in is defined and logged_in %}
 
+
+                            <div class="single">
+                                <div class="label">
+                                    Number of matches able to make:
+                                </div>
+        
+                                <div class="answer">
+                                    {{ user.num_pairings_can_make }}
+                                </div>
+                            </div>
+
                             <!--Division preference-->
                             {% if divisionPreference is not none %}
                             <div class="single">
