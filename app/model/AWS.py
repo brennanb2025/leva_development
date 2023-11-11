@@ -78,7 +78,6 @@ That will greatly reduce the amount of work happening on your server, as well as
 https://stackoverflow.com/questions/52342974/serve-static-files-in-flask-from-private-aws-s3-bucket
 """
 def create_resume_link(user):
-    print(user.resume, user.resume_key)
     if user.resume == None or user.resume_key == None:
         resumeUrl = None
     else:

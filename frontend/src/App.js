@@ -9,6 +9,7 @@ function App() {
 
   return (
     <div className='flex flex-col w-full h-screen'>
+      <meta name="csrf-token" content="{{ csrf_token() }}" />
       <section className="w-full p-8">
         <div className="flex flex-row items-center border-b pb-2">
           <div className="matchmaking-header min-w-[15rem]">{isMatch ? "Matchmaking" : "Statistics"}</div>

@@ -418,13 +418,13 @@ def mentorAvailable(mentorId): #if this mentor has free spots for mentees (even 
     if mentorMatches is None: #haven't made a match yet --> must be free
         return True
 
-    if mentor.num_pairings_can_make is None: 
+    if mentor.num_pairings_can_make is None:
         #just in case mentor did not have the option to allow for >1 mentee: can only make 1 
         return mentorMatches == []
     
     #can have 2 mentees, made 1 match, can make 1 more.
     #can have 2 mentees, made 2 matches, can't make another one.
-    return (mentor.num_pairings_can_make - len(mentorMatches)) > 0
+    return mentor.num_pairings_can_make < len(mentorMatches)
 
 def menteeAvailable(menteeId): #if this mentee has free spots for mentors (even if already matched)
     mentee = User.query.filter_by(id=menteeId).first()
@@ -436,11 +436,11 @@ def menteeAvailable(menteeId): #if this mentee has free spots for mentors (even 
 
     if mentee.num_pairings_can_make is None: 
         #just in case mentor did not have the option to allow for >1 mentee: can only make 1 
-        return menteeMatches is None
+        return menteeMatches == []
     
     #can have 2 mentees, made 1 match, can make 1 more.
     #can have 2 mentees, made 2 matches, can't make another one.
-    return (mentee.num_pairings_can_make - len(menteeMatches)) > 0
+    return mentee.num_pairings_can_make < len(menteeMatches)
 
 
 

@@ -7,6 +7,25 @@ function Statistics() {
     const [userResults, setUserResults] = useState({})
     const [eventResults, setEventResults] = useState({})
 
+    const handleSubmitForm = (values) => {
+        axios.get("/csrf", { withCredentials: true }).then((response) => {
+            axios.post("/admin-delete-match", {
+                mentorId: values.mentorID,
+                menteeId: values.menteeID
+            }, {
+                withCredentials: true,
+                headers: {
+                    'X-CSRFToken': response.headers['x-csrftoken'],
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then((results) => {
+                console.log(results)
+            }).catch(err => {
+                console.log(err)
+            })
+        })
+    }
+
     return (
         <div className='admin-parent-container'>
 
@@ -138,21 +157,7 @@ function Statistics() {
                         mentorID: '',
                         menteeID: '',
                     }}
-                    onSubmit={async (values) => {
-                        axios.post("/admin-delete-match", {
-                            "mentorId": values.mentorID,
-                            "menteeId": values.menteeID
-                        }, {
-                            data: {
-                                "mentorId": values.mentorID,
-                                "menteeId": values.menteeID
-                            }
-                        }).then((results) => {
-                            console.log(results)
-                        }).catch(err => {
-                            console.log(err)
-                        })
-                    }}>
+                    onSubmit={(values) => handleSubmitForm(values)}>
                     <Form>
                         <label htmlFor="mentorID">Mentor ID</label>
                         <Field id="mentorID" name="mentorID" placeholder="Mentor ID" />

@@ -318,7 +318,6 @@ def admin_lookup_user_feed_all():
 
 @app.route("/admin-delete-match", methods = ['POST'])
 def admin_delete_match():
-    print("Got here")
     if not adminUserLoggedIn():
         return
 
@@ -462,10 +461,10 @@ def sign_in_post():
         session["userID"] = id
         #newToken = SessionTokens(sessionID=sessionToken) #make a new token
         #db.session.add(newToken) #add to database
-        admin.logData(session.get('userId'),4,"") #log in post success
+        admin.logData(session.get('userID'),4,"") #log in post success
         return resp
     else:
-        admin.logData(session.get('userId'),3,"") #log in post failure
+        admin.logData(session.get('userID'),3,"") #log in post failure
         return redirect(url_for('sign_in')) #failure
 
 
@@ -490,7 +489,7 @@ def register():
     # record the current time as a string
     resp.set_cookie('initialTimestampGET', str(datetime.datetime.utcnow()))
 
-    admin.logData(session.get('userId'),0,"") #log data: register get
+    admin.logData(session.get('userID'),0,"") #log data: register get
 
     return resp  # return the template with the cookie
 
@@ -546,7 +545,7 @@ def registerPost():
             request.cookies.get('initialTimestampGET'), "%Y-%m-%d %H:%M:%S.%f"))
         dataDict = {}
         dataDict["registerTimeDiff"] = timeDiff
-        admin.logData(session.get('userId'),2, json.dumps(dataDict))
+        admin.logData(session.get('userID'),2, json.dumps(dataDict))
 
         # success: get request to sign_in page
         resp = make_response(redirect(url_for('sign_in')))
@@ -663,7 +662,7 @@ def registerPreviouslyFilledOut(form, resp, request):
     dataDict = {}
     dataDict["registerTimeDiff"] = timeDiff
     dataDict["errors"] = [] #TODO temporary (removed error listing)
-    admin.logData(session.get('userId'),1, json.dumps(dataDict)) #log data: register post error
+    admin.logData(session.get('userID'),1, json.dumps(dataDict)) #log data: register post error
     
 
     return resp
@@ -687,7 +686,7 @@ def editProfile():
     interestTags, careerInterests, schools = registerFuncs.get_popular_tags()
     resumeUrl = AWS.create_resume_link(user)
 
-    admin.logData(session.get('userId'),5,"") #log data edit profile get
+    admin.logData(session.get('userID'),5,"") #log data edit profile get
 
 
     title="Edit profile Page"
@@ -779,7 +778,7 @@ def editProfileTest():
 
     resumeUrl = create_resume_link(user)
 
-    admin.logData(session.get('userId'),5,"") #log data edit profile get
+    admin.logData(session.get('userID'),5,"") #log data edit profile get
 
     title="Edit profile Page"
     #return render_template('edit_profile.html', intro_video=intro_video_link, 
@@ -959,7 +958,7 @@ def editProfilePost():
         dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess
         dataChangedDict["contact"] = changedContactMethodSuccess
         
-        admin.logData(session.get('userId'),7,json.dumps(dataChangedDict)) #log data edit profile success
+        admin.logData(session.get('userID'),7,json.dumps(dataChangedDict)) #log data edit profile success
 
         return redirect(url_for('view', id=session.get('userID')))
     else:
@@ -976,7 +975,7 @@ def editProfilePost():
         dataChangedDict["division"] = changedDivisionSuccess
         dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess
         dataChangedDict["contact"] = changedContactMethodSuccess
-        admin.logData(session.get('userId'),6,json.dumps(dataChangedDict)) #log data edit profile error
+        admin.logData(session.get('userID'),6,json.dumps(dataChangedDict)) #log data edit profile error
         return redirect(url_for('editProfile'))
 
 
@@ -1023,7 +1022,7 @@ def editProfPic():
             flash(u'Could not assess image size.', 'imageError')
         if resp.badFileType:
             flash(u''+resp.badFileTypeMessage, 'imageError')
-        admin.logData(session.get('userId'),18,resp.errorMsg)
+        admin.logData(session.get('userID'),18,resp.errorMsg)
 
     return redirect(url_for('editProfile'))
 
@@ -1179,9 +1178,9 @@ def view():
     title = "Profile Page"
 
     if this_user_is_logged_in:
-        admin.logData(session.get('userId'),9,"")
+        admin.logData(session.get('userID'),9,"")
     else:
-        admin.logData(session.get('userId'),10,"")
+        admin.logData(session.get('userID'),10,"")
 
     #TODO: is all this necessary? Just saying user. in profile page
     return render_template('profile.html', title=title, profile_picture=user.profile_picture, intro_video=user.intro_video,
@@ -1208,7 +1207,7 @@ def logout():
         session.pop('userID', None)
         # db.session.commit() #remove this user's session token from the dict
 
-    admin.logData(session.get('userId'),11,"")
+    admin.logData(session.get('userID'),11,"")
 
     return redirect(url_for('index'))
 
@@ -1233,7 +1232,7 @@ def deleteProfile():
 
         editProfileFuncs.deleteProfile(user)
 
-        admin.logData(session.get('userId'),12,"")
+        admin.logData(session.get('userID'),12,"")
 
         return render_template('delete-profile-success.html')
     else:
@@ -1295,7 +1294,7 @@ def feedPost():
 
     userMatchID = form.get('userID')
 
-    if not feed.feedPost(session.get('userId'), userMatchID):
+    if not feed.feedPost(session.get('userID'), userMatchID):
         flash(u'That mentor has been selected already.', 'feedError')
         return redirect(url_for('mentor'))
     
@@ -1303,7 +1302,7 @@ def feedPost():
     dictLog["userID"] = userMatchID
     dictLog["score"] = form.get('userScore')
     dictLog["index"] = form.get('userIdx')
-    admin.logData(session.get('userId'),14,json.dumps(dictLog))
+    admin.logData(session.get('userID'),14,json.dumps(dictLog))
 
     return redirect(url_for("progress"))
 
@@ -1364,11 +1363,19 @@ def adminUserLoggedIn():
     return False
 
 
+from flask_wtf.csrf import generate_csrf
+
+@app.route("/csrf", methods=['GET'])
+def get_csrf():
+    response = jsonify(detail="success")
+    response.headers.set("X-CSRFToken", generate_csrf())
+    return response
+
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
     dictLog = {}
     dictLog['desc'] = e.description
-    admin.logData(session.get('userId'),17,json.dumps(dictLog))
+    admin.logData(session.get('userID'),17,json.dumps(dictLog))
     return render_template('csrf_error.html', reason=e.description), 400
 
 
@@ -1384,7 +1391,7 @@ This should be handled client-side, since there is already a bit of code in my j
 @app.errorhandler(413)
 def size_error(e):
     print("logging error 413")
-    admin.logData(session.get('userId'),18,"[Image is too big (max 5 MB)]")
+    admin.logData(session.get('userID'),18,"[Image is too big (max 5 MB)]")
     flash(u'Image is too big (max 5 MB).', 'imageError')
     return redirect(url_for('editProfile'))
 

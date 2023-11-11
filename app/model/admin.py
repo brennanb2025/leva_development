@@ -19,8 +19,8 @@ import app.model.feed as feed
 from app.utils.create_excel import create_excel_sheet
 
 
-def admin_validate_login(username, password):
-    return str(app.config['ADMIN_PASSWORD']) == password and str(app.config['ADMIN_USERNAME']) == username
+#def admin_validate_login(username, password):
+#    return str(app.config['ADMIN_PASSWORD']) == password and str(app.config['ADMIN_USERNAME']) == username
 
 def admin_lookup_user(userId, firstName, lastName, email):
     if userId != None:  
@@ -73,7 +73,7 @@ def user_matches(businessId):
             User,
             Select
     ).filter( \
-        User.business_id == businessId and User.is_student
+        (User.business_id == businessId) & (User.is_student)
     ).outerjoin(User, User.id == Select.mentee_id).all()
 
     dictMenteeToMentor = {}
@@ -159,7 +159,7 @@ def validate_matches(matches): #takes {menteeId : mentorId}
         selectQuery = db.session.query( \
                 Select
             ).filter( \
-                Select.mentee == m.id and Select.mentor_id == matches[m].id
+                (Select.mentee == m.id) & (Select.mentor_id == matches[m].id)
             ).first()
         if selectQuery != None:
             invalidMatches[m] = matches[m] #invalid
@@ -195,7 +195,7 @@ def deleteMatch(menteeId, mentorId):
     selectQuery = db.session.query( \
                 Select
             ).filter( \
-                Select.mentee_id == menteeId and Select.mentor_id == mentorId
+                (Select.mentee_id == menteeId) & (Select.mentor_id == mentorId)
             ).first()
 
     if selectQuery is None:
