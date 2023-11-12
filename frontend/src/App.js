@@ -17,7 +17,7 @@ function App() {
           <button className="option-button" onClick={() => { setIsMatch(true) }}>Matchmaking</button>
         </div>
       </section>
-      <div className="flex-grow overflow-y-hidden">
+      <div className="flex-grow">
         {isMatch ? <Matchmaking /> : <Statistics />}
       </div>
     </div>

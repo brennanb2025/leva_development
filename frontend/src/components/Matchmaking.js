@@ -2,46 +2,37 @@ import { React, useState, useEffect } from 'react'
 import Dropdown from 'react-dropdown'
 import Modal from 'react-modal'
 import axios from 'axios'
-import MENTEE from '../static/nulogo.png'
-import MENTOR from '../static/nulogo.png'
 
 function Matchmaking() {
 
     const [selected, setSelected] = useState(-1)
     const [modalOpen, setModalOpen] = useState(false)
-
-    let mockData = []
-
-    for (let i = 0; i < 10; i++) {
-        mockData.push(
-            {
-                mentee: "menteeName" + i,
-                mentor: "mentorName" + i,
-                menteeImage: MENTEE,
-                mentorImage: MENTOR,
-                candidates: [
-                    "mentorName" + i,
-                    "hi" + i,
-                    "hi",
-                    "hi",
-                    "hi",
-                    "hi"
-                ]
-            }
-        )
-    }
+    const [matches, setMatches] = useState([])
 
     useEffect(() => {
-        axios.get("/admin-user-matches?businessId=1").then((res) => {
-            console.log(res.data)
-        }).catch((err) => {
-            console.log(err)
+
+        axios.get("/admin-user-matches", {
+            params: {
+                "businessId": 1
+            },
+        }).then((results) => {
+            console.log(results.data)
+            setMatches(results.data)
         })
     }, [])
 
+    // "Helper functions"
     function MatchEntry(props) {
 
         let matchdata = props.match
+        let mentee = matchdata.user;
+        let mentor = matchdata.mentors[0]
+
+        let candidates = []
+        for (let i = 0; i < matchdata.mentors.length; i++) {
+            let mentorinfo = matchdata.mentors[i]
+            candidates.push(mentorinfo.first_name)
+        }
         let index = props.index
 
         const [disabled, setDisabled] = useState(false)
@@ -63,8 +54,8 @@ function Matchmaking() {
                         setSelected(index)
                     }}>
                     <div className="flex flex-row items-center basis-1/3">
-                        <img className='pfp-image' src={matchdata.menteeImage} alt=''></img>
-                        {matchdata.mentee}
+                        <img className='pfp-image' src={mentee.profile_picture} alt=''></img>
+                        {mentee.first_name}
                     </div>
 
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -74,15 +65,15 @@ function Matchmaking() {
 
 
                     <div className="flex flex-row items-center basis-1/3">
-                        <img className='pfp-image' src={matchdata.mentorImage} alt='' />
-                        {matchdata.mentor}
+                        <img className='pfp-image' src={mentor.profile_picture} alt='' />
+                        {mentor.first_name}
                     </div>
                 </div>
 
                 <div className='z-10 relative basis-1/3'>
                     <Dropdown
                         disabled={disabled}
-                        options={matchdata.candidates}
+                        options={candidates}
                         placeholder={"See alternative mentors..."}
                         className={disabled ? "bg-gray-500" : "bg-transparent"}
                         controlClassName="border"
@@ -95,6 +86,51 @@ function Matchmaking() {
                     </button>
                 </div>
             </div>
+        )
+    }
+
+    function EntryModal() {
+        let mentor = matches[selected].mentors[0]
+        let mentee = matches[selected].user
+        return (
+            <Modal
+                isOpen={modalOpen}
+                onRequestClose={() => { setModalOpen(false) }}
+                contentLabel="One small step for man, one giant leap for mankind"
+                style={{ content: { zIndex: 20 } }}
+            >
+                <button onClick={() => { setModalOpen(false) }}>Close</button>
+
+                <div className="w-full h-full flex flex-row">
+                    {
+                        [mentor, mentee].map((person) => (
+                            <div className='flex-1 flex flex-col items-center'>
+                                <img src={person.profile_picture} className="w-28 h-28 rounded-full" />
+                                <div className="matchmaking-header mt-2 border-b px-4 pb-2">{person.first_name}</div>
+                                <div>Division: {person.division}</div>
+                                <div>
+                                    Interests:
+                                    {
+                                        person.interests.map((interest) => (
+                                            <p>{interest}</p>
+                                        ))
+                                    }
+                                </div>
+                                <div>
+                                    Career Interests:
+                                    {
+                                        person.career_interests.map((interest) => (
+                                            <p>{interest}</p>
+                                        ))
+                                    }
+                                </div>
+                                <div>Phone Number: {person.phone_number}</div>
+                                <div>Email: {person.email}</div>
+                            </div>
+                        ))
+                    }
+                </div>
+            </Modal>
         )
     }
 
@@ -124,36 +160,13 @@ function Matchmaking() {
 
                 <div className="overflow-y-scroll flex-1 z-0">
                     {
-                        mockData.map((data, index) => <MatchEntry match={data} index={index} />)
+                        matches.map((data, index) => <MatchEntry match={data} index={index} />)
                     }
                 </div>
 
             </section>
 
-            <Modal
-                isOpen={modalOpen}
-                onRequestClose={() => { setModalOpen(false) }}
-                contentLabel="One small step for man, one giant leap for mankind"
-                style={{ content: { zIndex: 20 } }}
-            >
-                <button onClick={() => { setModalOpen(false) }}>Close</button>
-
-                {selected != -1 ?
-                    (
-                        <div className="w-full flex flex-row">
-                            <div className='flex-1 flex flex-col items-center'>
-                                <img src={mockData[selected].menteeImage} className="w-28 h-28 rounded-full" />
-                                <div className="matchmaking-header mt-2 border-b px-4 pb-2">{mockData[selected].mentee}</div>
-                            </div>
-                            <div className='flex-1 flex flex-col items-center'>
-                                <img src={mockData[selected].menteeImage} className="w-28 h-28 rounded-full" />
-                                <div className="matchmaking-header mt-2 border-b px-4 pb-2">{mockData[selected].mentor}</div>
-                            </div>
-                        </div>
-                    )
-                    : ""
-                }
-            </Modal>
+            {selected != -1 ? <EntryModal /> : ""}
 
             <section className="w-full pt-8 flex justify-end py-8">
                 <button className="bg-slate-400 p-4">

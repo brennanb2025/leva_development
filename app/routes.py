@@ -244,10 +244,10 @@ def admin_get_events_exceptions():
     if not adminUserLoggedIn():
         return
 
-    startTime = datetime.datetime.strptime(
-        request.args.get("startTime"), '%Y-%m-%d %H:%M:%S')
-    endTime = datetime.datetime.strptime(
-        request.args.get("endTime"), '%Y-%m-%d %H:%M:%S')
+    startTime = datetime.datetime.fromisoformat(
+        request.args.get("startTime"))
+    endTime = datetime.datetime.fromisoformat(
+        request.args.get("endTime"))
     action = request.args.get("action")
 
     print(startTime, endTime)
