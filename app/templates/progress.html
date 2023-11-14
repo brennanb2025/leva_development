@@ -47,13 +47,13 @@
                         </a>
                     </li>
     
-                    <li class="nav-item">
+                    {#<li class="nav-item">
                         <a href="{{ url_for('mentor') }}">
                             <button class="nav-button">
                                 Mentor Matches
                             </button>
                         </a>
-                    </li>
+                    </li>#}
     
                     <li class="nav-item">
                         <a href="{{ url_for('progress') }}">
@@ -271,11 +271,8 @@
                     {% endfor %}
 
                 {% else %}
-                    {% if isMentee %}
-                        Select a mentor in the Mentor Matches tab!<br/>
-                    {% else %}
-                        Please wait until you have been selected by a mentee!<br/>
-                    {% endif %}
+                    <br/>
+                    Please wait until you have been matched by an administrator!<br/>
                 {% endif %}
 
 

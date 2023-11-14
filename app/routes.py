@@ -333,6 +333,9 @@ def admin_delete_match():
 
 @app.route('/admin-apply-match', methods=['POST'])
 def admin_apply_match():
+    if not adminUserLoggedIn():
+        return
+
     # A mentee chose a mentor --> post the form with the info
 
     menteeId = request.form.get("menteeId")
@@ -352,6 +355,8 @@ def admin_apply_match():
 
 @app.route('/admin-apply-matches', methods=['POST'])
 def admin_apply_matches():
+    if not adminUserLoggedIn():
+        return
     # A mentee chose a mentor --> post the form with the info
 
     matches = request.form.get("matches")
@@ -395,7 +400,9 @@ def admin_get_business_excel():
             as_attachment=True)
 
 
-@app.route('/mentor')
+#no longer in use (mentors are selected by admin)
+"""
+@app.route('/mentor', methods=['GET'])
 def mentor():
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
@@ -408,7 +415,7 @@ def mentor():
         return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=False)
 
     return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=True)
-
+"""
 
 @app.route('/progress', methods=['GET'])
 def progress():
