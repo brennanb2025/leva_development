@@ -141,55 +141,96 @@ def validate_matches(matches): #takes {menteeId : mentorId}
         if matches[m].is_student:
             invalidMatches[m] = matches[m]
 
-    #handle multiple mentees choosing the same mentor
+    #handle multiple mentees choosing the same mentor and vv.
 
-    numMentorMatching = {}
+    numMatching = {}
     #get the # each mentor is matched:
     for m in matches.values():
-        if m in numMentorMatching:
-            numMentorMatching[m] += 1
-        else:
-            numMentorMatching[m] = 1
+        numMatching[m] = numMatching.get(m,0)+1
+
+    for m in matches.keys():
+        numMatching[m] = numMatching.get(m,0)+1
 
 
     #verify none already in database
     for m in matches.keys():
-
-        #this match doesn't exist in the db
-        selectQuery = db.session.query( \
-                Select
-            ).filter( \
-                (Select.mentee == m.id) & (Select.mentor_id == matches[m].id)
-            ).first()
-        if selectQuery != None:
+        if not validate_match(m.id, matches[m].id):
             invalidMatches[m] = matches[m] #invalid
-
-        #check if the pairing can each make another match
-        mentee = User.query.filter_by(id=m.id)
-        mentor = User.query.filter_by(id=matches[m].id)
-        selectsMentee = Select.query.filter_by(mentee_id=m.id).all()
-        selectsMentor = Select.query.filter_by(mentor_id=matches[m].userId).all()
         
-        if len(selectsMentee) >= mentee.num_pairings_can_make or \
-                numMentorMatching[matches[m].id]+len(selectsMentor) >= mentor.num_pairings_can_make:
-            #can't go over number of times this mentor has been chosen in the given dict
-            # + the # of pairings the mentor was already a part of.
-            invalidMatches[m] = matches[m] #invalid
-
     return invalidMatches
 
-
-def applyMatches(matches): #takes {menteeId : mentorId} -> bool denoting success
-    if len(validate_matches(matches)) != 0:
+def validate_match(menteeId, mentorId, numMatching):
+    #this match doesn't exist in the db
+    selectQuery = db.session.query( \
+            Select
+        ).filter( \
+            (Select.mentee == menteeId) & (Select.mentor_id == mentorId)
+        ).first()
+    if selectQuery is not None:
         return False
+
+    #check if the pairing can each make another match
+    mentee = User.query.filter_by(id=menteeId)
+    mentor = User.query.filter_by(id=mentorId)
+    num_pairings_mentee = mentee.num_pairings_can_make if mentee.num_pairings_can_make is not None else 1
+    num_pairings_mentee = mentor.num_pairings_can_make if mentor.num_pairings_can_make is not None else 1
+    #default to 1
+
+    selectsMentee = Select.query.filter_by(mentee_id=menteeId).all()
+    selectsMentor = Select.query.filter_by(mentor_id=mentorId).all()
+    
+    if numMatching[menteeId]+len(selectsMentee) >= mentee.num_pairings_can_make or \
+            numMatching[mentorId]+len(selectsMentor) >= mentor.num_pairings_can_make:
+        #can't go over number of times this mentor has been chosen in the given dict
+        # + the # of pairings the mentor was already a part of.
+        return False
+    
+    return True
+
+class apply_match_resp:
+    def __init__():
+        self.match_success = None
+        self.match = None #(menteeid, mentorid)
+
+class apply_matches_resp:
+    def __init__():
+        self.match_overall_success = None
+        self.invalid_matches = None #{menteeid : mentorid}
+
+
+def apply_matches(matches): #takes {menteeId : mentorId} -> bool denoting success
+    resp = apply_matches_resp()
+    resp.match_overall_success = True
+
+    invalidMatches = validate_matches(matches)
+    if len(invalidMatches) != 0:
+        resp.invalid_matches = invalidMatches
+        resp.match_overall_success = False
 
     for m in matches.keys: #post new select for each pairing
         success = feed.feedPost(m.id, matches[m].id)
         if not success:
-            return False
+            resp.match_overall_success = False
 
-    return True
-    
+    return resp
+
+def apply_match(menteeId, mentorId): #takes {menteeId : mentorId} -> bool denoting success
+    resp = apply_match_resp()
+    resp.match_success = True
+    resp.match = (menteeId, mentorId)
+
+    if not validate_match(menteeId, mentorId):
+        resp.match_success = True
+
+    #post new select for each pairing
+    success = feed.feedPost(menteeId, mentorId)
+    if not success:
+        resp.match_success = True
+
+    return resp
+
+
+
 def deleteMatch(menteeId, mentorId):
 
     selectQuery = db.session.query( \

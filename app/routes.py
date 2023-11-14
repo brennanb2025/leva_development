@@ -327,9 +327,45 @@ def admin_delete_match():
     if menteeId is None or mentorId is None:
         return jsonify({"success":False})
 
-    success = admin.deleteMatch(menteeId, mentorId)
+    success = admin.delete_match(menteeId, mentorId)
 
     return jsonify({"success":success})
+
+@app.route('/admin-apply-match', methods=['POST'])
+def admin_apply_match():
+    # A mentee chose a mentor --> post the form with the info
+
+    menteeId = request.form.get("menteeId")
+    mentorId = request.form.get("mentorId")
+
+    if menteeId is None or mentorId is None:
+        return jsonify({"success":False})
+
+    success = admin.apply_match(menteeId, mentorId)
+
+    return jsonify(
+        {
+            "success": success.match_success,
+            "match": (success.match[0], success.match[1])
+        })
+
+
+@app.route('/admin-apply-matches', methods=['POST'])
+def admin_apply_matches():
+    # A mentee chose a mentor --> post the form with the info
+
+    matches = request.form.get("matches")
+
+    if matches is None:
+        return jsonify({"success":False})
+
+    success = admin.apply_matches(matches)
+
+    return jsonify(
+        {
+            "success": success.match_overall_success,
+            "matches_success": success.invalid_matches
+        })
 
 
 @app.route("/business-excel")

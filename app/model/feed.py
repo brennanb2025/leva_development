@@ -449,7 +449,6 @@ def feedPost(userId, userMatchID):
     if not menteeAvailable(userId) or not mentorAvailable(userMatchID):
         return False #one of them is unavailable
 
-
     newSelect = Select(mentee_id=userId, mentor_id=userMatchID)
     #selection will only be made by the user logged in - the mentee.
 
