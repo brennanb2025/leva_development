@@ -526,22 +526,22 @@ def get_all_matches(userId):
     if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":
         for u in users:
             #match in any personality trait - separate to add to the value per each match.
-            if u.personality_1 in user.personality_1 or user.personality_1 in u.personality_1:
+            if (u.personality_1 and user.personality_1) and (u.personality_1 in user.personality_1 or user.personality_1 in u.personality_1):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-            if u.personality_1 in user.personality_2 or user.personality_2 in u.personality_1:
+            if (u.personality_1 and user.personality_2) and (u.personality_1 in user.personality_2 or user.personality_2 in u.personality_1):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-            if u.personality_1 in user.personality_3 or user.personality_3 in u.personality_1:
+            if (u.personality_1 and user.personality_3) and (u.personality_1 in user.personality_3 or user.personality_3 in u.personality_1):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-            if u.personality_2 in user.personality_2 or user.personality_2 in u.personality_2:
+            if (u.personality_2 and user.personality_2) and (u.personality_2 in user.personality_2 or user.personality_2 in u.personality_2):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-            if u.personality_2 in user.personality_3 or user.personality_3 in u.personality_2:
+            if (u.personality_2 and user.personality_3) and (u.personality_2 in user.personality_3 or user.personality_3 in u.personality_2):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
-            if u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3:
+            if (u.personality_3 and user.personality_3) and (u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3):
                 userDict[u] += heuristicVals["personality"]
                 matches["personality"] += 1
     
