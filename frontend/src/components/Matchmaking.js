@@ -8,6 +8,12 @@ function Matchmaking() {
     const [selected, setSelected] = useState(-1)
     const [modalOpen, setModalOpen] = useState(false)
     const [matches, setMatches] = useState([])
+    //matches = [{mentee id : [mentor user objects]}]
+
+    //const [allUsers, setAllUsers] = useState([])
+    const [allMentees, setAllMentees] = useState([])
+    //allMentees = [user]
+    const [feedMatches, setFeedMatches] = useState({})
 
     useEffect(() => {
 
@@ -16,26 +22,86 @@ function Matchmaking() {
                 "businessId": 1
             },
         }).then((results) => {
+            const newDict = {}
+            results.data.map((element) => {
+                newDict[element["user"].id] = element["mentors"].map(m => m.id) //set user id : [ mentor id ]
+            })
+
+            setMatches(newDict)
+
+        })
+
+        axios.get("/admin-lookup-users-in-business", {
+            params: {
+                "businessId": 1
+            },
+        }).then((results) => {
             console.log(results.data)
-            setMatches(results.data)
+            //setAllUsers(results.data)
+
+            let feed = {}
+            results.data.filter(m => m.is_mentee).map((m) => {
+                axios.get("/admin-lookup-user-feed-all", {
+                    params: {
+                        "userid": m.id
+                    },
+                }).then((results) => {
+                    //setAllUsers(results.data)
+                    feed[m.id] = results.data.matches
+                })
+            })
+            setFeedMatches(feed)
+            setAllMentees(results.data.filter(m => m.is_mentee))
         })
     }, [])
+    // useEffect(() => {
+    //     allMentees.map((m) => {
+    //         axios.get("/admin-lookup-user-feed-all", {
+    //             params: {
+    //                 "userid": m.id
+    //             },
+    //         }).then((results) => {
+    //             //setAllUsers(results.data)
+    //             feed[m] = results.data.matches
+    //         })
+    //     })
+    //     setFeedMatches(feed)
+    // }, [allMentees])
 
     // "Helper functions"
     function MatchEntry(props) {
 
-        let matchdata = props.match
+        /*let matchdata = props.match
         let mentee = matchdata.user;
-        let mentor = matchdata.mentors[0]
+        let mentor = matchdata.mentors[0]*/
 
-        let candidates = []
-        for (let i = 0; i < matchdata.mentors.length; i++) {
+        //let matchData = 
+        let mentee = props.mentee
+        let mentors = matches[mentee.id] //get the match from the matches obj (stores mentee id : mentor id)
+
+        console.log("allMentees", allMentees)
+        //console.log("mentors == undefined", mentors === undefined)
+
+        const [disabled, setDisabled] = useState(mentors === undefined) //mentee in matches --> mentee was already matched
+
+        if (mentors === undefined) {
+            console.log("mentee", mentee, "was not matched yet")
+            //setDisabled(false)
+            return
+        }
+
+        console.log("mentors:", mentors)
+        console.log("mentee ", mentee)
+        console.log("mentee id,", mentee.id)
+        console.log("feedMatches ", feedMatches)
+        console.log("feedMatches ", feedMatches[mentee.id])
+        let candidates = feedMatches[mentee.id].map(m => m.mentor.first_name)
+        console.log(candidates)
+        /*for (let i = 0; i < matchdata.mentors.length; i++) {
             let mentorinfo = matchdata.mentors[i]
             candidates.push(mentorinfo.first_name)
-        }
+        }*/
         let index = props.index
-
-        const [disabled, setDisabled] = useState(false)
 
         return (
             <div
@@ -65,8 +131,8 @@ function Matchmaking() {
 
 
                     <div className="flex flex-row items-center basis-1/3">
-                        <img className='pfp-image' src={mentor.profile_picture} alt='' />
-                        {mentor.first_name}
+                        <img className='pfp-image' src={mentors[0].profile_picture} alt='' />
+                        {mentors[0].first_name}
                     </div>
                 </div>
 
@@ -179,7 +245,7 @@ function Matchmaking() {
 
                 <div className="overflow-y-scroll flex-1 z-0">
                     {
-                        matches.map((data, index) => <MatchEntry match={data} index={index} />)
+                        allMentees.map((m, i) => <MatchEntry mentee={m} index={i} />)
                     }
                 </div>
 

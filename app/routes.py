@@ -353,6 +353,28 @@ def admin_apply_match():
         })
 
 
+@app.route('/admin-validate-match', methods=['GET'])
+def admin_validate_match():
+    if not adminUserLoggedIn():
+        return
+
+    # A mentee chose a mentor --> post the form with the info
+
+    menteeId = request.form.get("menteeId")
+    mentorId = request.form.get("mentorId")
+    numMatching = request.form.get("numMatching")
+
+    if menteeId is None or mentorId is None:
+        return jsonify({"success":False})
+
+    success = admin.validate_match(menteeId, mentorId, numMatching)
+
+    return jsonify(
+        {
+            "success": success
+        })
+
+
 @app.route('/admin-apply-matches', methods=['POST'])
 def admin_apply_matches():
     if not adminUserLoggedIn():
