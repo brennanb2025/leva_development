@@ -106,26 +106,45 @@ function Matchmaking() {
                         [mentor, mentee].map((person) => (
                             <div className='flex-1 flex flex-col items-center'>
                                 <img src={person.profile_picture} className="w-28 h-28 rounded-full" />
-                                <div className="matchmaking-header mt-2 border-b px-4 pb-2">{person.first_name}</div>
-                                <div>Division: {person.division}</div>
-                                <div>
-                                    Interests:
+                                <div className='matchmaking-subheader mb-4'>{person.first_name} {person.last_name}</div>
+                                <div className="text-start">
                                     {
-                                        person.interests.map((interest) => (
-                                            <p>{interest}</p>
-                                        ))
+                                        Object.keys(person).map((k, i) => {
+                                            console.log(typeof person[k])
+                                            if (k === "profile_picture"
+                                                || k === "first_name"
+                                                || k === "last_name"
+                                                || !person[k]) {
+                                                return ""
+                                            }
+                                            else if (k === "resume") {
+                                                return <a href={person[k]} className='text-blue-700 underline'>Resume</a>
+                                            }
+                                            else if (typeof person[k] == "object") {
+                                                return (
+                                                    <div>
+                                                        <span className='font-bold'>{k}: </span>
+                                                        <span>{
+                                                            person[k].map((field, i) => {
+                                                                if (i == person[k].length - 1) {
+                                                                    return field
+                                                                }
+                                                                return field + ", "
+                                                            })
+                                                        }</span>
+                                                    </div>
+                                                )
+                                            }
+
+                                            return (
+                                                <div>
+                                                    <span className='font-bold'>{k}: </span>
+                                                    <span>{person[k]}</span>
+                                                </div>
+                                            )
+                                        })
                                     }
                                 </div>
-                                <div>
-                                    Career Interests:
-                                    {
-                                        person.career_interests.map((interest) => (
-                                            <p>{interest}</p>
-                                        ))
-                                    }
-                                </div>
-                                <div>Phone Number: {person.phone_number}</div>
-                                <div>Email: {person.email}</div>
                             </div>
                         ))
                     }
