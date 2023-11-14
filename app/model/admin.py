@@ -136,9 +136,17 @@ def validate_matches(matches): #takes {menteeId : mentorId}
 
     #verify all are mentee:mentor
     for m in matches.keys():
-        if not m.is_student:
+        menteeUser = User.query.filter_by(id=m).first()
+        mentorUser = User.query.filter_by(id=matches[m]).first()
+        #print(menteeUser, mentorUser)
+
+        if not menteeUser or not mentorUser:
             invalidMatches[m] = matches[m]
-        if matches[m].is_student:
+            continue
+        if not menteeUser.is_student:
+            invalidMatches[m] = matches[m]
+            continue
+        if mentorUser.is_student:
             invalidMatches[m] = matches[m]
 
     #handle multiple mentees choosing the same mentor and vv.
@@ -151,10 +159,12 @@ def validate_matches(matches): #takes {menteeId : mentorId}
     for m in matches.keys():
         numMatching[m] = numMatching.get(m,0)+1
 
+    #print(numMatching)
 
+    #print("checking valid")
     #verify none already in database
     for m in matches.keys():
-        if not validate_match(m.id, matches[m].id):
+        if not validate_match(m, matches[m], numMatching):
             invalidMatches[m] = matches[m] #invalid
         
     return invalidMatches
@@ -164,53 +174,58 @@ def validate_match(menteeId, mentorId, numMatching):
     selectQuery = db.session.query( \
             Select
         ).filter( \
-            (Select.mentee == menteeId) & (Select.mentor_id == mentorId)
+            (Select.mentee_id == menteeId) & (Select.mentor_id == mentorId)
         ).first()
     if selectQuery is not None:
         return False
 
     #check if the pairing can each make another match
-    mentee = User.query.filter_by(id=menteeId)
-    mentor = User.query.filter_by(id=mentorId)
+    mentee = User.query.filter_by(id=menteeId).first()
+    mentor = User.query.filter_by(id=mentorId).first()
     num_pairings_mentee = mentee.num_pairings_can_make if mentee.num_pairings_can_make is not None else 1
-    num_pairings_mentee = mentor.num_pairings_can_make if mentor.num_pairings_can_make is not None else 1
+    num_pairings_mentor = mentor.num_pairings_can_make if mentor.num_pairings_can_make is not None else 1
     #default to 1
 
     selectsMentee = Select.query.filter_by(mentee_id=menteeId).all()
     selectsMentor = Select.query.filter_by(mentor_id=mentorId).all()
     
-    if numMatching[menteeId]+len(selectsMentee) >= mentee.num_pairings_can_make or \
-            numMatching[mentorId]+len(selectsMentor) >= mentor.num_pairings_can_make:
-        #can't go over number of times this mentor has been chosen in the given dict
+    if numMatching[menteeId]-1+len(selectsMentee) >= num_pairings_mentee or \
+            numMatching[mentorId]-1+len(selectsMentor) >= num_pairings_mentor:
+        #can't go over number of times this mentor has been chosen in the given dict (-1 for chosen once)
         # + the # of pairings the mentor was already a part of.
         return False
     
     return True
 
 class apply_match_resp:
-    def __init__():
+    def __init__(self):
         self.match_success = None
         self.match = None #(menteeid, mentorid)
 
 class apply_matches_resp:
-    def __init__():
+    def __init__(self):
         self.match_overall_success = None
         self.invalid_matches = None #{menteeid : mentorid}
 
 
 def apply_matches(matches): #takes {menteeId : mentorId} -> bool denoting success
+    #print("admin apply_matches")
     resp = apply_matches_resp()
     resp.match_overall_success = True
 
     invalidMatches = validate_matches(matches)
+    #print("any invalid:", invalidMatches)
     if len(invalidMatches) != 0:
         resp.invalid_matches = invalidMatches
         resp.match_overall_success = False
+        return resp
 
-    for m in matches.keys: #post new select for each pairing
-        success = feed.feedPost(m.id, matches[m].id)
+    for m in matches.keys(): #post new select for each pairing
+        #print("posting",m,matches[m])
+        success = feed.feedPost(m, matches[m])
         if not success:
             resp.match_overall_success = False
+
 
     return resp
 
@@ -220,12 +235,13 @@ def apply_match(menteeId, mentorId): #takes {menteeId : mentorId} -> bool denoti
     resp.match = (menteeId, mentorId)
 
     if not validate_match(menteeId, mentorId):
-        resp.match_success = True
+        resp.match_success = False
+        return resp
 
     #post new select for each pairing
     success = feed.feedPost(menteeId, mentorId)
     if not success:
-        resp.match_success = True
+        resp.match_success = False
 
     return resp
 

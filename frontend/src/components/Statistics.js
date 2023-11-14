@@ -126,6 +126,8 @@ function Statistics() {
                                 "email": values.email
                             },
                         }).then((results) => {
+                            console.log("results here");
+                            console.log(results);
                             setUserResults(results.data)
                         })
                         setCurrentQuery(values.picked)

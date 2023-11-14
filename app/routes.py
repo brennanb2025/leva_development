@@ -359,6 +359,9 @@ def admin_apply_matches():
     if matches is None:
         return jsonify({"success":False})
 
+    #test
+    matches = {1,2}
+
     success = admin.apply_matches(matches)
 
     return jsonify(
