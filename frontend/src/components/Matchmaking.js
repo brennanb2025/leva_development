@@ -28,7 +28,6 @@ function Matchmaking() {
             })
 
             setMatches(newDict)
-
         })
 
         axios.get("/admin-lookup-users-in-business", {
@@ -39,7 +38,7 @@ function Matchmaking() {
             console.log(results.data)
             //setAllUsers(results.data)
 
-            let feed = {}
+            const feed = {}
             results.data.filter(m => m.is_mentee).map((m) => {
                 axios.get("/admin-lookup-user-feed-all", {
                     params: {
@@ -48,25 +47,25 @@ function Matchmaking() {
                 }).then((results) => {
                     //setAllUsers(results.data)
                     feed[m.id] = results.data.matches
+                    console.log("set feed",feed)
                 })
             })
             setFeedMatches(feed)
-            setAllMentees(results.data.filter(m => m.is_mentee))
         })
     }, [])
-    // useEffect(() => {
-    //     allMentees.map((m) => {
-    //         axios.get("/admin-lookup-user-feed-all", {
-    //             params: {
-    //                 "userid": m.id
-    //             },
-    //         }).then((results) => {
-    //             //setAllUsers(results.data)
-    //             feed[m] = results.data.matches
-    //         })
-    //     })
-    //     setFeedMatches(feed)
-    // }, [allMentees])
+
+    //after feed is set, set all mentees
+    //have to call admin-lookup-users-in-business twice, sucks, fix later TODO
+    useEffect(() => {
+        axios.get("/admin-lookup-users-in-business", {
+            params: {
+                "businessId": 1
+            },
+        }).then((results) => {
+            //console.log("set feed matches done",feedMatches,"now setting all mentees")
+            setAllMentees(results.data.filter(m => m.is_mentee))
+        })
+    }, [feedMatches])
 
     // "Helper functions"
     function MatchEntry(props) {
@@ -95,8 +94,11 @@ function Matchmaking() {
         console.log("mentee id,", mentee.id)
         console.log("feedMatches ", feedMatches)
         console.log("feedMatches ", feedMatches[mentee.id])
+        if(feedMatches[mentee.id] === undefined) {
+            return
+        }
         let candidates = feedMatches[mentee.id].map(m => m.mentor.first_name)
-        console.log(candidates)
+        console.log("candidates:",candidates)
         /*for (let i = 0; i < matchdata.mentors.length; i++) {
             let mentorinfo = matchdata.mentors[i]
             candidates.push(mentorinfo.first_name)
