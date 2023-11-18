@@ -1,110 +1,123 @@
-import { React, useState, useEffect } from 'react'
+import { React, useEffect, useState } from 'react'
 import Dropdown from 'react-dropdown'
 import Modal from 'react-modal'
 import axios from 'axios'
 
 function Matchmaking() {
 
-    const [selected, setSelected] = useState(-1)
+    const [modalProps, setModalProps] = useState({})
     const [modalOpen, setModalOpen] = useState(false)
-    const [matches, setMatches] = useState([])
-    //matches = [{mentee id : [mentor user objects]}]
 
-    //const [allUsers, setAllUsers] = useState([])
-    const [allMentees, setAllMentees] = useState([])
-    //allMentees = [user]
-    const [feedMatches, setFeedMatches] = useState({})
+    const [matches, setMatches] = useState({}) // All "confirmed" matches
+    const [allUsers, setAllUsers] = useState([]) // All users
+    const [mentees, setMentees] = useState([]) // All mentees
+    const [feed, setFeed] = useState({})
+    const [numMatches, setNumMatches] = useState({}) // Mapping from mentor to number of mentees pointing to mentor
 
+    // Populate matches, mentees state
     useEffect(() => {
-
-        axios.get("/admin-user-matches", {
+        const matchescall = axios.get("/admin-user-matches", {
             params: {
                 "businessId": 1
             },
-        }).then((results) => {
-            const newDict = {}
-            results.data.map((element) => {
-                newDict[element["user"].id] = element["mentors"].map(m => m.id) //set user id : [ mentor id ]
-            })
-
-            setMatches(newDict)
         })
 
-        axios.get("/admin-lookup-users-in-business", {
+        const userscall = axios.get("/admin-lookup-users-in-business", {
             params: {
                 "businessId": 1
             },
-        }).then((results) => {
-            console.log(results.data)
-            //setAllUsers(results.data)
+        })
 
-            const feed = {}
-            results.data.filter(m => m.is_mentee).map((m) => {
-                axios.get("/admin-lookup-user-feed-all", {
-                    params: {
-                        "userid": m.id
-                    },
-                }).then((results) => {
-                    //setAllUsers(results.data)
-                    feed[m.id] = results.data.matches
-                    console.log("set feed",feed)
-                })
+        Promise.all([matchescall, userscall]).then((results) => {
+            let dict = {}
+            results[0].data.map(m => {
+                dict[m.user.id] = m.mentors
             })
-            setFeedMatches(feed)
+            setMatches(dict)
+
+            setAllUsers(results[1].data)
         })
     }, [])
 
-    //after feed is set, set all mentees
-    //have to call admin-lookup-users-in-business twice, sucks, fix later TODO
+    // As a consequence of the API call, the function should...
+    // Update the matches state
     useEffect(() => {
-        axios.get("/admin-lookup-users-in-business", {
-            params: {
-                "businessId": 1
-            },
-        }).then((results) => {
-            //console.log("set feed matches done",feedMatches,"now setting all mentees")
-            setAllMentees(results.data.filter(m => m.is_mentee))
+        if (Object.keys(matches).length == 0) {
+            return
+        }
+        let tempNum = numMatches
+        Object.keys(matches).map((m) => {
+            const mentors = matches[m]
+            for (let i = 0; i < mentors.length; i++) {
+                const m_id = mentors[i].id
+                if (tempNum[m_id] === undefined) {
+                    tempNum[m_id] = 1
+                }
+                else {
+                    tempNum[m_id] += 1
+                }
+            }
         })
-    }, [feedMatches])
+        console.log(tempNum)
+        setNumMatches(tempNum)
+    }, [matches])
+
+    // ...and update the mentees.
+    useEffect(() => {
+        // Perform filter here...
+        if (allUsers.length == 0) {
+            return
+        }
+        let filtered = allUsers.filter(m => m.is_mentee)
+        let promises = []
+        filtered.map((m) => {
+            const feedcall = axios.get("/admin-lookup-user-feed-all", {
+                params: {
+                    "userid": m.id
+                },
+            })
+            promises.push(feedcall)
+        })
+
+        Promise.all(promises).then((results) => {
+            let temp = {}
+            console.log(results)
+            results.map((m) => {
+                temp[m.data.userId] = m.data.matches
+            })
+            setFeed(temp)
+        })
+    }, [allUsers])
+
+    useEffect(() => {
+        let filtered = allUsers.filter(m => m.is_mentee)
+        setMentees(filtered, () => { console.log(mentees) })
+    }, [feed])
 
     // "Helper functions"
     function MatchEntry(props) {
 
-        /*let matchdata = props.match
-        let mentee = matchdata.user;
-        let mentor = matchdata.mentors[0]*/
-
-        //let matchData = 
         let mentee = props.mentee
-        let mentors = matches[mentee.id] //get the match from the matches obj (stores mentee id : mentor id)
-
-        console.log("allMentees", allMentees)
-        //console.log("mentors == undefined", mentors === undefined)
-
-        const [disabled, setDisabled] = useState(mentors === undefined) //mentee in matches --> mentee was already matched
-
-        if (mentors === undefined) {
-            console.log("mentee", mentee, "was not matched yet")
-            //setDisabled(false)
-            return
-        }
-
-        console.log("mentors:", mentors)
-        console.log("mentee ", mentee)
-        console.log("mentee id,", mentee.id)
-        console.log("feedMatches ", feedMatches)
-        console.log("feedMatches ", feedMatches[mentee.id])
-        if(feedMatches[mentee.id] === undefined) {
-            return
-        }
-        let candidates = feedMatches[mentee.id].map(m => m.mentor.first_name)
-        console.log("candidates:",candidates)
-        /*for (let i = 0; i < matchdata.mentors.length; i++) {
-            let mentorinfo = matchdata.mentors[i]
-            candidates.push(mentorinfo.first_name)
-        }*/
+        let mentors = props.mentors
+        let candidates = props.candidates.map(m => m.mentor)
         let index = props.index
 
+        const [disabled, setDisabled] = useState(mentors !== undefined) //mentee in matches --> mentee was already matched
+        const [selMentor, setSelMentor] = useState(null)
+
+        if (candidates === undefined) {
+            console.log("I hate this so much. die")
+            return
+        }
+
+        let mentor
+        if (mentors === undefined) {
+            mentor = candidates[0]
+        }
+        else {
+            mentor = mentors[0]
+        }
+        const options = candidates.map((m, i) => ({ label: m.first_name, value: i }))
         return (
             <div
                 className={`w-full relative border p-3 mt-3 first:mt-0 flex flex-row justify-around items-center`}
@@ -113,13 +126,13 @@ function Matchmaking() {
                 <div className="absolute w-full h-full bg-slate-100 hover:cursor-pointer"
                     onClick={() => {
                         setModalOpen(true)
-                        setSelected(index)
+                        setModalProps({ mentee: mentee, mentor: mentor })
                     }}></div>
 
                 <div className='z-10 basis-1/3 flex flex-row justify-between items-center'
                     onClick={() => {
                         setModalOpen(true)
-                        setSelected(index)
+                        setModalProps({ mentee: mentee, mentor: mentor })
                     }}>
                     <div className="flex flex-row items-center basis-1/3">
                         <img className='pfp-image' src={mentee.profile_picture} alt=''></img>
@@ -133,23 +146,73 @@ function Matchmaking() {
 
 
                     <div className="flex flex-row items-center basis-1/3">
-                        <img className='pfp-image' src={mentors[0].profile_picture} alt='' />
-                        {mentors[0].first_name}
+                        <img className='pfp-image' src={mentor.profile_picture} alt='' />
+                        {mentor.first_name}
                     </div>
                 </div>
 
                 <div className='z-10 relative basis-1/3'>
                     <Dropdown
                         disabled={disabled}
-                        options={candidates}
+                        options={options}
+                        value={selMentor ? selMentor : { label: mentor.first_name, value: 0 }}
                         placeholder={"See alternative mentors..."}
                         className={disabled ? "bg-gray-500" : "bg-transparent"}
                         controlClassName="border"
-                        menuClassName='absolute bg-slate-300 w-full' />
+                        menuClassName='absolute bg-slate-300 w-full'
+                        onChange={(option) => {
+                            setSelMentor(option)
+                        }} />
                 </div>
 
                 <div className='z-10 basis-1/6'>
-                    <button className="bg-green-400 p-2 w-full" onClick={() => { setDisabled(!disabled) }}>
+                    <button className="bg-green-400 p-2 w-full" onClick={async () => {
+                        if (disabled == false) {
+                            let m_id = candidates[selMentor.value].id
+                            let numCopy = structuredClone(numMatches)
+                            if (numCopy[m_id] === undefined) {
+                                numCopy[m_id] = 1
+                            }
+                            else {
+                                numCopy[m_id] = numCopy[m_id] + 1
+                            }
+                            numCopy[mentor.id] -= 1
+                            console.log("original", numMatches)
+                            console.log("copy", numCopy)
+                            const query = await axios.get("/admin-validate-match", {
+                                params: {
+                                    mentorId: candidates[selMentor.value].id,
+                                    menteeId: mentee.id,
+                                    numMatching: JSON.stringify(numCopy)
+                                }
+                            })
+                            if (query.data.success) {
+                                // change matching...
+                                axios.post("/admin-apply-match", {
+                                    matches: [mentee.id, candidates[selMentor.value].id]
+                                }, {
+                                    withCredentials: true,
+                                    headers: {
+                                        'X-CSRFToken': response.headers['x-csrftoken'],
+                                        'Content-Type': 'multipart/form-data'
+                                    }
+                                })
+                                // Frontend changes...
+                                setDisabled(!disabled)
+                                setMatches(prev => {
+                                    prev[mentee.id] = [candidates[selMentor.value]]
+                                    return prev
+                                })
+                                setNumMatches(numCopy)
+                            }
+                            else {
+                                console.log("invalid")
+                            }
+                        }
+                        else {
+                            setDisabled(!disabled)
+                        }
+                    }}>
                         {disabled ? "Edit" : "Confirm"}
                     </button>
                 </div>
@@ -157,9 +220,10 @@ function Matchmaking() {
         )
     }
 
-    function EntryModal() {
-        let mentor = matches[selected].mentors[0]
-        let mentee = matches[selected].user
+    function EntryModal(props) {
+        let mentor = props.mentor
+        let mentee = props.user
+        console.log(props)
         return (
             <Modal
                 isOpen={modalOpen}
@@ -178,7 +242,6 @@ function Matchmaking() {
                                 <div className="text-start">
                                     {
                                         Object.keys(person).map((k, i) => {
-                                            console.log(typeof person[k])
                                             if (k === "profile_picture"
                                                 || k === "first_name"
                                                 || k === "last_name"
@@ -221,7 +284,6 @@ function Matchmaking() {
         )
     }
 
-
     return (
         <div className="admin-parent-container">
 
@@ -247,13 +309,13 @@ function Matchmaking() {
 
                 <div className="overflow-y-scroll flex-1 z-0">
                     {
-                        allMentees.map((m, i) => <MatchEntry mentee={m} index={i} />)
+                        mentees.map((m, i) => <MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={i} />)
                     }
                 </div>
 
             </section>
 
-            {selected != -1 ? <EntryModal /> : ""}
+            {Object.keys(modalProps).length != 0 ? <EntryModal user={modalProps.mentee} mentor={modalProps.mentor} /> : ""}
 
             <section className="w-full pt-8 flex justify-end py-8">
                 <button className="bg-slate-400 p-4">

@@ -360,9 +360,9 @@ def admin_validate_match():
 
     # A mentee chose a mentor --> post the form with the info
 
-    menteeId = request.form.get("menteeId")
-    mentorId = request.form.get("mentorId")
-    numMatching = request.form.get("numMatching")
+    menteeId = request.args.get("menteeId")
+    mentorId = request.args.get("mentorId")
+    numMatching = json.loads(request.args.get("numMatching"))
 
     if menteeId is None or mentorId is None:
         return jsonify({"success":False})
