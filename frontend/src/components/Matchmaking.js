@@ -91,7 +91,11 @@ function Matchmaking() {
 
     useEffect(() => {
         let filtered = allUsers.filter(m => m.is_mentee)
-        setMentees(filtered, () => { console.log(mentees) })
+        let grouped = Object.groupBy(filtered, (m) => matches[m.id] === undefined)
+        if (Object.keys(grouped).length > 0) {
+            filtered = grouped[false].concat(grouped[true])
+        }
+        setMentees(filtered)
     }, [feed])
 
     // "Helper functions"
@@ -188,14 +192,16 @@ function Matchmaking() {
                             })
                             if (query.data.success) {
                                 // change matching...
-                                axios.post("/admin-apply-match", {
-                                    matches: [mentee.id, candidates[selMentor.value].id]
-                                }, {
-                                    withCredentials: true,
-                                    headers: {
-                                        'X-CSRFToken': response.headers['x-csrftoken'],
-                                        'Content-Type': 'multipart/form-data'
-                                    }
+                                axios.get("/csrf", { withCredentials: true }).then((response) => {
+                                    axios.post("/admin-apply-match", {
+                                        matches: [mentee.id, candidates[selMentor.value].id]
+                                    }, {
+                                        withCredentials: true,
+                                        headers: {
+                                            'X-CSRFToken': response.headers['x-csrftoken'],
+                                            'Content-Type': 'multipart/form-data'
+                                        }
+                                    })
                                 })
                                 // Frontend changes...
                                 setDisabled(!disabled)
@@ -309,7 +315,7 @@ function Matchmaking() {
 
                 <div className="overflow-y-scroll flex-1 z-0">
                     {
-                        mentees.map((m, i) => <MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={i} />)
+                        mentees.map((m, i) => (<MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={i} />))
                     }
                 </div>
 
