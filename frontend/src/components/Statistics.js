@@ -90,9 +90,9 @@ function Statistics() {
     }
 
     return (
-        <div className='admin-parent-container pb-4'>
+        <div className='admin-parent-container items-center pb-4'>
 
-            <section id='user'>
+            <section id='user' className='stats-section'>
                 <div className='matchmaking-subheader'>
                     Search User
                 </div>
@@ -141,12 +141,12 @@ function Statistics() {
                                     <span className="checkmark"></span>
                                 </label>
                                 <label className='regtext'>
-                                    Feed for user
+                                    User Potential Matches
                                     <Field type="radio" name="picked" value="feed" className="radio-button" />
                                     <span className="checkmark"></span>
                                 </label>
                                 <label className='regtext'>
-                                    Feed for user (including matches)
+                                    User Confirmed Matches
                                     <Field type="radio" name="picked" value="feed_all" className="radio-button" />
                                     <span className="checkmark"></span>
                                 </label>
@@ -217,7 +217,7 @@ function Statistics() {
 
             </section>
 
-            <section id='match'>
+            <section id='match' className='stats-section'>
                 <div className='matchmaking-subheader'>
                     Delete Match
                 </div>
@@ -241,7 +241,7 @@ function Statistics() {
                             </div>
                         </div>
 
-                        <button type="submit" className='submit-button'>Submit</button>
+                        <button type="submit" className='submit-button'>Delete</button>
                     </Form>
                 </Formik>
 

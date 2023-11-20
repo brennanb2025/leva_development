@@ -67,7 +67,7 @@
 }
 
 .input-container {
-  @apply flex flex-col ml-6 first:ml-0 max-w-xs
+  @apply flex flex-1 flex-col ml-6 first:ml-0 max-w-xs
 }
 
 .stats-input {
@@ -80,6 +80,10 @@
 
 .radio-button {
   @apply invisible
+}
+
+.stats-section {
+  @apply w-[90%] mb-8
 }
 
 /* Source: W3Schools */

@@ -93,10 +93,7 @@ function Matchmaking() {
     useEffect(() => {
         let filtered = allUsers.filter(m => m.is_mentee)
         let grouped = Object.groupBy(filtered, (m) => matches[m.id] === undefined)
-        if (Object.keys(grouped).length > 0) {
-            filtered = grouped[false].concat(grouped[true])
-        }
-        setMentees(filtered)
+        setMentees(grouped)
     }, [feed])
 
     // "Helper functions"
@@ -123,12 +120,13 @@ function Matchmaking() {
             mentor = mentors[0]
         }
         const options = candidates.map((m, i) => ({ label: m.first_name, value: i }))
+        let color = disabled ? "bg-purple-200" : "bg-slate-100"
         return (
             <div
                 className={`w-full relative border p-3 mt-3 first:mt-0 flex flex-row justify-around items-center`}
                 style={{ zIndex: (10 - index) * 10 }}>
 
-                <div className="absolute w-full h-full bg-slate-100 hover:cursor-pointer"
+                <div className={"absolute w-full h-full hover:cursor-pointer " + color}
                     onClick={() => {
                         setModalOpen(true)
                         setModalProps({ mentee: mentee, mentor: mentor })
@@ -144,11 +142,10 @@ function Matchmaking() {
                         {mentee.first_name}
                     </div>
 
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    {/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-
-
+                    </svg> */}
+                    <div className="font-bold text-xl">&</div>
 
                     <div className="flex flex-row items-center basis-1/3">
                         <img className='pfp-image' src={mentor.profile_picture} alt='' />
@@ -162,7 +159,7 @@ function Matchmaking() {
                         options={options}
                         value={selMentor ? selMentor : { label: mentor.first_name, value: 0 }}
                         placeholder={"See alternative mentors..."}
-                        className={disabled ? "bg-gray-500" : "bg-transparent"}
+                        className={disabled ? "bg-white cursor-not-allowed" : "bg-white cursor-pointer"}
                         controlClassName="border"
                         menuClassName='absolute bg-slate-300 w-full'
                         onChange={(option) => {
@@ -215,6 +212,11 @@ function Matchmaking() {
                                     return prev
                                 })
                                 setNumMatches(numCopy)
+                                setMentees(prev => {
+                                    prev[false].push(mentee)
+                                    prev[true].splice(prev[true].indexOf(mentee), 1)
+                                    return prev
+                                })
                             }
                             else {
                                 console.log("invalid")
@@ -320,7 +322,10 @@ function Matchmaking() {
 
                 <div className="overflow-y-scroll flex-1 z-0">
                     {
-                        mentees.map((m, i) => (<MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={i} />))
+                        mentees[false] ? mentees[false].map((m, i) => (<MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={i} />)) : ""
+                    }
+                    {
+                        mentees[true] ? mentees[true].map((m, i) => (<MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={i} />)) : ""
                     }
                 </div>
 
