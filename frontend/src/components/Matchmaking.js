@@ -57,6 +57,7 @@ function Matchmaking() {
                     tempNum[m_id] += 1
                 }
             }
+            tempNum[m] = mentors.length
         })
         console.log(tempNum)
         setNumMatches(tempNum)
@@ -181,11 +182,13 @@ function Matchmaking() {
                                 numCopy[m_id] = numCopy[m_id] + 1
                             }
                             numCopy[mentor.id] -= 1
-                            console.log("original", numMatches)
-                            console.log("copy", numCopy)
+                            if (numCopy[mentee.id] === undefined) {
+                                numCopy[mentee.id] = 1
+                            }
+                            console.log(numCopy)
                             const query = await axios.get("/admin-validate-match", {
                                 params: {
-                                    mentorId: candidates[selMentor.value].id,
+                                    mentorId: m_id,
                                     menteeId: mentee.id,
                                     numMatching: JSON.stringify(numCopy)
                                 }
@@ -194,14 +197,16 @@ function Matchmaking() {
                                 // change matching...
                                 axios.get("/csrf", { withCredentials: true }).then((response) => {
                                     axios.post("/admin-apply-match", {
-                                        matches: [mentee.id, candidates[selMentor.value].id]
+                                        menteeId: mentee.id,
+                                        mentorId: m_id,
+                                        numMatching: JSON.stringify(numCopy)
                                     }, {
                                         withCredentials: true,
                                         headers: {
                                             'X-CSRFToken': response.headers['x-csrftoken'],
                                             'Content-Type': 'multipart/form-data'
                                         }
-                                    })
+                                    }).then((result) => { console.log(result) })
                                 })
                                 // Frontend changes...
                                 setDisabled(!disabled)

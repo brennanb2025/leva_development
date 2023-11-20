@@ -94,7 +94,7 @@ function Statistics() {
 
             <section id='user'>
                 <div className='matchmaking-subheader'>
-                    User Lookup
+                    Search User
                 </div>
 
                 <Formik
@@ -180,7 +180,7 @@ function Statistics() {
                                 </div>
                             </div>
 
-                            <button type="submit" className='submit-button'>Submit</button>
+                            <button type="submit" className='submit-button'>Search</button>
 
                             {userResults.length > 0 && currentQuery === "lookup" ? (
                                 <div className='bg-slate-500 rounded-md p-4 text-white mt-4 w-fit flex flex-row items-center hover:cursor-pointer'
@@ -217,131 +217,9 @@ function Statistics() {
 
             </section>
 
-            <section id='event'>
-                <div className='matchmaking-subheader'>
-                    Event Lookup
-                </div>
-                <Formik
-                    initialValues={{
-                        query_type: "16",
-                        startDate: '',
-                        startTime: '',
-                        endDate: '',
-                        endTime: '',
-                    }}
-                    onSubmit={async (values) => {
-                        axios.get("/admin-events-exceptions", {
-                            params: {
-                                "action": parseInt(values.query_type),
-                                "startTime": values.startDate.toISOString(),
-                                "endTime": values.endDate.toISOString(),
-                            },
-                        }).then((results) => {
-                            setEventResults(results.data)
-                        })
-                    }}>
-                    {props => {
-                        const {
-                            values,
-                            setFieldValue,
-                        } = props;
-                        return (
-                            <Form>
-                                <div role="group" aria-labelledby="my-radio-group" className='flex flex-col mt-4'>
-
-                                    {/* "Actions" - the number assigned to each event logged
-                                    Exceptions (16)
-                                    Edit profile picture failure (18)
-                                    Csrf error (17)
-                                    Feed info (13)
-                                    Chosen person feed info (14)
-                                    Uploading file to s3 (8)
-                                    Number of users per day (logins - 4 - must separate by timestamp, so this may require its own function). */}
-
-                                    <label className='regtext'>
-                                        Exceptions
-                                        <Field type="radio" name="query_type" value="16" className="radio-button" />
-                                        <span className="checkmark"></span>
-                                    </label>
-                                    <label className='regtext'>
-                                        Edit profile picture failure
-                                        <Field type="radio" name="query_type" value="18" className="radio-button" />
-                                        <span className="checkmark"></span>
-                                    </label>
-                                    <label className='regtext'>
-                                        Csrf error
-                                        <Field type="radio" name="query_type" value="17" className="radio-button" />
-                                        <span className="checkmark"></span>
-                                    </label>
-                                    <label className='regtext'>
-                                        Feed info
-                                        <Field type="radio" name="query_type" value="13" className="radio-button" />
-                                        <span className="checkmark"></span>
-                                    </label>
-                                    <label className='regtext'>
-                                        Chosen person feed info
-                                        <Field type="radio" name="query_type" value="14" className="radio-button" />
-                                        <span className="checkmark"></span>
-                                    </label>
-                                    <label className='regtext'>
-                                        Uploading file to s3
-                                        <Field type="radio" name="query_type" value="8" className="radio-button" />
-                                        <span className="checkmark"></span>
-                                    </label>
-                                </div>
-                                <div className='flex flex-row'>
-                                    <div className='input-container'>
-                                        <label htmlFor="startDate">Start Date</label>
-                                        <DatePickerField
-                                            name="startDate"
-                                            value={values.startDate}
-                                            onChange={setFieldValue} />
-                                    </div>
-
-                                    <div className='input-container'>
-                                        <label htmlFor="endDate">End Date</label>
-                                        <DatePickerField
-                                            name="endDate"
-                                            value={values.endDate}
-                                            onChange={setFieldValue} />
-                                    </div>
-                                </div>
-
-                                <button type="submit" className='submit-button'>Submit</button>
-
-                                {eventResults.length > 0 ? (
-                                    <div className='flex flex-row flex-wrap h-72 overflow-y-scroll mt-2 p-2 border'>
-                                        {
-                                            eventResults.map((error) => {
-                                                return (
-                                                    <div className="basis-1/4  text-white p-4">
-                                                        <div className='bg-slate-500 rounded-md p-2'>
-                                                            {
-                                                                Object.keys(error).map((k, i) => {
-                                                                    return (
-                                                                        <div>
-                                                                            <span className='font-bold'>{k}: </span>
-                                                                            <span>{error[k]}</span>
-                                                                        </div>
-                                                                    )
-                                                                })
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                )
-                                            })
-                                        }
-                                    </div>
-                                ) : ""}
-                            </Form>
-                        )
-                    }}
-                </Formik>
-            </section>
-
             <section id='match'>
                 <div className='matchmaking-subheader'>
-                    Match Management
+                    Delete Match
                 </div>
 
                 <Formik

@@ -229,12 +229,13 @@ def apply_matches(matches): #takes {menteeId : mentorId} -> bool denoting succes
 
     return resp
 
-def apply_match(menteeId, mentorId): #takes {menteeId : mentorId} -> bool denoting success
+def apply_match(menteeId, mentorId, numMatching): #takes {menteeId : mentorId} -> bool denoting success
     resp = apply_match_resp()
     resp.match_success = True
     resp.match = (menteeId, mentorId)
 
-    if not validate_match(menteeId, mentorId):
+    if not validate_match(menteeId, mentorId, numMatching):
+        print("here")
         resp.match_success = False
         return resp
 
@@ -248,6 +249,7 @@ def apply_match(menteeId, mentorId): #takes {menteeId : mentorId} -> bool denoti
 
 
 def deleteMatch(menteeId, mentorId):
+
 
     selectQuery = db.session.query( \
                 Select

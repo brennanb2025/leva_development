@@ -340,11 +340,12 @@ def admin_apply_match():
 
     menteeId = request.form.get("menteeId")
     mentorId = request.form.get("mentorId")
+    numMatching = json.loads(request.form.get("numMatching"))
 
     if menteeId is None or mentorId is None:
         return jsonify({"success":False})
 
-    success = admin.apply_match(menteeId, mentorId)
+    success = admin.apply_match(menteeId, mentorId, numMatching)
 
     return jsonify(
         {
@@ -368,6 +369,7 @@ def admin_validate_match():
         return jsonify({"success":False})
 
     success = admin.validate_match(menteeId, mentorId, numMatching)
+    print(success)
 
     return jsonify(
         {
@@ -385,9 +387,6 @@ def admin_apply_matches():
 
     if matches is None:
         return jsonify({"success":False})
-
-    #test
-    matches = {1,2}
 
     success = admin.apply_matches(matches)
 
