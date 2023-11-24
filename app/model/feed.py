@@ -424,7 +424,7 @@ def mentorAvailable(mentorId): #if this mentor has free spots for mentees (even 
     
     #can have 2 mentees, made 1 match, can make 1 more.
     #can have 2 mentees, made 2 matches, can't make another one.
-    return mentor.num_pairings_can_make < len(mentorMatches)
+    return len(mentorMatches) < mentor.num_pairings_can_make
 
 def menteeAvailable(menteeId): #if this mentee has free spots for mentors (even if already matched)
     mentee = User.query.filter_by(id=menteeId).first()
@@ -440,7 +440,7 @@ def menteeAvailable(menteeId): #if this mentee has free spots for mentors (even 
     
     #can have 2 mentees, made 1 match, can make 1 more.
     #can have 2 mentees, made 2 matches, can't make another one.
-    return mentee.num_pairings_can_make < len(menteeMatches)
+    return len(menteeMatches) < mentee.num_pairings_can_make
 
 
 
