@@ -14,7 +14,7 @@ function EntryModal(props) {
 
             <div className="w-full h-full flex flex-row">
                 {
-                    [mentor, mentee].map((person) => (
+                    [mentee, mentor].map((person) => (
                         <div className='flex-1 flex flex-col items-center'>
                             <img src={person.profile_picture} className="w-28 h-28 rounded-full" />
                             <div className='matchmaking-subheader mb-4'>{person.first_name} {person.last_name}</div>

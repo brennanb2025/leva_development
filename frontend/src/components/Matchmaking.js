@@ -104,14 +104,6 @@ function Matchmaking() {
         let candidates = props.candidates.map(m => m.mentor)
         let index = props.index
 
-        const [disabled, setDisabled] = useState(mentors !== undefined) //mentee in matches --> mentee was already matched
-        const [selMentor, setSelMentor] = useState(null)
-
-        if (candidates === undefined) {
-            console.log("I hate this so much. die")
-            return
-        }
-
         let mentor
         if (mentors === undefined) {
             mentor = candidates[0]
@@ -119,6 +111,11 @@ function Matchmaking() {
         else {
             mentor = mentors[0]
         }
+
+        const [disabled, setDisabled] = useState(mentors !== undefined) //mentee in matches --> mentee was already matched
+        const [selMentor, setSelMentor] = useState({ label: mentor.first_name, value: mentors === undefined ? 0 : -1 })
+        const [updateStatus, setUpdateStatus] = useState(1)
+
         const options = candidates.map((m, i) => ({ label: m.first_name, value: i }))
         let color = disabled ? "bg-purple-200" : "bg-slate-100"
         return (
@@ -142,10 +139,9 @@ function Matchmaking() {
                         {mentee.first_name}
                     </div>
 
-                    {/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg> */}
-                    <div className="font-bold text-xl">&</div>
+                    <div className='font-bold text-xl'>
+                        &
+                    </div>
 
                     <div className="flex flex-row items-center basis-1/3">
                         <img className='pfp-image' src={mentor.profile_picture} alt='' />
@@ -153,23 +149,44 @@ function Matchmaking() {
                     </div>
                 </div>
 
-                <div className='z-10 relative basis-1/3'>
+                <div className='flex flex-row z-10 relative basis-1/3'>
                     <Dropdown
                         disabled={disabled}
                         options={options}
-                        value={selMentor ? selMentor : { label: mentor.first_name, value: 0 }}
+                        value={selMentor}
                         placeholder={"See alternative mentors..."}
-                        className={disabled ? "bg-white cursor-not-allowed" : "bg-white cursor-pointer"}
+                        className={disabled ? "bg-white cursor-not-allowed flex-1 flex-grow" : "bg-white cursor-pointer flex-1 flex-grow"}
                         controlClassName="border"
                         menuClassName='absolute bg-slate-300 w-full'
                         onChange={(option) => {
                             setSelMentor(option)
                         }} />
+
+                    {
+                        updateStatus == 0 &&
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+
+                    }
+                    {
+                        updateStatus == 2 &&
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-green-500">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+
+                    }
                 </div>
 
                 <div className='z-10 basis-1/6'>
                     <button className="bg-green-400 p-2 w-full" onClick={async () => {
                         if (disabled == false) {
+
+                            if (selMentor.value == -1 && mentors) {
+                                setDisabled(!disabled)
+                                return
+                            }
+
                             let m_id = candidates[selMentor.value].id
                             let numCopy = structuredClone(numMatches)
                             if (numCopy[m_id] === undefined) {
@@ -207,6 +224,8 @@ function Matchmaking() {
                                 })
                                 // Frontend changes...
                                 setDisabled(!disabled)
+                                setUpdateStatus(2)
+                                setTimeout(() => setUpdateStatus(1), "3000")
                                 setMatches(prev => {
                                     prev[mentee.id] = [candidates[selMentor.value]]
                                     return prev
@@ -220,6 +239,8 @@ function Matchmaking() {
                             }
                             else {
                                 console.log("invalid")
+                                setUpdateStatus(0)
+                                setTimeout(() => setUpdateStatus(1), "3000")
                             }
                         }
                         else {
@@ -248,7 +269,7 @@ function Matchmaking() {
 
                 <div className="w-full h-full flex flex-row">
                     {
-                        [mentor, mentee].map((person) => (
+                        [mentee, mentor].map((person) => (
                             <div className='flex-1 flex flex-col items-center'>
                                 <img src={person.profile_picture} className="w-28 h-28 rounded-full" />
                                 <div className='matchmaking-subheader mb-4'>{person.first_name} {person.last_name}</div>
