@@ -16,8 +16,8 @@ function Statistics() {
     const handleSubmitForm = (values) => {
         axios.get("/csrf", { withCredentials: true }).then((response) => {
             axios.post("/admin-delete-match", {
-                mentorId: values.mentorID,
-                menteeId: values.menteeID
+                mentorId: values.mentorId,
+                menteeId: values.menteeId
             }, {
                 withCredentials: true,
                 headers: {
