@@ -327,7 +327,7 @@ def admin_delete_match():
     if menteeId is None or mentorId is None:
         return jsonify({"success":False})
 
-    success = admin.delete_match(menteeId, mentorId)
+    success = admin.deleteMatch(menteeId, mentorId)
 
     return jsonify({"success":success})
 
@@ -384,6 +384,8 @@ def admin_apply_matches():
     # A mentee chose a mentor --> post the form with the info
 
     matches = request.form.get("matches")
+    matches = json.loads(matches)
+    matches = {int(k):int(v) for k,v in matches.items()}
 
     if matches is None:
         return jsonify({"success":False})

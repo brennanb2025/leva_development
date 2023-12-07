@@ -2,13 +2,15 @@ import { React, useEffect, useState } from 'react'
 import Dropdown from 'react-dropdown'
 import Modal from 'react-modal'
 import axios from 'axios'
+import { confirmAlert } from "react-confirm-alert"; // Import
+import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 
 function Matchmaking() {
 
     const [modalProps, setModalProps] = useState({})
     const [modalOpen, setModalOpen] = useState(false)
 
-    const [matches, setMatches] = useState({}) // All "confirmed" matches
+    const [matches, setMatches] = useState({}) // All "confirmed" matches, key: menteeid, value: mentorid
     const [allUsers, setAllUsers] = useState([]) // All users
     const [mentees, setMentees] = useState([]) // All mentees
     const [feed, setFeed] = useState({})
@@ -86,6 +88,7 @@ function Matchmaking() {
             results.map((m) => {
                 temp[m.data.userId] = m.data.matches
             })
+            console.log(temp)
             setFeed(temp)
         })
     }, [allUsers])
@@ -105,19 +108,16 @@ function Matchmaking() {
         let index = props.index
 
         let mentor
-        if (mentors === undefined) {
-            mentor = candidates[0]
-        }
-        else {
+        if (mentors !== undefined) {
             mentor = mentors[0]
         }
 
         const [disabled, setDisabled] = useState(mentors !== undefined) //mentee in matches --> mentee was already matched
-        const [selMentor, setSelMentor] = useState({ label: mentor.first_name, value: mentors === undefined ? 0 : -1 })
+        const [selMentor, setSelMentor] = useState({ label: mentor ? mentor.first_name : "Select mentor...", value: mentors === undefined ? 0 : -1 })
         const [updateStatus, setUpdateStatus] = useState(1)
 
         const options = candidates.map((m, i) => ({ label: m.first_name, value: i }))
-        let color = disabled ? "bg-purple-200" : "bg-slate-100"
+        let color = !disabled ? "bg-purple-200" : "bg-slate-100"
         return (
             <div
                 className={`w-full relative border p-3 mt-3 first:mt-0 flex flex-row justify-around items-center`}
@@ -144,8 +144,8 @@ function Matchmaking() {
                     </div>
 
                     <div className="flex flex-row items-center basis-1/3">
-                        <img className='pfp-image' src={mentor.profile_picture} alt='' />
-                        {mentor.first_name}
+                        {mentor && <img className='pfp-image' src={mentor.profile_picture} alt='' />}
+                        {mentor ? mentor.first_name : ""}
                     </div>
                 </div>
 
@@ -157,7 +157,7 @@ function Matchmaking() {
                         placeholder={"See alternative mentors..."}
                         className={disabled ? "bg-white cursor-not-allowed flex-1 flex-grow" : "bg-white cursor-pointer flex-1 flex-grow"}
                         controlClassName="border"
-                        menuClassName='absolute bg-slate-300 w-full'
+                        menuClassName='absolute bg-slate-300 w-full z-[100]'
                         onChange={(option) => {
                             setSelMentor(option)
                         }} />
@@ -209,19 +209,6 @@ function Matchmaking() {
                             })
                             if (query.data.success) {
                                 // change matching...
-                                axios.get("/csrf", { withCredentials: true }).then((response) => {
-                                    axios.post("/admin-apply-match", {
-                                        menteeId: mentee.id,
-                                        mentorId: m_id,
-                                        numMatching: JSON.stringify(numCopy)
-                                    }, {
-                                        withCredentials: true,
-                                        headers: {
-                                            'X-CSRFToken': response.headers['x-csrftoken'],
-                                            'Content-Type': 'multipart/form-data'
-                                        }
-                                    }).then((result) => { console.log(result) })
-                                })
                                 // Frontend changes...
                                 setDisabled(!disabled)
                                 setUpdateStatus(2)
@@ -241,6 +228,57 @@ function Matchmaking() {
                                 console.log("invalid")
                                 setUpdateStatus(0)
                                 setTimeout(() => setUpdateStatus(1), "3000")
+
+                                let conflicts = []
+                                console.log(conflicts)
+                                // Find the conflicts...
+                                for (const [key, value] of Object.entries(matches)) {
+                                    if (value[0].id == candidates[selMentor.value].id) {
+                                        console.log(parseInt(key))
+                                        conflicts.push(parseInt(key))
+                                    }
+                                }
+                                // modal here...
+                                confirmAlert({
+                                    title: "Confirm to reorder",
+                                    message: "This mentor is current matched with these other mentees. Select one to evict...",
+                                    buttons: conflicts.map((menteeid) => {
+                                        const conflictMentee = allUsers.find(obj => {
+                                            return obj.id === menteeid
+                                        })
+                                        return ({
+                                            label: conflictMentee.first_name,
+                                            onClick: () => {
+                                                setMentees(prev => {
+                                                    prev[false].push(mentee)
+                                                    prev[true].splice(prev[true].indexOf(mentee), 1)
+                                                    prev[true].push(conflictMentee)
+                                                    prev[false].splice(prev[false].indexOf(conflictMentee), 1)
+                                                    return prev
+                                                })
+                                                let numCopy = structuredClone(numMatches)
+
+                                                if (numCopy[mentee.id] === undefined) {
+                                                    numCopy[mentee.id] = 1
+                                                }
+                                                else {
+                                                    numCopy[mentee.id] += 1
+                                                }
+                                                numCopy[conflictMentee.id] -= 1
+
+                                                setNumMatches(numCopy)
+                                                setMatches(prev => {
+                                                    prev[mentee.id] = [candidates[selMentor.value]]
+                                                    delete prev[conflictMentee.id]
+                                                    console.log("mentee:", mentee.id)
+                                                    console.log("Conflict:", conflictMentee.id)
+                                                    console.log(prev)
+                                                    return prev
+                                                })
+                                            }
+                                        })
+                                    })
+                                });
                             }
                         }
                         else {
@@ -257,7 +295,12 @@ function Matchmaking() {
     function EntryModal(props) {
         let mentor = props.mentor
         let mentee = props.user
-        console.log(props)
+
+        let displayinfo = [mentee]
+        if (mentor !== undefined) {
+            displayinfo.push(mentor)
+        }
+
         return (
             <Modal
                 isOpen={modalOpen}
@@ -269,7 +312,7 @@ function Matchmaking() {
 
                 <div className="w-full h-full flex flex-row">
                     {
-                        [mentee, mentor].map((person) => (
+                        displayinfo.map((person) => (
                             <div className='flex-1 flex flex-col items-center'>
                                 <img src={person.profile_picture} className="w-28 h-28 rounded-full" />
                                 <div className='matchmaking-subheader mb-4'>{person.first_name} {person.last_name}</div>
@@ -318,6 +361,33 @@ function Matchmaking() {
         )
     }
 
+    function submitMatches() {
+
+        let l = structuredClone(matches)
+
+        Object.keys(l).forEach(function (key, index) {
+            l[key] = l[key][0].id;
+        });
+
+        console.log(l)
+
+        axios.get("/csrf", { withCredentials: true }).then((response) => {
+            axios.post("/admin-apply-matches", {
+                matches: JSON.stringify(l)
+            }, {
+                withCredentials: true,
+                headers: {
+                    'X-CSRFToken': response.headers['x-csrftoken'],
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then((results) => {
+                console.log(results)
+            }).catch(err => {
+                console.log(err)
+            })
+        })
+    }
+
     return (
         <div className="admin-parent-container">
 
@@ -343,10 +413,10 @@ function Matchmaking() {
 
                 <div className="overflow-y-scroll flex-1 z-0">
                     {
-                        mentees[false] ? mentees[false].map((m, i) => (<MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={i} />)) : ""
+                        mentees[true] ? mentees[true].map((m, i) => (<MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={i} />)) : ""
                     }
                     {
-                        mentees[true] ? mentees[true].map((m, i) => (<MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={i} />)) : ""
+                        mentees[false] ? mentees[false].map((m, i) => (<MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={mentees[true].length + i} />)) : ""
                     }
                 </div>
 
@@ -355,8 +425,8 @@ function Matchmaking() {
             {Object.keys(modalProps).length != 0 ? <EntryModal user={modalProps.mentee} mentor={modalProps.mentor} /> : ""}
 
             <section className="w-full pt-8 flex justify-end py-8">
-                <button className="bg-slate-400 p-4">
-                    Confirm All
+                <button className="bg-slate-400 p-4" onClick={submitMatches}>
+                    Submit all matches
                 </button>
             </section>
         </div>
