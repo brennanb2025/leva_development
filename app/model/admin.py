@@ -229,6 +229,99 @@ def apply_matches(matches): #takes {menteeId : mentorId} -> bool denoting succes
 
     return resp
 
+#1 = ok, 2 = invalid, 3 = already matched
+def validate_match_allow_already_matched(menteeId, mentorId, numMatching):
+    #don't check if match already exists
+    selectQuery = db.session.query( \
+            Select
+        ).filter( \
+            (Select.mentee_id == menteeId) & (Select.mentor_id == mentorId)
+        ).first()
+    if selectQuery is not None:
+        return 3
+
+    #check if the pairing can each make another match
+    mentee = User.query.filter_by(id=menteeId).first()
+    mentor = User.query.filter_by(id=mentorId).first()
+    num_pairings_mentee = mentee.num_pairings_can_make if mentee.num_pairings_can_make is not None else 1
+    num_pairings_mentor = mentor.num_pairings_can_make if mentor.num_pairings_can_make is not None else 1
+    #default to 1
+
+    selectsMentee = Select.query.filter_by(mentee_id=menteeId).all()
+    selectsMentor = Select.query.filter_by(mentor_id=mentorId).all()
+    
+    if numMatching[menteeId]-1+len(selectsMentee) >= num_pairings_mentee or \
+            numMatching[mentorId]-1+len(selectsMentor) >= num_pairings_mentor:
+        #can't go over number of times this mentor has been chosen in the given dict (-1 for chosen once)
+        # + the # of pairings the mentor was already a part of.
+        return 2
+    
+    return 1
+
+def validate_matches_allow_already_matched(matches): #takes {menteeId : mentorId}
+    invalidMatches = {}
+    alreadyMatched = {}
+
+    #verify all are mentee:mentor
+    for m in matches.keys():
+        menteeUser = User.query.filter_by(id=m).first()
+        mentorUser = User.query.filter_by(id=matches[m]).first()
+        #print(menteeUser, mentorUser)
+
+        if not menteeUser or not mentorUser:
+            invalidMatches[m] = matches[m]
+            continue
+        if not menteeUser.is_student:
+            invalidMatches[m] = matches[m]
+            continue
+        if mentorUser.is_student:
+            invalidMatches[m] = matches[m]
+
+    #handle multiple mentees choosing the same mentor and vv.
+
+    numMatching = {}
+    #get the # each mentor is matched:
+    for m in matches.values():
+        numMatching[m] = numMatching.get(m,0)+1
+
+    for m in matches.keys():
+        numMatching[m] = numMatching.get(m,0)+1
+
+    #print(numMatching)
+
+    #print("checking valid")
+    #verify none already in database
+    for m in matches.keys():
+        match_validation = validate_match_allow_already_matched(m, matches[m], numMatching)
+        if match_validation == 2:
+            invalidMatches[m] = matches[m] #invalid
+        elif match_validation == 3:
+            alreadyMatched[m] = matches[m] #valid - just already matched.
+        
+    return invalidMatches, alreadyMatched
+
+def apply_matches_if_unmatched(matches): #takes {menteeId : mentorId} -> bool denoting success
+    #able to take matches that already exist
+    resp = apply_matches_resp()
+    resp.match_overall_success = True
+
+    invalidMatches, alreadymatched = validate_matches_allow_already_matched(matches)
+    #print("any invalid:", invalidMatches)
+    if len(invalidMatches) != 0:
+        resp.invalid_matches = invalidMatches
+        resp.match_overall_success = False
+        return resp
+
+    for m in matches.keys(): #post new select for each pairing
+        #print("posting",m,matches[m])
+        if m not in alreadyMatched: #skip already matched
+            success = feed.feedPost(m, matches[m])
+            if not success:
+                resp.match_overall_success = False
+
+    return resp
+
+
 def apply_match(menteeId, mentorId, numMatching): #takes {menteeId : mentorId} -> bool denoting success
     resp = apply_match_resp()
     resp.match_success = True
