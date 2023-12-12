@@ -397,6 +397,27 @@ def admin_apply_matches():
             "matches_success": success.invalid_matches
         })
 
+#allows already matched users top be sent - just skips them.
+@app.route('/admin-apply-matches-if-unmatched', methods=['POST'])
+def admin_apply_matches_if_unmatched():
+    if not adminUserLoggedIn():
+        return
+    # A mentee chose a mentor --> post the form with the info
+
+    matches = request.form.get("matches")
+    matches = json.loads(matches)
+    matches = {int(k):int(v) for k,v in matches.items()}
+
+    if matches is None:
+        return jsonify({"success":False})
+
+    success = admin.apply_matches_if_unmatched(matches)
+
+    return jsonify(
+        {
+            "success": success.match_overall_success,
+            "matches_success": success.invalid_matches
+        })
 
 @app.route("/business-excel")
 def admin_get_business_excel():
