@@ -188,6 +188,11 @@ def validate_match(menteeId, mentorId, numMatching):
 
     selectsMentee = Select.query.filter_by(mentee_id=menteeId).all()
     selectsMentor = Select.query.filter_by(mentor_id=mentorId).all()
+
+    print(numMatching[menteeId]-1+len(selectsMentee))
+    print(num_pairings_mentee)
+    print(numMatching[mentorId]-1+len(selectsMentor))
+    print(num_pairings_mentor)
     
     if numMatching[menteeId]-1+len(selectsMentee) >= num_pairings_mentee or \
             numMatching[mentorId]-1+len(selectsMentor) >= num_pairings_mentor:
