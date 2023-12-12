@@ -419,6 +419,33 @@ def admin_apply_matches_if_unmatched():
             "matches_success": success.invalid_matches
         })
 
+#allows already matched users top be sent - just skips them.
+@app.route('/admin-replace-match', methods=['POST'])
+def admin_replace_match():
+    if not adminUserLoggedIn():
+        return
+    # A mentee chose a mentor --> post the form with the info
+
+    menteeId = request.args.get("menteeId")
+    mentorId = request.args.get("mentorId")
+
+    if menteeId is None or mentorId is None:
+        return jsonify({"success":False})
+
+    success = admin.deleteMatch(menteeId, mentorId)
+    if not success:
+        return jsonify(
+            {
+                "success": False
+            })
+
+    success = admin.apply_match(menteeId, mentorId, {}) #empty dict for numMatching
+
+    return jsonify(
+        {
+            "success": success
+        })
+
 @app.route("/business-excel")
 def admin_get_business_excel():
     if not adminUserLoggedIn():
