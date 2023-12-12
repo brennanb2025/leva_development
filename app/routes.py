@@ -364,7 +364,6 @@ def admin_validate_match():
     menteeId = request.args.get("menteeId")
     mentorId = request.args.get("mentorId")
     numMatching = json.loads(request.args.get("numMatching"))
-
     if menteeId is None or mentorId is None:
         return jsonify({"success":False})
 

@@ -182,7 +182,7 @@ function Matchmaking() {
                     <button className="bg-green-400 p-2 w-full" onClick={async () => {
                         if (disabled == false) {
 
-                            if (selMentor.value == -1 && mentors) {
+                            if (mentors && (selMentor.value == -1 || candidates[selMentor.value].id == mentor.id)) {
                                 setDisabled(!disabled)
                                 return
                             }
@@ -193,11 +193,18 @@ function Matchmaking() {
                                 numCopy[m_id] = 1
                             }
                             else {
-                                numCopy[m_id] = numCopy[m_id] + 1
+                                numCopy[m_id] = numCopy[m_id] - 1
                             }
-                            numCopy[mentor.id] -= 1
+
+                            if (mentor) {
+                                numCopy[mentor.id] -= 1
+                            }
+
                             if (numCopy[mentee.id] === undefined) {
                                 numCopy[mentee.id] = 1
+                            }
+                            else {
+                                numCopy[mentee.id] -= 1
                             }
                             console.log(numCopy)
                             const query = await axios.get("/admin-validate-match", {
@@ -218,11 +225,13 @@ function Matchmaking() {
                                     return prev
                                 })
                                 setNumMatches(numCopy)
-                                setMentees(prev => {
-                                    prev[false].push(mentee)
-                                    prev[true].splice(prev[true].indexOf(mentee), 1)
-                                    return prev
-                                })
+                                if (!mentors) {
+                                    setMentees(prev => {
+                                        prev[false].push(mentee)
+                                        prev[true].splice(prev[true].indexOf(mentee), 1)
+                                        return prev
+                                    })
+                                }
                             }
                             else {
                                 console.log("invalid")
@@ -241,7 +250,7 @@ function Matchmaking() {
                                 // modal here...
                                 confirmAlert({
                                     title: "Confirm to reorder",
-                                    message: "This mentor is current matched with these other mentees. Select one to evict...",
+                                    message: "This mentor is current matched with these other mentees. Select one to mentee to replace...",
                                     buttons: conflicts.map((menteeid) => {
                                         const conflictMentee = allUsers.find(obj => {
                                             return obj.id === menteeid
@@ -277,7 +286,7 @@ function Matchmaking() {
                                                 })
                                             }
                                         })
-                                    })
+                                    }).concat([{ label: "Cancel", onClick: () => { "" } }])
                                 });
                             }
                         }
