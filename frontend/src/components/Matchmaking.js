@@ -118,6 +118,8 @@ function Matchmaking() {
 
         const options = candidates.map((m, i) => ({ label: m.first_name, value: i }))
         let color = !disabled ? "bg-purple-200" : "bg-slate-100"
+        console.log("mentee:",mentee)
+        console.log("mentee profile picture:",mentee.profile_picture)
         return (
             <div
                 className={`w-full relative border p-3 mt-3 first:mt-0 flex flex-row justify-around items-center`}
@@ -135,7 +137,11 @@ function Matchmaking() {
                         setModalProps({ mentee: mentee, mentor: mentor })
                     }}>
                     <div className="flex flex-row items-center basis-1/3">
-                        <img className='pfp-image' src={mentee.profile_picture} alt=''></img>
+                        {mentee.profile_picture === null ? 
+                            <img className='pfp-image' src="/blank-profile-picture.png" alt=''></img>
+                            : <img className='pfp-image' src={mentee.profile_picture} alt=''></img>
+                        }
+                        
                         {mentee.first_name}
                     </div>
 
@@ -144,7 +150,11 @@ function Matchmaking() {
                     </div>
 
                     <div className="flex flex-row items-center basis-1/3">
-                        {mentor && <img className='pfp-image' src={mentor.profile_picture} alt='' />}
+                        {mentor && 
+                            (mentee.profile_picture === null ? 
+                                <img className='pfp-image' src="/blank-profile-picture.png" alt=''></img>
+                                : <img className='pfp-image' src={mentor.profile_picture} alt='' />)
+                        }
                         {mentor ? mentor.first_name : ""}
                     </div>
                 </div>
@@ -372,7 +382,8 @@ function Matchmaking() {
         console.log(l)
 
         axios.get("/csrf", { withCredentials: true }).then((response) => {
-            axios.post("/admin-apply-matches", {
+            //axios.post("/admin-apply-matches", {
+            axios.post("/admin-apply-matches-if-unmatched", {
                 matches: JSON.stringify(l)
             }, {
                 withCredentials: true,
