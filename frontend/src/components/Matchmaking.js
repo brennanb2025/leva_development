@@ -118,8 +118,8 @@ function Matchmaking() {
 
         const options = candidates.map((m, i) => ({ label: m.first_name, value: i }))
         let color = !disabled ? "bg-purple-200" : "bg-slate-100"
-        console.log("mentee:",mentee)
-        console.log("mentee profile picture:",mentee.profile_picture)
+        console.log("mentee:", mentee)
+        console.log("mentee profile picture:", mentee.profile_picture)
         return (
             <div
                 className={`w-full relative border p-3 mt-3 first:mt-0 flex flex-row justify-around items-center`}
@@ -137,11 +137,11 @@ function Matchmaking() {
                         setModalProps({ mentee: mentee, mentor: mentor })
                     }}>
                     <div className="flex flex-row items-center basis-1/3">
-                        {mentee.profile_picture === null ? 
+                        {mentee.profile_picture === null ?
                             <img className='pfp-image' src="/blank-profile-picture.png" alt=''></img>
                             : <img className='pfp-image' src={mentee.profile_picture} alt=''></img>
                         }
-                        
+
                         {mentee.first_name}
                     </div>
 
@@ -150,8 +150,8 @@ function Matchmaking() {
                     </div>
 
                     <div className="flex flex-row items-center basis-1/3">
-                        {mentor && 
-                            (mentee.profile_picture === null ? 
+                        {mentor &&
+                            (mentee.profile_picture === null ?
                                 <img className='pfp-image' src="/blank-profile-picture.png" alt=''></img>
                                 : <img className='pfp-image' src={mentor.profile_picture} alt='' />)
                         }
@@ -199,11 +199,12 @@ function Matchmaking() {
 
                             let m_id = candidates[selMentor.value].id
                             let numCopy = structuredClone(numMatches)
+                            // Changes start here
                             if (numCopy[m_id] === undefined) {
                                 numCopy[m_id] = 1
                             }
                             else {
-                                numCopy[m_id] = numCopy[m_id] - 1
+                                numCopy[m_id] += 1
                             }
 
                             if (mentor) {
@@ -212,9 +213,6 @@ function Matchmaking() {
 
                             if (numCopy[mentee.id] === undefined) {
                                 numCopy[mentee.id] = 1
-                            }
-                            else {
-                                numCopy[mentee.id] -= 1
                             }
                             console.log(numCopy)
                             const query = await axios.get("/admin-validate-match", {
@@ -269,8 +267,10 @@ function Matchmaking() {
                                             label: conflictMentee.first_name,
                                             onClick: () => {
                                                 setMentees(prev => {
-                                                    prev[false].push(mentee)
-                                                    prev[true].splice(prev[true].indexOf(mentee), 1)
+                                                    if (!mentors) {
+                                                        prev[false].push(mentee)
+                                                        prev[true].splice(prev[true].indexOf(mentee), 1)
+                                                    }
                                                     prev[true].push(conflictMentee)
                                                     prev[false].splice(prev[false].indexOf(conflictMentee), 1)
                                                     return prev
@@ -289,9 +289,6 @@ function Matchmaking() {
                                                 setMatches(prev => {
                                                     prev[mentee.id] = [candidates[selMentor.value]]
                                                     delete prev[conflictMentee.id]
-                                                    console.log("mentee:", mentee.id)
-                                                    console.log("Conflict:", conflictMentee.id)
-                                                    console.log(prev)
                                                     return prev
                                                 })
                                             }
@@ -337,6 +334,7 @@ function Matchmaking() {
                                 <div className='matchmaking-subheader mb-4'>{person.first_name} {person.last_name}</div>
                                 <div className="text-start">
                                     {
+                                        // string.charAt(0).toUpperCase() + string.slice(1);
                                         Object.keys(person).map((k, i) => {
                                             if (k === "profile_picture"
                                                 || k === "first_name"
@@ -348,9 +346,11 @@ function Matchmaking() {
                                                 return <a href={person[k]} className='text-blue-700 underline'>Resume</a>
                                             }
                                             else if (typeof person[k] == "object") {
+                                                let klabel = k.charAt(0).toUpperCase() + k.slice(1)
+                                                klabel = klabel.replace(/_/g, " ")
                                                 return (
                                                     <div>
-                                                        <span className='font-bold'>{k}: </span>
+                                                        <span className='font-bold'>{klabel}: </span>
                                                         <span>{
                                                             person[k].map((field, i) => {
                                                                 if (i == person[k].length - 1) {
@@ -362,10 +362,10 @@ function Matchmaking() {
                                                     </div>
                                                 )
                                             }
-
+                                            k = k.charAt(0).toUpperCase() + k.slice(1)
                                             return (
                                                 <div>
-                                                    <span className='font-bold'>{k}: </span>
+                                                    <span className='font-bold'>{k.replace(/_/g, " ")}: </span>
                                                     <span>{person[k]}</span>
                                                 </div>
                                             )

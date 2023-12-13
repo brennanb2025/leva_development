@@ -319,7 +319,7 @@ def apply_matches_if_unmatched(matches): #takes {menteeId : mentorId} -> bool de
 
     for m in matches.keys(): #post new select for each pairing
         #print("posting",m,matches[m])
-        if m not in alreadyMatched: #skip already matched
+        if m not in alreadymatched: #skip already matched
             success = feed.feedPost(m, matches[m])
             if not success:
                 resp.match_overall_success = False
