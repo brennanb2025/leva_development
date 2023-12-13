@@ -10,11 +10,14 @@ function Matchmaking() {
     const [modalProps, setModalProps] = useState({})
     const [modalOpen, setModalOpen] = useState(false)
 
+    const [initialMatches, setInitialMatches] = useState({}) // All initial matches (when the screen loads), key: menteeid, value: mentorid
     const [matches, setMatches] = useState({}) // All "confirmed" matches, key: menteeid, value: mentorid
     const [allUsers, setAllUsers] = useState([]) // All users
     const [mentees, setMentees] = useState([]) // All mentees
     const [feed, setFeed] = useState({})
     const [numMatches, setNumMatches] = useState({}) // Mapping from mentor to number of mentees pointing to mentor
+
+    const [replacedUsers, setReplacedUsers] = useState([])
 
     // Populate matches, mentees state
     useEffect(() => {
@@ -36,6 +39,7 @@ function Matchmaking() {
                 dict[m.user.id] = m.mentors
             })
             setMatches(dict)
+            setInitialMatches(dict)
 
             setAllUsers(results[1].data)
         })
@@ -234,6 +238,15 @@ function Matchmaking() {
                                     prev[mentee.id] = [candidates[selMentor.value]]
                                     return prev
                                 })
+                                /*if(initialMatches[menteeId] === candidates[selMentor.value]) {
+                                    if()
+                                    const copyReplacedUsers = {...replacedUsers}
+                                    delete copyReplacedUsers[menteeId]
+                                } 
+                                else {
+                                    setReplacedUsers(...replacedusers, menteeId)
+                                    //if different than the initial match, set the 
+                                }*/
                                 setNumMatches(numCopy)
                                 if (!mentors) {
                                     setMentees(prev => {
@@ -335,7 +348,93 @@ function Matchmaking() {
                             <div className='flex-1 flex flex-col items-center'>
                                 <img src={person.profile_picture} className="w-28 h-28 rounded-full" />
                                 <div className='matchmaking-subheader mb-4'>{person.first_name} {person.last_name}</div>
-                                <div className="text-start">
+                                <div>
+                                    <span className='font-bold'>{person.is_mentee ? "Mentee" : "Mentor"}</span>
+                                </div>
+                                <div>
+                                    <span className='font-bold'>Email: </span> 
+                                    <span>{person.email}</span>
+                                </div>
+                                <div>
+                                    <span className='font-bold'>Bio: </span> 
+                                    <span>{person.bio}</span>
+                                </div>
+                                <div>
+                                    <span className='font-bold'>Division: </span> 
+                                    <span>{person.division}</span>
+                                </div>
+                                <div>
+                                    <span className='font-bold'>Division preference: </span> 
+                                    <span>{person.division_preference}</span>
+                                </div>
+                                <div>
+                                    <span className='font-bold'>Current occupation: </span> 
+                                    <span>{person.current_occupation}</span>
+                                </div>
+                                <div>
+                                    <span className='font-bold'>Personality traits: </span> 
+                                    <span>{person.personality_1}, {person.personality_2}, {person.personality_3}</span>
+                                </div>
+
+                                {
+                                    person.is_mentee ?
+                                        <div>
+                                            <span className='font-bold'>Mentor gender preference: </span> 
+                                            <span>{person.mentor_gender_preference}</span>
+                                        </div>
+                                        :
+                                        <div>
+                                            <span className='font-bold'>Gender identity: </span> 
+                                            <span>{person.gender_identity}</span>
+                                        </div>
+                                }
+
+                                <div>
+                                    <span className='font-bold'>{person.is_mentee ? "Career interests: " : "Career experience: "}</span>
+                                    <span>{
+                                        person.career_interests.map((field, i) => {
+                                            if (i == person.career_interests.length - 1) {
+                                                return field
+                                            }
+                                            return field + ", "
+                                        })
+                                    }</span>
+                                </div>
+                                <div>
+                                    <span className='font-bold'>Interests: </span>
+                                    <span>{
+                                        person.interests.map((field, i) => {
+                                            if (i == person.interests.length - 1) {
+                                                return field
+                                            }
+                                            return field + ", "
+                                        })
+                                    }</span>
+                                </div>
+                                <div>
+                                    <span className='font-bold'>Education: </span>
+                                    <span>{
+                                        person.education.map((field, i) => {
+                                            if (i == person.education.length - 1) {
+                                                return field
+                                            }
+                                            return field + ", "
+                                        })
+                                    }</span>
+                                </div>
+
+                                {
+                                    !person.is_mentee &&
+                                    <span className='font-bold'>
+                                        Can make {person.num_pairings_can_make === null || person.num_pairings_can_make === 1 ? "1 match" : person.num_pairings_can_make + " matches"}
+                                    </span> 
+                                }
+
+                                <a href={person.resume} target="_blank" className='text-blue-700 underline'>Resume</a>
+
+                                
+                                {/* <div className="text-start">
+                                    <a href={person.resume} className='text-blue-700 underline'>Resume</a>
                                     {
                                         Object.keys(person).map((k, i) => {
                                             if (k === "profile_picture"
@@ -371,7 +470,7 @@ function Matchmaking() {
                                             )
                                         })
                                     }
-                                </div>
+                                </div> */}
                             </div>
                         ))
                     }

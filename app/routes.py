@@ -397,6 +397,7 @@ def admin_apply_matches():
             "matches_success": success.invalid_matches
         })
 
+#Removed validation from server side - now it just replaces all of them.
 #allows already matched users top be sent - just skips them.
 @app.route('/admin-apply-matches-if-unmatched', methods=['POST'])
 def admin_apply_matches_if_unmatched():
@@ -419,27 +420,28 @@ def admin_apply_matches_if_unmatched():
             "matches_success": success.invalid_matches
         })
 
-#allows already matched users top be sent - just skips them.
 @app.route('/admin-replace-match', methods=['POST'])
 def admin_replace_match():
     if not adminUserLoggedIn():
         return
     # A mentee chose a mentor --> post the form with the info
 
-    menteeId = request.args.get("menteeId")
-    mentorId = request.args.get("mentorId")
+    oldMenteeId = request.args.get("oldMenteeId")
+    oldMentorId = request.args.get("oldMentorId")
+    newMenteeId = request.args.get("newMenteeId")
+    newMentorId = request.args.get("newMentorId")
 
     if menteeId is None or mentorId is None:
         return jsonify({"success":False})
 
-    success = admin.deleteMatch(menteeId, mentorId)
+    success = admin.deleteMatch(oldMenteeId, oldMentorId)
     if not success:
         return jsonify(
             {
                 "success": False
             })
 
-    success = admin.apply_match(menteeId, mentorId, {}) #empty dict for numMatching
+    success = admin.apply_match(newMenteeId, newMentorId, {}) #empty dict for numMatching
 
     return jsonify(
         {

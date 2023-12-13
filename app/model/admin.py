@@ -189,6 +189,8 @@ def validate_match(menteeId, mentorId, numMatching):
     selectsMentee = Select.query.filter_by(mentee_id=menteeId).all()
     selectsMentor = Select.query.filter_by(mentor_id=mentorId).all()
 
+    print("validating match. Mentee:",mentee,"mentor:",mentor,"numMatching:", numMatching)
+
     print(numMatching[menteeId]-1+len(selectsMentee))
     print(num_pairings_mentee)
     print(numMatching[mentorId]-1+len(selectsMentor))
@@ -305,24 +307,67 @@ def validate_matches_allow_already_matched(matches): #takes {menteeId : mentorId
         
     return invalidMatches, alreadyMatched
 
+
+def find_existing_matches(matches): #takes {menteeId : mentorId}
+    maintainTheseMatches = []
+    for m in matches.keys():
+
+        selectQuery = db.session.query( \
+            Select
+        ).filter( \
+            (Select.mentee_id == m) & (Select.mentor_id == matches[m])
+        ).first()
+
+        if selectQuery is not None:
+            maintainTheseMatches.append(selectQuery.id)
+    
+    return maintainTheseMatches
+
+
 def apply_matches_if_unmatched(matches): #takes {menteeId : mentorId} -> bool denoting success
     #able to take matches that already exist
     resp = apply_matches_resp()
     resp.match_overall_success = True
 
-    invalidMatches, alreadymatched = validate_matches_allow_already_matched(matches)
+    """invalidMatches, alreadyMatched = validate_matches_allow_already_matched(matches)
     #print("any invalid:", invalidMatches)
     if len(invalidMatches) != 0:
         resp.invalid_matches = invalidMatches
         resp.match_overall_success = False
         return resp
+    """
+    maintainSelects = find_existing_matches(matches)
 
     for m in matches.keys(): #post new select for each pairing
-        #print("posting",m,matches[m])
-        if m not in alreadyMatched: #skip already matched
+        #delete any selects that should be replaced
+
+        #assume each mentee can only have 1 mentor.
+        selectThisMentee = Select.query.filter_by(mentee_id=m).first()
+        if not selectThisMentee: #select doesn't exist. We can create it.
+            print("nothing to delete, posting",m,matches[m])
             success = feed.feedPost(m, matches[m])
             if not success:
                 resp.match_overall_success = False
+            continue
+
+            
+        #if the match we want to make does not already exist:
+        if selectThisMentee.id not in maintainSelects:
+            print("deleting mentee=",selectThisMentee.mentee_id,"mentor=",selectThisMentee.mentor_id)
+            Select.query.filter_by(id=selectThisMentee.id).delete() #delete all other matches
+
+            #delete any progress meetings associated with this user
+            ProgressMeetingCompletionInformation.query.filter(
+                    #ProgressMeetingCompletionInformation.num_progress_meeting == selectQuery.current_meeting_number_mentee,
+                    ProgressMeetingCompletionInformation.select_id == selectThisMentee.id
+                ).delete()
+
+            print("posting",m,matches[m])
+            success = feed.feedPost(m, matches[m])
+            if not success:
+                resp.match_overall_success = False
+
+    db.session.commit() #commit deletes
 
     return resp
 

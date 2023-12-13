@@ -1,4 +1,5 @@
 import imghdr
+import app.model.AWS as AWS
 
 #ensures that the image is valid.
 def validate_image(stream):
@@ -18,7 +19,7 @@ def format_user_as_json(user):
             "is_mentee": user.is_student,
             "bio": user.bio,
             "profile_picture": user.profile_picture, #the one used for displaying
-            "resume": user.resume, #the one used for displaying
+            "resume": AWS.create_resume_link(user),
             "email_contact": user.email_contact, #true: contact with email. False: contact with phone number
             "phone_number": user.phone_number,
             "city_name": user.city_name,
@@ -33,5 +34,5 @@ def format_user_as_json(user):
             "division": user.division,
             "interests": [i.entered_name for i in user.rtn_interests()],
             "career_interests": [i.entered_name for i in user.rtn_career_interests()],
-            "education_interests": [i.entered_name for i in user.rtn_education()]
+            "education": [i.entered_name for i in user.rtn_education()]
         }
