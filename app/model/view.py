@@ -50,6 +50,7 @@ def create_user_page(id):
             mentorGenderPreference = "No preference"
     resp.mentorGenderPreference = mentorGenderPreference
 
+    """
     divisionPreference = user.division_preference
     if divisionPreference != None:
         if divisionPreference == "same":
@@ -59,6 +60,7 @@ def create_user_page(id):
         else:
             divisionPreference = "No preference"
     resp.divisionPreference = divisionPreference
+    """
 
     genderIdentity = user.gender_identity
     if genderIdentity != None:

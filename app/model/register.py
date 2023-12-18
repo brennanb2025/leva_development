@@ -144,11 +144,13 @@ def registerPost(form, resume, img):
             #flash(u"Please enter your gender identity.", 'gender_identity_error')
             success = False
     
+    """
     if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #if division preference should be taken into account, check it.
         if form.get("divisionPreference") == None: #mentee and mentor division preference empty or mentor and mentee division preference empty
             resp.divisionPreferenceError = True
             #flash(u"Please enter a preference for your division.", 'division_preference_error')
             success = False
+    """
 
     if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True": #if personality should be taken into account, check it.
         if form.get('personality1') != None and form.get('personality2') != None and form.get('personality3') != None:
@@ -162,11 +164,13 @@ def registerPost(form, resume, img):
             success = False
 
 
+    """
     if form.get('current_occupation') == '':
         success = False
         resp.currentOccupationError = True
         #flash(u'Please enter your current occupation.', 'currentOccupationError')
         errors.append("current_occupation")
+    """
 
 
     if form.get('business') == '' or form.get('business') == None:
@@ -311,7 +315,7 @@ def registerPost(form, resume, img):
         #changed division form to be 1:Freshman, 2:Sophomore, etc.
         #TODO undid this change
         
-        division_set = form.get('division').strip()
+        #division_set = form.get('division').strip()
         """
         if division_set == "1":
             division_set = "Freshman"
@@ -323,7 +327,7 @@ def registerPost(form, resume, img):
             division_set = "Senior"
         """
 
-        division_preference_set = form.get("divisionPreference")
+        #division_preference_set = form.get("divisionPreference")
         #if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "False":
             #if division preference should not be taken into account, set it to None
             #division_preference_set = None
@@ -339,12 +343,12 @@ def registerPost(form, resume, img):
 
         user = User(email=form.get('email'), first_name=form.get('first_name'), last_name=form.get('last_name'), 
                     is_student=isMentee, bio=form.get('bio'), email_contact=True, phone_number=None,
-                    city_name=form.get('city_name'), current_occupation=form.get('current_occupation'),
+                    #city_name=form.get('city_name'), current_occupation=form.get('current_occupation'),
                     business_id=businessRegisteredUnder.id, 
                     num_pairings_can_make=int(form.get('num_pairings')),
                     mentor_gender_preference=mentor_gender_preferenceForm,
                     gender_identity=gender_identityForm,
-                    division_preference=division_preference_set, division=division_set,
+                    #division_preference=division_preference_set, division=division_set,
                     personality_1=personality_1_set, personality_2=personality_2_set,
                     personality_3=personality_3_set)
         
@@ -470,6 +474,7 @@ def checkBasicInfo(form, resp):
             #flash(u'Passwords do not match.', 'password2Error')
             #errors.append("password") not used for anything - passwords are wiped anyway
 
+    """
     if form.get('division') == '':
         success = False
         resp.divisionError = True
@@ -481,6 +486,7 @@ def checkBasicInfo(form, resp):
         resp.cityNameError = True
         #flash(u'Please enter a city.', 'cityNameError')
         errors.append("city_name")
+    """
     
     if form.get('num_pairings') == '':
         success = False

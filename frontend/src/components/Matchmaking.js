@@ -122,8 +122,6 @@ function Matchmaking() {
 
         const options = candidates.map((m, i) => ({ label: m.first_name, value: i }))
         let color = !disabled ? "bg-purple-200" : "bg-slate-100"
-        console.log("mentee:", mentee)
-        console.log("mentee profile picture:", mentee.profile_picture)
         return (
             <div
                 className={`w-full relative border p-3 mt-3 first:mt-0 flex flex-row justify-around items-center`}
@@ -356,7 +354,7 @@ function Matchmaking() {
                                     <span className='font-bold'>Bio: </span> 
                                     <span>{person.bio}</span>
                                 </div>
-                                <div>
+                                {/* <div>
                                     <span className='font-bold'>Division: </span> 
                                     <span>{person.division}</span>
                                 </div>
@@ -367,7 +365,7 @@ function Matchmaking() {
                                 <div>
                                     <span className='font-bold'>Current occupation: </span> 
                                     <span>{person.current_occupation}</span>
-                                </div>
+                                </div> */}
                                 <div>
                                     <span className='font-bold'>Personality traits: </span> 
                                     <span>{person.personality_1}, {person.personality_2}, {person.personality_3}</span>

@@ -351,7 +351,7 @@ def apply_matches_if_unmatched(matches): #takes {menteeId : mentorId} -> bool de
             continue
 
             
-        #if the match we want to make does not already exist:
+        #if the match we want to make does already exist:
         if selectThisMentee.id not in maintainSelects:
             print("deleting mentee=",selectThisMentee.mentee_id,"mentor=",selectThisMentee.mentor_id)
             Select.query.filter_by(id=selectThisMentee.id).delete() #delete all other matches
@@ -366,6 +366,12 @@ def apply_matches_if_unmatched(matches): #takes {menteeId : mentorId} -> bool de
             success = feed.feedPost(m, matches[m])
             if not success:
                 resp.match_overall_success = False
+
+    #unmatched mentees:
+    #previously unmatched: don't do anything.
+    #were not previously unmatched (ie have at least one select:)
+        #if the mentee id is not in matches:
+            #delete the select information (unmatch them.)
 
     db.session.commit() #commit deletes
 

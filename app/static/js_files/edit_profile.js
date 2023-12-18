@@ -369,9 +369,11 @@ function client_validate_everything() {
 
 
     //location
+    /*
     if(document.getElementById("city_name").value === '') {
         errors['city_name'] = 'Please enter a city.'
     }
+    */
 
     //bio
     if(document.getElementById("bio").value === "") {
@@ -386,9 +388,11 @@ function client_validate_everything() {
 
 
     //division
+    /*
     if(document.getElementById("division").value === '') {
         errors['division'] = 'Please enter your division within the company.'
     }
+    */
 
     // if(document.getElementById("current_occupation").value === "") {
     //     errors['current_occupation'] = 'Please enter your current occupation.'

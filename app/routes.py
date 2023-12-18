@@ -150,7 +150,8 @@ def admin_lookup_users_in_business():
     if not adminUserLoggedIn():
         return
 
-    businessId = request.args.get("businessId")
+    #businessId = request.args.get("businessId")
+    businessId = AdminUser.query.filter_by(id=session["adminId"]).first().business_id
 
     return jsonify([userUtils.format_user_as_json(u) for u in admin.admin_lookup_users_in_business(businessId)])
 
@@ -687,10 +688,10 @@ def registerPreviouslyFilledOut(form, resp, request):
     bio = form.get("bio")
     email_or_phone = "email"
     phone_num = ""
-    city_name = form.get("city_name")
+    #city_name = form.get("city_name")
     first_last_error = False
-    current_occupation = form.get("current_occupation")
-    division = form.get("division")
+    #current_occupation = form.get("current_occupation")
+    #division = form.get("division")
 
     """if "email" in errors:  # if error - make it blank.
         email = ""
@@ -711,12 +712,15 @@ def registerPreviouslyFilledOut(form, resp, request):
         email = ""
     if resp.firstNameError:
         first_name = ""
+    #commented out
+    """
     if resp.cityNameError:
         city_name = ""
     if resp.divisionError:
         division = ""
     if resp.currentOccupationError:
         current_occupation = ""
+    """
     if resp.lastNameError:
         last_name = ""
         if resp.firstNameError:
@@ -733,7 +737,8 @@ def registerPreviouslyFilledOut(form, resp, request):
     textPersonality1 = form.get("personality1")
     textPersonality2 = form.get("personality2")
     textPersonality3 = form.get("personality3")
-    divisionPreference = form.get("divisionPreference")
+    #commented out
+    #divisionPreference = form.get("divisionPreference")
 
     # get all the input attributes
     interestInputs = []
@@ -765,12 +770,15 @@ def registerPreviouslyFilledOut(form, resp, request):
     interestTags, careerInterests, schools = registerFuncs.get_popular_tags()
 
     resp = make_response(render_template('register1.html', email=email, first_name=first_name, last_name=last_name, first_last_error=first_last_error,
-                                         bio=bio, email_or_phone=email_or_phone, city_name=city_name, current_occupation=current_occupation,
-                                         division=division, phone_num=phone_num, register_type=register_type,
+                                         bio=bio, email_or_phone=email_or_phone, 
+                                         #city_name=city_name, current_occupation=current_occupation, division=division, 
+                                         phone_num=phone_num, register_type=register_type,
                                          interestList=interestInputs, educationList=eduInputs, careerInterestList=carIntInputs,
                                          interestTags=interestTags, careerInterests=careerInterests, schools=schools, form=formNew,
                                          mentorGenderIdentity=mentorGenderIdentity, menteeGenderPreference=menteeGenderPreference, textPersonality1=textPersonality1,
-                                         textPersonality2=textPersonality2, textPersonality3=textPersonality3, divisionPreference=divisionPreference))
+                                         textPersonality2=textPersonality2, textPersonality3=textPersonality3, 
+                                         #divisionPreference=divisionPreference
+                                         ))
 
     resp.set_cookie('initialTimestampGET', request.cookies.get(
         'initialTimestampGET'))  # return with the initial time
@@ -818,8 +826,9 @@ def editProfile():
             careerInterestList=readyProfileResp.careerInterestList, 
             educationList=readyProfileResp.educationList, 
             personality_1=user.personality_1, personality_2=user.personality_2, personality_3=user.personality_3, 
-            division=user.division, resumeUrl=resumeUrl,
-            divisionPreference=readyProfileResp.divisionPreference,
+            #division=user.division, 
+            resumeUrl=resumeUrl,
+            #divisionPreference=readyProfileResp.divisionPreference,
             mentorGenderPreference=readyProfileResp.mentorGenderPreference, 
             genderIdentity=readyProfileResp.genderIdentity,
             formPwd=formPwd,
@@ -943,6 +952,7 @@ def editProfilePost():
             success = False
             flash(u'Please enter a new last name.', 'lastNameError')
 
+    """
     changedCitySuccess = False #init as false in case they didn't change it
     if form.get("city_name") != u.city_name: #changed city name --> check it
         changedCitySuccess=editProfileFuncs.checkCityName(form.get("city_name"))
@@ -956,6 +966,7 @@ def editProfilePost():
         if not changedOccupationSuccess: #change unsuccessful.
             success = False
             flash(u'Please enter a new current occupation.', 'currentOccupationError')
+    """
 
     changedBioSuccess = False #init as false in case they didn't change it
     if form.get("bio") != u.bio: #changed bio --> check it
@@ -1004,6 +1015,8 @@ def editProfilePost():
             success = False
             flash(u'You must input 3 personality traits/phrases.', 'personalityError')
     
+    #commented out
+    """
     changedDivisionSuccess = False
     if form.get("division") != u.division: #changed --> check it
         changedDivisionSuccess=editProfileFuncs.checkDivision(form.get('division'))
@@ -1020,6 +1033,7 @@ def editProfilePost():
                 flash(u"Please enter a preference for your mentor's division.", 'divisionPreferenceError')
             else:
                 flash(u"Please enter a preference for your mentee's division.", 'divisionPreferenceError')
+    """
 
     changedContactMethodSuccess = False
     if form.get("radio_contact") == "Phone number" and u.email_contact \
@@ -1035,10 +1049,10 @@ def editProfilePost():
             u.set_first_name(form.get("first_name"))
         if changedLnSuccess:
             u.set_last_name(form.get("last_name"))
-        if changedCitySuccess:
+        """if changedCitySuccess:
             u.set_city_name(form.get("city_name"))
         if changedOccupationSuccess:
-            u.set_current_occupation(form.get("current_occupation"))
+            u.set_current_occupation(form.get("current_occupation"))"""
         if changedBioSuccess:
             u.set_bio(form.get("bio"))
         if changedMentorGenderSuccess:
@@ -1050,10 +1064,10 @@ def editProfilePost():
         if changedPersonalitySuccess:
             u.set_personality(form.get('personality1').strip(), form.get(
                 'personality2').strip(), form.get('personality3').strip())
-        if changedDivisionSuccess:
+        """if changedDivisionSuccess:
             u.set_division(form.get("division").strip())
         if changedDivisionPreferenceSuccess:
-            u.set_division_preference(form.get("divisionPreference"))
+            u.set_division_preference(form.get("divisionPreference"))"""
         if changedContactMethodSuccess:
             if form.get('radio_contact') == 'Email':  # checked the email box
                 u.remove_phone()
@@ -1065,15 +1079,15 @@ def editProfilePost():
         dataChangedDict = {}
         dataChangedDict["fn"] = changedFnSuccess
         dataChangedDict["ln"] = changedLnSuccess
-        dataChangedDict["city"] = changedCitySuccess
-        dataChangedDict["occupation"] = changedOccupationSuccess
+        """dataChangedDict["city"] = changedCitySuccess
+        dataChangedDict["occupation"] = changedOccupationSuccess"""
         dataChangedDict["bio"] = changedBioSuccess
         dataChangedDict["mentorGender"] = changedMentorGenderSuccess
         dataChangedDict["genderIdentity"] = changedGenderIdentitySuccess
         dataChangedDict["attributes"] = changedInputsSuccess
         dataChangedDict["personality"] = changedPersonalitySuccess
-        dataChangedDict["division"] = changedDivisionSuccess
-        dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess
+        """dataChangedDict["division"] = changedDivisionSuccess
+        dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess"""
         dataChangedDict["contact"] = changedContactMethodSuccess
         
         admin.logData(session.get('userID'),7,json.dumps(dataChangedDict)) #log data edit profile success
@@ -1083,15 +1097,15 @@ def editProfilePost():
         dataChangedDict = {}
         dataChangedDict["fn"] = changedFnSuccess
         dataChangedDict["ln"] = changedLnSuccess
-        dataChangedDict["city"] = changedCitySuccess
-        dataChangedDict["occupation"] = changedOccupationSuccess
+        """dataChangedDict["city"] = changedCitySuccess
+        dataChangedDict["occupation"] = changedOccupationSuccess"""
         dataChangedDict["bio"] = changedBioSuccess
         dataChangedDict["mentorGender"] = changedMentorGenderSuccess
         dataChangedDict["genderIdentity"] = changedGenderIdentitySuccess
         dataChangedDict["attributes"] = changedInputsSuccess
         dataChangedDict["personality"] = changedPersonalitySuccess
-        dataChangedDict["division"] = changedDivisionSuccess
-        dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess
+        """dataChangedDict["division"] = changedDivisionSuccess
+        dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess"""
         dataChangedDict["contact"] = changedContactMethodSuccess
         admin.logData(session.get('userID'),6,json.dumps(dataChangedDict)) #log data edit profile error
         return redirect(url_for('editProfile'))
@@ -1304,7 +1318,7 @@ def view():
     return render_template('profile.html', title=title, profile_picture=user.profile_picture, intro_video=user.intro_video,
                 bio=user.bio, logged_in=this_user_is_logged_in, resumeUrl=resp.resumeUrl,
                 interestList=resp.interestList, careerInterestList=resp.careerInterestList, educationList=resp.educationList, 
-                genderIdentity=resp.genderIdentity, divisionPreference=resp.divisionPreference,
+                genderIdentity=resp.genderIdentity, #divisionPreference=resp.divisionPreference,
                 numMatchesCanMake=resp.numMatchesCanMake,
                 isStudent=user.is_student, mentorGenderPreference=resp.mentorGenderPreference, user=user, userID=session.get('userID'))
     #user logged in: show profile page.

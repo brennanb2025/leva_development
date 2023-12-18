@@ -4,24 +4,35 @@ from app.input_sets.models import Event, Select, Business, User, ProgressMeeting
 
 #from app.routes import delete_intro_video, delete_profile_picture, delete_resume, delete_user_attributes, logData
 
-print(User.query.all())
+"""
+b = Business(
+    name="test",
+    number_employees_maximum=100,
+    number_employees_currently_registered=0)
+db.session.add(b)
+db.session.commit()
+"""
+#print(User.query.filter_by(business_id=6).all())
+for b in Business.query.all():
+    print(b.id, b.name)
+
 """
 u = AdminUser(
-    email="adminTest1@test.com",
-    first_name="adminTest1First",
-    last_name="adminTest1Last",
-    business_id=1
+    email="adminTestBusiness@test.com",
+    first_name="adminTestF",
+    last_name="adminTestL",
+    business_id=2
 )
 
 db.session.add(u) #add to database
-u.set_password("adminTest1") #must set pwd w/ hashing method
+u.set_password("adminTestBusiness") #must set pwd w/ hashing method
 db.session.commit()
 
-print("All admin users:",AdminUser.query.all())
+print("All admin users:", AdminUser.query.all())
 """
 
-
-"""for b in Business.query.all():
+"""
+for b in Business.query.all():
     print(b)
 """
 
@@ -94,12 +105,8 @@ for b in Business.query.all():
     print(b)
 
 for u in User.query.all():
-<<<<<<<<< Temporary merge branch 1
     print(u.email)
     print(u.first_name)
-=========
-    print(u)
->>>>>>>>> Temporary merge branch 2
 
 """
 

@@ -57,7 +57,8 @@ def readyUserProfile(userId):
             mentorGenderPreference = "No preference"
     
     resp.mentorGenderPreference = mentorGenderPreference
-
+    
+    """
     divisionPreference = user.division_preference
     if divisionPreference != None:
         if divisionPreference == "same":
@@ -68,6 +69,7 @@ def readyUserProfile(userId):
             divisionPreference = "No preference"
 
     resp.divisionPreference = divisionPreference
+    """
 
     genderIdentity = user.gender_identity
     if genderIdentity != None:

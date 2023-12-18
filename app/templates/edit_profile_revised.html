@@ -230,7 +230,9 @@
                                                 {% endwith %}
                                             </div>
                                         </div>
-            
+
+
+                                        {#
                                         <div class="single">
                                             <div class="label">
                                                 Job Title:
@@ -249,6 +251,7 @@
                                                 <input id="division" name="division" value="{{ user.division }}">
                                             </div>
                                         </div>
+                                        #}
             
                                         <div class="single">
                                             <div class="label">
@@ -260,6 +263,7 @@
                                             </div>
                                         </div>
             
+                                        {#
                                         <div class="single">
                                             <div class="label">
                                                 Location:
@@ -269,6 +273,7 @@
                                                 <input id="city_name" name="city_name" value="{{ user.city_name }}">
                                             </div>
                                         </div>
+                                        #}
 
                                         <div class="single">
                                             {% if resumeUrl is none %}
@@ -501,6 +506,7 @@
                                             {% endif %}
                                         </div>
             
+                                        {#
                                         <div class="Mentor">
                                             <label>
                                                 {% if user.is_student %}
@@ -547,6 +553,7 @@
                                                 {% endif %}
                                             </div>
                                         </div>
+                                        #}
             
                                         {% if genderIdentity is not none and not user.is_student  %}
                                         <div class="Mentor">

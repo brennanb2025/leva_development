@@ -113,6 +113,8 @@
                             </div>
                         </div>
 
+                        {#
+
                         <!--Job title-->
                         <div class="single">
                             <div class="label">
@@ -134,6 +136,8 @@
                                 {{ user.division }}
                             </div>
                         </div>
+
+                        #}
 
                         <!--Bio-->
                         <div class="single">
@@ -159,6 +163,7 @@
                             {% endif %}
                         </div>
 
+                        {#
                         <!--Location-->
                         <div class="single">
                             <div class="label">
@@ -169,6 +174,7 @@
                                 {{ user.city_name }}
                             </div>
                         </div>
+                        #}
 
                         <!--Goals/Expertise-->
                         <div class="single">
@@ -244,10 +250,15 @@
                                 </div>
         
                                 <div class="answer">
-                                    {{ user.num_pairings_can_make }}
+                                    {% if user.num_pairings_can_make is none %}
+                                        1
+                                    {% else %}
+                                        {{ user.num_pairings_can_make }}
+                                    {% endif %}
                                 </div>
                             </div>
 
+                            {#
                             <!--Division preference-->
                             {% if divisionPreference is not none %}
                             <div class="single">
@@ -260,6 +271,7 @@
                                 </div>
                             </div>
                             {% endif %}
+                            #}
 
                             <!--
                             <div class="single">

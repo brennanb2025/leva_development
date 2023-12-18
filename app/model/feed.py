@@ -53,7 +53,7 @@ def feedMenteeNew(userId):
 
     userDict = {} #user : number match.
     matches = {} #for data logging
-    matches["division_pref"] = 0
+    #matches["division_pref"] = 0
     matches["personality"] = 0
     matches["education"] = 0
     matches["career"] = 0
@@ -80,6 +80,8 @@ def feedMenteeNew(userId):
             #ignore case mentor gender preference == "noPreference".
 
 
+    #Commented out division preferences
+    """
     #division preferences
     if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #only check if flag for division preference is "True"
         for u in users:
@@ -91,6 +93,7 @@ def feedMenteeNew(userId):
                 #this user division preference
                 userDict[u] += heuristicVals["division_pref"]
                 matches["division_pref"] += 1
+    """
 
     #personality
     if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":
@@ -223,7 +226,7 @@ def feedMentee(userId):
 
     userDict = {} #user : number match.
     matches = {} #for data logging
-    matches["division_pref"] = 0
+    #matches["division_pref"] = 0
     matches["personality"] = 0
     matches["education"] = 0
     matches["career"] = 0
@@ -251,6 +254,7 @@ def feedMentee(userId):
 
 
     #division preferences
+    """
     if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #only check if flag for division preference is "True"
         for u in users:
             if (u.division_preference == "same" and user.division == u.division) or u.division_preference == "noPreference":
@@ -261,6 +265,7 @@ def feedMentee(userId):
                 #this user division preference
                 userDict[u] += heuristicVals["division_pref"]
                 matches["division_pref"] += 1
+    """
 
     #TODO Added u.personality_n and before all to test if None before asking if in. Update the above to do the same.
     #personality
@@ -481,7 +486,7 @@ def get_all_matches(userId):
 
     userDict = {} #user : number match.
     matches = {} #for data logging
-    matches["division_pref"] = 0
+    #matches["division_pref"] = 0
     matches["personality"] = 0
     matches["education"] = 0
     matches["career"] = 0
@@ -510,6 +515,8 @@ def get_all_matches(userId):
             #ignore case mentor gender preference == "noPreference".
 
 
+    #commented out
+    """
     #division preferences
     if str(app.config['MATCHING_FLAG_DIVISION_PREFERENCE']) == "True": #only check if flag for division preference is "True"
         for u in users:
@@ -521,6 +528,7 @@ def get_all_matches(userId):
                 #this user division preference
                 userDict[u] += heuristicVals["division_pref"]
                 matches["division_pref"] += 1
+    """
 
     #personality
     if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":

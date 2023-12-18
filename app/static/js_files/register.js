@@ -182,9 +182,10 @@ function validatePersonal1() {
     var errors = {}
 
     //location, business, Mentor
-    if(formSubmission.city_name.value === '') {
+    //commented out
+    /*if(formSubmission.city_name.value === '') {
         errors['city_name'] = 'Please enter a city.'
-    }
+    }*/
 
     if(formSubmission.business.value === '') {
         errors['business'] = 'Please enter the company you are a part of.'
@@ -233,6 +234,7 @@ function validateMatching() {
 
     var errors = {}
 
+    /*
     if(formSubmission.division.value === '') {
         errors['division'] = 'Please enter your division within the company.'
     }
@@ -240,6 +242,7 @@ function validateMatching() {
     if(formSubmission.current_occupation.value === "") {
         errors['current_occupation'] = 'Please enter your current occupation.'
     }
+    */
 
     if(formSubmission.num_pairings.value === "") {
         errors['num_pairings'] = 'Please the amount of mentors/mentees you are willing to have.'
@@ -296,7 +299,9 @@ window.addEventListener('load', function() {
     document.getElementById("genderMentor").style.display = "none"; //hide gender radio - assume they are a mentee
     //document.getElementById("newVideo").style.display = "none"; //hide new video if user hasn't input anything yet
     //document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
-    document.getElementById("menteeDivisionPreference").style.display = "none"; //hide mentee preference - assume they are a mentee
+    
+    //commented out
+    //document.getElementById("menteeDivisionPreference").style.display = "none"; //hide mentee preference - assume they are a mentee
 
     //had to add this now that cropping is out
     document.getElementById("image_container_div").style.display = "none"; //hide all image
@@ -597,8 +602,9 @@ function radio_phone() {
     document.getElementById("whiteContainerPhone").style.display = "block";
 }
 function radio_mentor() { //function for if user selected that they are a mentor
-    document.getElementById("menteeDivisionPreference").style.display = "block";
-    document.getElementById("mentorDivisionPreference").style.display = "none"; //show the mentee preference and hide mentor preference
+    //commented out
+    //document.getElementById("menteeDivisionPreference").style.display = "block";
+    //document.getElementById("mentorDivisionPreference").style.display = "none"; //show the mentee preference and hide mentor preference
     document.getElementById("careerExp").style.display = "block"; //show career experience instead of career interests
     document.getElementById("careerInt").style.display = "none"; //hide
     document.getElementById("genderMentor").style.display = "block";
@@ -609,8 +615,9 @@ function radio_mentor() { //function for if user selected that they are a mentor
     radio_mentee_selected = false
 }
 function radio_mentee() { //function for if user selected that they are a mentee
-    document.getElementById("menteeDivisionPreference").style.display = "none";
-    document.getElementById("mentorDivisionPreference").style.display = "block"; //hide the mentee preference and show mentor preference
+    //commented out
+    //document.getElementById("menteeDivisionPreference").style.display = "none";
+    //document.getElementById("mentorDivisionPreference").style.display = "block"; //hide the mentee preference and show mentor preference
     document.getElementById("careerInt").style.display = "block"; //show career experience instead of career interests
     document.getElementById("careerExp").style.display = "none"; //hide
     document.getElementById("genderMentor").style.display = "none";

@@ -235,8 +235,8 @@
                     
                             <!--Info container (personal questions about user)-->
                             <div class="personal1 info-container" id="personal1">
-                                <!--Location-->
-                                <div class="location">
+                                <!--Location - commented out-->
+                                {#<div class="location">
                                     <div class="input-container">
                                         <label for="location">{{ form.city_name.label }}</label>
                                         {{ form.city_name(value=city_name) }}
@@ -252,7 +252,7 @@
                                             </ul>
                                         {% endif %}
                                     {% endwith %}   
-                                </div>
+                                </div>#}
 
                                 <!--Business-->
                                 <div class="business">
@@ -522,6 +522,8 @@
                             <!--Info container (information about user needed to match with another user)-->
                             <div class="matching info-container" id="matching">
                                 <!--Current division within the user's company-->
+                                <!-- commented out -->
+                                {#
                                 <div class="division">
                                     <div class="input-container">
                                         <label for="e-mail">{{ form.division.label }}</label>
@@ -540,6 +542,7 @@
                                     {% endwith %}
                                 </div>
 
+                                <!-- commented out -->
                                 <!--Current user occupation-->
                                 <div class="occupation">
                                     <div class="input-container">
@@ -558,6 +561,7 @@
                                         {% endif %}
                                     {% endwith %}
                                 </div>
+                                #}
 
                                 <div class="num_pairings">
                                     <div class="input-container">
@@ -692,7 +696,10 @@
                                     </div>
                                 </div>
 
+
+                                <!-- commented out -->
                                 <!--For mentors-->
+                                {#
                                 <div class="Mentor">
                                     <!--Mentee division preference-->
                                     <label>
@@ -753,6 +760,8 @@
                                         {% endwith %}
                                     </div>
                                 </div>
+
+                                #}
 
                             </div>
 
