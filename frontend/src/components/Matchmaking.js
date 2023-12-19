@@ -140,7 +140,7 @@ function Matchmaking() {
                     }}>
                     <div className="flex flex-row items-center basis-1/3">
                         {mentee.profile_picture === null ?
-                            <img className='pfp-image' src="/blank-profile-picture.png" alt=''></img>
+                            <img className='pfp-image' src={process.env.PUBLIC_URL + "/blank-profile-picture.png"} alt=''></img>
                             : <img className='pfp-image' src={mentee.profile_picture} alt=''></img>
                         }
 
@@ -153,8 +153,8 @@ function Matchmaking() {
 
                     <div className="flex flex-row items-center basis-1/3">
                         {mentor &&
-                            (mentee.profile_picture === null ?
-                                <img className='pfp-image' src="/blank-profile-picture.png" alt=''></img>
+                            (mentor.profile_picture === null ?
+                                <img className='pfp-image' src={process.env.PUBLIC_URL + "/blank-profile-picture.png"} alt=''></img>
                                 : <img className='pfp-image' src={mentor.profile_picture} alt='' />)
                         }
                         {mentor ? mentor.first_name : ""}
@@ -341,7 +341,10 @@ function Matchmaking() {
                     {
                         displayinfo.map((person) => (
                             <div className='flex-1 flex flex-col items-center'>
-                                <img src={person.profile_picture} className="w-28 h-28 rounded-full" />
+                                {/* <img src={person.profile_picture} className="w-28 h-28 rounded-full" /> */}
+                                {person.profile_picture === null ?
+                                    <img className="w-28 h-28 rounded-full" src={process.env.PUBLIC_URL + "/blank-profile-picture.png"} alt=''></img>
+                                    : <img className="w-28 h-28 rounded-full" src={person.profile_picture} alt='' />}
                                 <div className='matchmaking-subheader mb-4'>{person.first_name} {person.last_name}</div>
                                 <div>
                                     <span className='font-bold'>{person.is_mentee ? "Mentee" : "Mentor"}</span>
