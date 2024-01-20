@@ -343,147 +343,166 @@ function Matchmaking() {
                 isOpen={modalOpen}
                 onRequestClose={() => { setModalOpen(false) }}
                 contentLabel="One small step for man, one giant leap for mankind"
-                style={{ content: { zIndex: 20 } }}
+                style={{ content: { zIndex: 20, padding: 0, color: "white" } }}
             >
-                <button onClick={() => { setModalOpen(false) }}>Close</button>
+                <button className='absolute right-6 top-6' onClick={() => { setModalOpen(false) }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
 
                 <div className="w-full h-full flex flex-row">
                     {
-                        displayinfo.map((person) => (
-                            <div className='flex-1 flex flex-col items-center'>
-                                {/* <img src={person.profile_picture} className="w-28 h-28 rounded-full" /> */}
-                                {person.profile_picture === null ?
-                                    <img className="w-28 h-28 rounded-full" src={process.env.PUBLIC_URL + "/blank-profile-picture.png"} alt=''></img>
-                                    : <img className="w-28 h-28 rounded-full" src={person.profile_picture} alt='' />}
-                                <div className='matchmaking-subheader mb-4'>{person.first_name} {person.last_name}</div>
-                                <div>
-                                    <span className='font-bold'>{person.is_mentee ? "Mentee" : "Mentor"}</span>
-                                </div>
-                                <div>
-                                    <span className='font-bold'>Email: </span> 
-                                    <span>{person.email}</span>
-                                </div>
-                                <div>
-                                    <span className='font-bold'>Bio: </span> 
-                                    <span>{person.bio}</span>
-                                </div>
-                                {/* <div>
-                                    <span className='font-bold'>Division: </span> 
-                                    <span>{person.division}</span>
-                                </div>
-                                <div>
-                                    <span className='font-bold'>Division preference: </span> 
-                                    <span>{person.division_preference}</span>
-                                </div>
-                                <div>
-                                    <span className='font-bold'>Current occupation: </span> 
-                                    <span>{person.current_occupation}</span>
-                                </div> */}
-                                <div>
-                                    <span className='font-bold'>Personality traits: </span> 
-                                    <span>{person.personality_1}, {person.personality_2}, {person.personality_3}</span>
-                                </div>
-
-                                {
-                                    person.is_mentee ?
-                                        <div>
-                                            <span className='font-bold'>Mentor gender preference: </span> 
-                                            <span>{person.mentor_gender_preference}</span>
+                        displayinfo.map((person, index) => {
+                            let backgroundClass = 'flex-1 pt-8 flex pl-12 text-white '
+                            if(index == 0){
+                                // do something
+                                backgroundClass += "bg-secondary"
+                            }
+                            else{
+                                // do something
+                                backgroundClass += "bg-primary"
+                            }
+                            return (
+                                <div className={backgroundClass}>
+                                    <ul className='flex flex-col items-start list-disc'>
+                                        {/* <img src={person.profile_picture} className="w-28 h-28 rounded-full" /> */}
+                                        <div className='flex flex-row items-end mb-4'>
+                                            <div className='matchmaking-subheader mr-4'>{person.first_name} {person.last_name}</div>
+                                            {person.profile_picture === null ?
+                                                <img className="w-28 h-28 rounded-full" src={process.env.PUBLIC_URL + "/blank-profile-picture.png"} alt=''></img>
+                                                : <img className="w-28 h-28 rounded-full" src={person.profile_picture} alt='' />}
                                         </div>
-                                        :
-                                        <div>
-                                            <span className='font-bold'>Gender identity: </span> 
-                                            <span>{person.gender_identity}</span>
+                                        <li>
+                                            <span className='font-bold'>{person.is_mentee ? "Mentee" : "Mentor"}</span>
+                                        </li>
+                                        <li>
+                                            <span className='font-bold'>Email: </span> 
+                                            <span>{person.email}</span>
+                                        </li>
+                                        <li>
+                                            <span className='font-bold'>Bio: </span> 
+                                            <span>{person.bio}</span>
+                                        </li>
+                                        {/* <div>
+                                            <span className='font-bold'>Division: </span> 
+                                            <span>{person.division}</span>
                                         </div>
-                                }
+                                        <div>
+                                            <span className='font-bold'>Division preference: </span> 
+                                            <span>{person.division_preference}</span>
+                                        </div>
+                                        <div>
+                                            <span className='font-bold'>Current occupation: </span> 
+                                            <span>{person.current_occupation}</span>
+                                        </div> */}
+                                        <li>
+                                            <span className='font-bold'>Personality traits: </span> 
+                                            <span>{person.personality_1}, {person.personality_2}, {person.personality_3}</span>
+                                        </li>
 
-                                <div>
-                                    <span className='font-bold'>{person.is_mentee ? "Career interests: " : "Career experience: "}</span>
-                                    <span>{
-                                        person.career_interests.map((field, i) => {
-                                            if (i == person.career_interests.length - 1) {
-                                                return field
+                                        {
+                                            person.is_mentee ?
+                                                <li>
+                                                    <span className='font-bold'>Mentor gender preference: </span> 
+                                                    <span>{person.mentor_gender_preference}</span>
+                                                </li>
+                                                :
+                                                <li>
+                                                    <span className='font-bold'>Gender identity: </span> 
+                                                    <span>{person.gender_identity}</span>
+                                                </li>
+                                        }
+
+                                        <li>
+                                            <span className='font-bold'>{person.is_mentee ? "Career interests: " : "Career experience: "}</span>
+                                            <span>{
+                                                person.career_interests.map((field, i) => {
+                                                    if (i == person.career_interests.length - 1) {
+                                                        return field
+                                                    }
+                                                    return field + ", "
+                                                })
+                                            }</span>
+                                        </li>
+                                        <li>
+                                            <span className='font-bold'>Interests: </span>
+                                            <span>{
+                                                person.interests.map((field, i) => {
+                                                    if (i == person.interests.length - 1) {
+                                                        return field
+                                                    }
+                                                    return field + ", "
+                                                })
+                                            }</span>
+                                        </li>
+                                        <li>
+                                            <span className='font-bold'>Education: </span>
+                                            <span>{
+                                                person.education.map((field, i) => {
+                                                    if (i == person.education.length - 1) {
+                                                        return field
+                                                    }
+                                                    return field + ", "
+                                                })
+                                            }</span>
+                                        </li>
+
+                                        {
+                                            !person.is_mentee &&
+                                            <span className='font-bold'>
+                                                Can make {person.num_pairings_can_make === null || person.num_pairings_can_make === 1 ? "1 match" : person.num_pairings_can_make + " matches"}
+                                            </span> 
+                                        }
+
+                                        <a href={person.resume} target="_blank" className='text-white underline cursor-pointer'>Resume</a>
+
+                                        
+                                        {/* <div className="text-start">
+                                            <a href={person.resume} className='text-blue-700 underline'>Resume</a>
+                                            {
+                                                // string.charAt(0).toUpperCase() + string.slice(1);
+                                                Object.keys(person).map((k, i) => {
+                                                    if (k === "profile_picture"
+                                                        || k === "first_name"
+                                                        || k === "last_name"
+                                                        || !person[k]) {
+                                                        return ""
+                                                    }
+                                                    else if (k === "resume") {
+                                                        return <a href={person[k]} className='text-blue-700 underline'>Resume</a>
+                                                    }
+                                                    else if (typeof person[k] == "object") {
+                                                        let klabel = k.charAt(0).toUpperCase() + k.slice(1)
+                                                        klabel = klabel.replace(/_/g, " ")
+                                                        return (
+                                                            <div>
+                                                                <span className='font-bold'>{klabel}: </span>
+                                                                <span>{
+                                                                    person[k].map((field, i) => {
+                                                                        if (i == person[k].length - 1) {
+                                                                            return field
+                                                                        }
+                                                                        return field + ", "
+                                                                    })
+                                                                }</span>
+                                                            </div>
+                                                        )
+                                                    }
+                                                    k = k.charAt(0).toUpperCase() + k.slice(1)
+                                                    return (
+                                                        <div>
+                                                            <span className='font-bold'>{k.replace(/_/g, " ")}: </span>
+                                                            <span>{person[k]}</span>
+                                                        </div>
+                                                    )
+                                                })
                                             }
-                                            return field + ", "
-                                        })
-                                    }</span>
+                                        </div> */}
+                                    </ul>
                                 </div>
-                                <div>
-                                    <span className='font-bold'>Interests: </span>
-                                    <span>{
-                                        person.interests.map((field, i) => {
-                                            if (i == person.interests.length - 1) {
-                                                return field
-                                            }
-                                            return field + ", "
-                                        })
-                                    }</span>
-                                </div>
-                                <div>
-                                    <span className='font-bold'>Education: </span>
-                                    <span>{
-                                        person.education.map((field, i) => {
-                                            if (i == person.education.length - 1) {
-                                                return field
-                                            }
-                                            return field + ", "
-                                        })
-                                    }</span>
-                                </div>
-
-                                {
-                                    !person.is_mentee &&
-                                    <span className='font-bold'>
-                                        Can make {person.num_pairings_can_make === null || person.num_pairings_can_make === 1 ? "1 match" : person.num_pairings_can_make + " matches"}
-                                    </span> 
-                                }
-
-                                <a href={person.resume} target="_blank" className='text-blue-700 underline'>Resume</a>
-
-                                
-                                {/* <div className="text-start">
-                                    <a href={person.resume} className='text-blue-700 underline'>Resume</a>
-                                    {
-                                        // string.charAt(0).toUpperCase() + string.slice(1);
-                                        Object.keys(person).map((k, i) => {
-                                            if (k === "profile_picture"
-                                                || k === "first_name"
-                                                || k === "last_name"
-                                                || !person[k]) {
-                                                return ""
-                                            }
-                                            else if (k === "resume") {
-                                                return <a href={person[k]} className='text-blue-700 underline'>Resume</a>
-                                            }
-                                            else if (typeof person[k] == "object") {
-                                                let klabel = k.charAt(0).toUpperCase() + k.slice(1)
-                                                klabel = klabel.replace(/_/g, " ")
-                                                return (
-                                                    <div>
-                                                        <span className='font-bold'>{klabel}: </span>
-                                                        <span>{
-                                                            person[k].map((field, i) => {
-                                                                if (i == person[k].length - 1) {
-                                                                    return field
-                                                                }
-                                                                return field + ", "
-                                                            })
-                                                        }</span>
-                                                    </div>
-                                                )
-                                            }
-                                            k = k.charAt(0).toUpperCase() + k.slice(1)
-                                            return (
-                                                <div>
-                                                    <span className='font-bold'>{k.replace(/_/g, " ")}: </span>
-                                                    <span>{person[k]}</span>
-                                                </div>
-                                            )
-                                        })
-                                    }
-                                </div> */}
-                            </div>
-                        ))
+                            )
+                        })
                     }
                 </div>
             </Modal>
