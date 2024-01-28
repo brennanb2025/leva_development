@@ -202,14 +202,19 @@
                                     <br/>
                                 </div>
 
-                                <form id="meetingDoneButton" action="{{ url_for('progress') }}" method="POST">
+                                <form id="meetingDoneButton" action="{{ url_for('progress') }}" method="POST" class="form-relative">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
                                     <input type="hidden" name="matchedUserId" value="{{matched_user.id}}"/>
 
                                     <textarea id="meetingNotes" name="meetingNotes" placeholder="Meeting notes here..."></textarea>
                                     <br/>
-                                    <button id="finishMeetingButton" class="register">Complete this meeting and save meeting notes →</button>
+                                    <span id="finishMeetingButton" class="register" onclick="openModal()">Complete this meeting and save meeting notes →</span>
+
+                                    <div class="feedback-modal" id="feedback-modal">
+                                        this is a modal. do you have a problem with that?
+                                        <button onclick="closeModal()">exit</button>
+                                    </div>
                                 </form>
 
                             {% endif %}
@@ -378,7 +383,14 @@
                 case "completed":
                     document.getElementById("header").innerHTML = "Completed Meetings"
             }
+        }
 
+        function openModal(){
+            document.getElementById('feedback-modal').style.display = "block"
+        }
+
+        function closeModal(){
+            document.getElementById('feedback-modal').style.display = "none"
         }
     </script>
 
