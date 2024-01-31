@@ -4,32 +4,36 @@ from app.input_sets.models import Event, Select, Business, User, ProgressMeeting
 
 #from app.routes import delete_intro_video, delete_profile_picture, delete_resume, delete_user_attributes, logData
 
+
 """
 b = Business(
-    name="test",
+    name="test1",
     number_employees_maximum=100,
     number_employees_currently_registered=0)
 db.session.add(b)
 db.session.commit()
 """
-#print(User.query.filter_by(business_id=6).all())
+
 for b in Business.query.all():
     print(b.id, b.name)
 
-"""
+
+#print(User.query.filter_by(business_id=6).all())
+
+
 u = AdminUser(
-    email="adminTestBusiness@test.com",
-    first_name="adminTestF",
-    last_name="adminTestL",
-    business_id=2
+    email="katefawcett2024@u.northwestern.edu",
+    first_name="Kate",
+    last_name="Fawcett",
+    business_id=9
 )
 
 db.session.add(u) #add to database
-u.set_password("adminTestBusiness") #must set pwd w/ hashing method
+u.set_password("brennanPassword1") #must set pwd w/ hashing method
 db.session.commit()
 
 print("All admin users:", AdminUser.query.all())
-"""
+
 
 """
 for b in Business.query.all():

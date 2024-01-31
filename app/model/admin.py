@@ -13,7 +13,7 @@ admin_get_events
 logData(num, msg)
 
 """
-from app.input_sets.models import User, Select, Business, Event, ProgressMeetingCompletionInformation
+from app.input_sets.models import User, Select, Business, Event, ProgressMeetingCompletionInformation, UserFeedback
 from app import app, db
 import app.model.feed as feed
 from app.utils.create_excel import create_excel_sheet
@@ -422,6 +422,16 @@ def deleteMatch(menteeId, mentorId):
 
     db.session.commit() #only commit when all deletes are done
     return True
+
+
+def submitFeedback(userid, content):
+    business = User.query.filter_by(id=userid).first().business_id
+    userFeedback = UserFeedback(user_id=userid, content=content, business_id=business)
+    db.session.add(userFeedback)
+    db.session.commit()
+
+def getFeedback(business_id):
+    return UserFeedback.query.filter_by(business_id=business).all()
     
 
 def createExcelSheet(businessId):

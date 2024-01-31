@@ -511,3 +511,26 @@ class AdminUser(db.Model, Base):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password) #<^=pwd hashing logic
+
+
+    def __repr__(self):
+        return '<AdminUser {}>'.format(
+                str(self.id) + ", email: " + str(self.email) + 
+                ", business id: " + str(self.business_id))
+
+
+
+class UserFeedback(db.Model, Base):
+
+    __tablename__ = "UserFeedback"
+    
+    id = db.Column(db.Integer, primary_key=True) #id = primary key
+    user_id = db.Column(db.Integer, index=True, unique=True)
+    content = db.Column(db.String(512))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    business_id = db.Column(db.Integer)
+
+    def __repr__(self):
+        return '<UserFeedback {}>'.format(
+                str(self.id) + ", user: " + str(self.user_id) + 
+                ", content: " + str(self.content) + ", at: " + str(self.timestamp))

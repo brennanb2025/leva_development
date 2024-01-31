@@ -490,6 +490,41 @@ def mentor():
     return render_template('mentor.html', isStudent=user.is_student, userID=session.get('userID'), find_match=True)
 """
 
+
+@app.route('/feedback', methods=['GET'])
+def admin_get_feedback():
+
+    if not adminUserLoggedIn():
+        return
+
+    business = getAdminUser().business_id
+
+    feedbackResponses = admin.getFeedback(business)
+
+    return jsonify({
+        "responses": [
+            {
+                "user": userUtils.format_user_as_json(User.query.filter_by(id=f.user_id)),
+                "content": f.content,
+                "timestamp": f.timestamp
+            }
+            for f in feedbackResponses
+        ]
+    })
+
+@app.route('/feedback', methods=['POST'])
+def submit_feedback():
+
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+
+    userId = request.args.get("userId")
+    content = request.args.get("content")
+
+    admin.submitFeedback(userId, content)
+
+
 @app.route('/progress', methods=['GET'])
 def progress():
 
@@ -1493,6 +1528,15 @@ def adminUserLoggedIn():
         return True
 
     return False
+
+def getAdminUser():
+
+    # Checks if the user is actually logged in and is an admin
+    if session.get('adminId'):
+        # valid session token -- user already logged in
+        return AdminUser.query.filter_by(id=session.get('adminId')).first()
+
+    return None
 
 
 from flask_wtf.csrf import generate_csrf
