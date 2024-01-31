@@ -159,3 +159,16 @@
     font-size: 25px;
     font-weight: 700;
 }
+
+.feedback-modal{
+    display: none;
+    position: absolute;
+    background-color: white;
+    width: 90%;
+    height: 90%;
+    box-shadow: 3px 3px 3px 3px rgba(0, 0, 0, 0.526);
+}
+
+.form-relative{
+    position: relative;
+}
