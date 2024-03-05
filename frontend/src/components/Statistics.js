@@ -1,9 +1,9 @@
 import { React, useState } from 'react'
 import { Formik, Field, Form } from 'formik'
 import axios from 'axios'
-import DatePicker from 'react-datepicker'
-import { DatePickerField } from './DatePickerField'
 import Modal from 'react-modal'
+import { confirmAlert } from "react-confirm-alert"; // Import
+import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 
 function Statistics() {
 
@@ -12,6 +12,20 @@ function Statistics() {
     const [deleteResults, setDeleteResults] = useState()
     const [modalOpen, setModalOpen] = useState(false)
     const [currentQuery, setCurrentQuery] = useState("")
+
+    const deleteUser = () => {
+        confirmAlert({
+            title: "Confirm to delete",
+            message: "Are you sure you want to delete user " + userResults[0].first_name + "?",
+            buttons: [
+                {label: "Yes", onClick: () => {
+                    console.log("Deleting user id ", userResults[0].id)
+                    setModalOpen(false)
+                }},
+                {label: "No", onClick: () => {console.log("Abort delete")}}
+            ]
+        });
+    }
 
     const handleSubmitForm = (values) => {
         axios.get("/csrf", { withCredentials: true }).then((response) => {
@@ -85,6 +99,7 @@ function Statistics() {
                         }
                     </div>
                 </div>
+                <button className='text-red-600 absolute bottom-8 right-8' onClick={() => { deleteUser() }}>Delete User</button>
             </Modal>
         )
     }
@@ -106,17 +121,17 @@ function Statistics() {
                         picked: 'lookup'
                     }}
                     onSubmit={async (values) => {
-                        let url = ""
+                        let url = "/admin-lookup-user"
 
-                        if (values.picked === "lookup") {
-                            url = "/admin-lookup-user"
-                        }
-                        else if (values.picked === "feed") {
-                            url = "/admin-lookup-user-feed"
-                        }
-                        else if (values.picked === "feed_all") {
-                            url = "admin-lookup-user-feed-all"
-                        }
+                        // if (values.picked === "lookup") {
+                        //     url = "/admin-lookup-user"
+                        // }
+                        // else if (values.picked === "feed") {
+                        //     url = "/admin-lookup-user-feed"
+                        // }
+                        // else if (values.picked === "feed_all") {
+                        //     url = "admin-lookup-user-feed-all"
+                        // }
 
                         axios.get(url, {
                             params: {
@@ -134,7 +149,7 @@ function Statistics() {
                     }}>
                     {({ values }) => (
                         <Form>
-                            <div role="group" aria-labelledby="my-radio-group" className='flex flex-col mt-4'>
+                            {/* <div role="group" aria-labelledby="my-radio-group" className='flex flex-col mt-4'>
                                 <label className='regtext'>
                                     Lookup
                                     <Field type="radio" name="picked" value="lookup" className="radio-button" />
@@ -150,9 +165,12 @@ function Statistics() {
                                     <Field type="radio" name="picked" value="feed_all" className="radio-button" />
                                     <span className="checkmark"></span>
                                 </label>
-                            </div>
+                            </div> */}
 
-                            <div className='flex flex-row mt-4'>
+                            <div className='text-md text-gray-500 mt-4'>
+                                Lookup by...
+                            </div>
+                            <div className='flex flex-row'>
                                 <div className='input-container'>
                                     <label htmlFor="firstName">First Name</label>
                                     <Field id="firstName" name="firstName" placeholder="Jane" className="stats-input" />
@@ -217,7 +235,7 @@ function Statistics() {
 
             </section>
 
-            <section id='match' className='stats-section'>
+            {/* <section id='match' className='stats-section'>
                 <div className='matchmaking-subheader'>
                     Delete Match
                 </div>
@@ -256,7 +274,7 @@ function Statistics() {
                             : ""
                     }
                 </div>
-            </section>
+            </section> */}
 
         </div>
     )
