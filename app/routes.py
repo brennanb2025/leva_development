@@ -472,6 +472,25 @@ def admin_get_business_excel():
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             as_attachment=True)
 
+@app.route('/admin-delete-user', methods=['POST'])
+def admin_delete_user():   
+    if not adminUserLoggedIn():
+        return False
+
+    userId = request.args.get("userId")
+
+    user = User.query.filter_by(id=userId).first()
+    if not user:
+        return False
+
+    session.pop('userID', None)
+
+    editProfileFuncs.deleteProfile(user)
+
+    admin.logData(userId,12,"")
+
+    return True
+
 
 #no longer in use (mentors are selected by admin)
 """
@@ -511,6 +530,8 @@ def admin_get_feedback():
             for f in feedbackResponses
         ]
     })
+    
+
 
 @app.route('/feedback', methods=['POST'])
 def submit_feedback():
@@ -523,6 +544,33 @@ def submit_feedback():
     content = request.args.get("content")
 
     admin.submitFeedback(userId, content)
+
+@app.route('/feedback-soliciation-frequency', methods=['POST'])
+def admin_set_feedback_soliciation_frequency():
+
+    if not adminUserLoggedIn():
+        return
+
+    print("request:",request.args)
+
+    business = getAdminUser().business_id
+    frequency = int(request.args.get("frequency"))
+
+    resp = admin.setFeedbackSolicitationFrequency(business, frequency)
+
+    return jsonify({"result":resp})
+
+@app.route('/feedback-soliciation-frequency', methods=['GET'])
+def admin_get_feedback_soliciation_frequency():
+
+    if not adminUserLoggedIn():
+        return
+
+    business = getAdminUser().business_id
+
+    resp = admin.getFeedbackSolicitationFrequency(business)
+
+    return jsonify({"result":resp})
 
 
 @app.route('/progress', methods=['GET'])
@@ -571,6 +619,19 @@ def currentMeetingSetDone():
     progressFuncs.set_current_meeting_info_done(user, meetingNotes)
 
     return progress()  # send to progress page
+
+
+@app.route('/should-solicit-feedback', methods=['GET'])
+def shouldSolicitFeedback():
+    if not(userLoggedIn()):
+        flash(u'You must log in.', 'loginRedirectError')
+        return redirect(url_for('sign_in'))
+    
+    user = User.query.filter_by(id=session.get('userID')).first()
+
+    return json.dumps({
+        'result': progressFuncs.shouldSolicitFeedback(user)
+    })
 
 
 # sign-in page GET.
@@ -1205,6 +1266,31 @@ def deleteProfPic():
 
     return redirect(url_for('editProfile'))
 
+
+@app.route('/edit-profile-weights', methods = ['POST'])
+def editProfileWeights():
+
+    if not userLoggedIn():
+        return redirect(url_for('sign_in'))
+
+    user = User.query.filter_by(id=session.get('userID')).first()
+
+    form = request.form
+
+    dictWeights = {}
+    dictWeights["personality"] = form.get("personality")
+    dictWeights["mentor_gender_preference"] = form.get("mentor_gender_preference")
+    dictWeights["interests"] = form.get("interests")
+    dictWeights["career_interests"] = form.get("career_interests")
+    dictWeights["education"] = form.get("education")
+
+    editProfileFuncs.setFeedWeight(user.id, dictWeights)
+
+    if resp.success:
+        return redirect(url_for('editProfile'))
+    else: 
+        flash(u'Failed to update matching priorities.', 'matchingPriorityError')
+        return redirect(url_for('editProfile'))
 
 """
 @app.route('/delete-intro-video', methods=['POST'])

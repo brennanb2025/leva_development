@@ -390,11 +390,16 @@ class Business(db.Model, Base):
     number_employees_maximum = db.Column(db.Integer)
     number_employees_currently_registered = db.Column(db.Integer)
 
+    feedback_solicitation_frequency = db.Column(db.Integer)
+
     def inc_number_employees_currently_registered(self):
         self.number_employees_currently_registered = self.number_employees_currently_registered+1
     
     def dec_number_employees_currently_registered(self):
         self.number_employees_currently_registered = self.number_employees_currently_registered-1
+
+    def set_feedback_soliciation_frequency(self, frequency):
+        self.feedback_solicitation_frequency = frequency
 
     def __repr__(self):
         return '<Business {}>'.format(str(self.id) + " " + str(self.name) + ", Employees max: " + 
@@ -528,9 +533,43 @@ class UserFeedback(db.Model, Base):
     user_id = db.Column(db.Integer, index=True, unique=True)
     content = db.Column(db.String(512))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    meeting_number = db.Column(db.Integer)
     business_id = db.Column(db.Integer)
 
     def __repr__(self):
         return '<UserFeedback {}>'.format(
                 str(self.id) + ", user: " + str(self.user_id) + 
                 ", content: " + str(self.content) + ", at: " + str(self.timestamp))
+
+
+# 1:1 User : UserFeedWeights
+class UserFeedWeights(db.Model, Base):
+
+    __tablename__ = "UserFeedWeights"
+    
+    id = db.Column(db.Integer, primary_key=True) #id = primary key
+    user_id = db.Column(db.Integer, index=True, unique=True)
+    personality = db.Column(db.Integer)
+    mentor_gender_preference = db.Column(db.Integer)
+    interests = db.Column(db.Integer)
+    career_interests = db.Column(db.Integer)
+    education = db.Column(db.Integer)
+
+    def set_personality_weight(self, weight):
+        self.personality = weight
+
+    def set_mentor_gender_preference_weight(self, weight):
+        self.mentor_gender_preference = weight
+
+    def set_interests_weight(self, weight):
+        self.interests = weight
+
+    def set_career_interests_weight(self, weight):
+        self.career_interests = weight
+
+    def set_education_weight(self, weight):
+        self.education = weight
+
+    def __repr__(self):
+        return '<UserFeedWeights {}>'.format(
+                str(self.id) + ", user: " + str(self.user_id))

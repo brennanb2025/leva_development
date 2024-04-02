@@ -8,12 +8,12 @@ import json
 
 #search other users heuristic constants
 heuristicVals = {} #how much to weight matching attributes
-heuristicVals["education"] = 10     #2 matching schools - weight at +10
-heuristicVals["career"] = 20        #career interest
+heuristicVals["education"] = 20     #2 matching schools - weight at +10
+heuristicVals["career"] = 45       #career interest
 heuristicVals["interest"] = 15      #personal interest
-heuristicVals["personality"] = 5
-heuristicVals["division_pref"] = 15
-heuristicVals["gender_pref"] = 15
+heuristicVals["personality"] = 10
+#heuristicVals["division_pref"] = 0
+heuristicVals["gender_pref"] = 10
 
 
 class match_suggestion:

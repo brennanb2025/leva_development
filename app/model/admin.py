@@ -423,15 +423,19 @@ def deleteMatch(menteeId, mentorId):
     db.session.commit() #only commit when all deletes are done
     return True
 
-
-def submitFeedback(userid, content):
-    business = User.query.filter_by(id=userid).first().business_id
-    userFeedback = UserFeedback(user_id=userid, content=content, business_id=business)
-    db.session.add(userFeedback)
-    db.session.commit()
-
 def getFeedback(business_id):
     return UserFeedback.query.filter_by(business_id=business).all()
+
+
+def setFeedbackSolicitationFrequency(business_id, frequency):
+    business = Business.query.filter_by(id=business_id).first()
+    business.set_feedback_soliciation_frequency(frequency)
+    db.session.commit()
+    return True
+
+def getFeedbackSolicitationFrequency(business_id):
+    business = Business.query.filter_by(id=business_id).first()
+    return business.feedback_solicitation_frequency
     
 
 def createExcelSheet(businessId):

@@ -9,7 +9,8 @@ currentMeetingSetDone
 from app import app, db
 
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
-        CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation
+        CareerInterestTag, Select, Business, Event, ProgressMeeting, \
+        ProgressMeetingCompletionInformation, UserFeedback
 
 
 #TODO MAKE OBJECT
@@ -98,6 +99,63 @@ def getCompletedMeetingInfo(m, isMentee, selectId, currentMeetingNum):
         
     return mInfo
 
+
+def submitFeedback(userid, content):
+    user = User.query.filter_by(id=userid).first()
+    if not User:
+        return False
+
+    business = user.business_id
+
+    # get current meeting number
+    isMentee = user.is_student
+    if isMentee: 
+        selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        lastMeetingNumber = selectEntry.current_meeting_number_mentee
+    else:
+        selectEntry = Select.query.filter_by(mentor_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        lastMeetingNumber = selectEntry.current_meeting_number_mentor
+
+    userFeedback = UserFeedback(user_id=userid, content=content, business_id=business, meeting_number=lastMeetingNumber)
+    db.session.add(userFeedback)
+    db.session.commit()
+
+
+def shouldSolicitFeedback(user):
+    # get last UserFeedback
+    lastFeedback = UserFeedback.query.filter(
+        UserFeedback.user_id == user.id
+    ).order_by(
+        UserFeedback.meeting_number.desc() # opposite order .first() = last
+    ).first()
+
+    # get business feedback solicitation frequency
+    frequency = Business.query.filter_by(id=user.business_id).first().feedback_solicitation_frequency
+
+    # get last submitted progress meeting number
+    isMentee = user.is_student
+    if isMentee: 
+        selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        lastMeetingNumber = selectEntry.current_meeting_number_mentee
+    else:
+        selectEntry = Select.query.filter_by(mentor_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        lastMeetingNumber = selectEntry.current_meeting_number_mentor
+
+    # should solicit feedback if: 
+    # last submitted progress meeting number - last feedback meeting number >= frequency
+    # eg last time user submitted feedback was after meeting 1, they just finished their 4th meeting, 
+    # frequency = every 3 meetings. It prompted them after meeting 1, they submitted,
+    # that was 3 meetings ago, prompt them again.
+
+    print("testing",lastFeedback, frequency)
+
+    if not lastFeedback: # user has never submitted feedback
+        # in this case, we should solicit feedback unless the frequency is 0.
+        if not frequency or frequency == 0:
+            return False
+        return True
+
+    return (lastMeetingNumber - lastFeedback.meeting_number) >= frequency
 
 
 def set_current_meeting_info_done(user, meetingNotes):

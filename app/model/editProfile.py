@@ -1,6 +1,7 @@
 
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
-        CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation
+        CareerInterestTag, Select, Business, Event, ProgressMeeting, \
+        ProgressMeetingCompletionInformation, UserFeedWeights
 
 from app import app, db
 
@@ -425,4 +426,41 @@ def editProfilePicture(img,id):
     
     resp.success = success
     resp.errorMsg = errorMsg
+    return resp
+
+
+class setFeedWeightResponse:
+    def __init__(self):
+        self.success = False
+        self.errorMsg = ""
+
+
+# weights are all on a 0-10 scale
+def setFeedWeight(id, dictWeights):
+
+    resp = setFeedWeightResponse()
+
+    if value < 0 or value > 10:
+        resp.errorMsg = "Please enter a value from 0-10."
+        return resp
+
+    currentWeights = UserFeedWeights.query.filter_by(user_id).first()
+    if not currentWeights:
+        currentWeights = UserFeedWeights(user_id=id)
+        
+    for k in dictWeights.keys():
+        if k == "personality":
+            currentWeights.set_personality_weight(dictWeights[k])
+        elif k == "mentor_gender_preference":
+            currentWeights.set_mentor_gender_preference_weight(dictWeights[k])
+        elif k == "interests":
+            currentWeights.set_interests_weight(dictWeights[k])
+        elif k == "career_interests":
+            currentWeights.set_career_interests_weight(dictWeights[k])
+        elif k == "education":
+            currentWeights.set_education_weight(dictWeights[k])
+
+    db.session.commit()
+
+    resp.success = True
     return resp
