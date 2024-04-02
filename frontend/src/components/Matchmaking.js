@@ -124,21 +124,15 @@ function Matchmaking() {
         let color = !disabled ? "bg-purple-200" : "bg-slate-100"
         return (
             <div
-                className={`w-full relative border p-3 mt-3 first:mt-0 flex flex-row justify-around items-center`}
+                className={`w-full relative p-3 mt-4 first:mt-0 flex flex-row justify-around items-center`}
                 style={{ zIndex: (10 - index) * 10 }}>
 
-                <div className={"absolute w-full h-full hover:cursor-pointer " + color}
-                    onClick={() => {
-                        setModalOpen(true)
-                        setModalProps({ mentee: mentee, mentor: mentor })
-                    }}></div>
-
-                <div className='z-10 basis-1/3 flex flex-row justify-between items-center'
+                <div className='z-10 basis-1/3 flex flex-row justify-between items-center peer'
                     onClick={() => {
                         setModalOpen(true)
                         setModalProps({ mentee: mentee, mentor: mentor })
                     }}>
-                    <div className="flex flex-row items-center basis-1/3">
+                    <div className="flex flex-row items-center basis-1/3 font-bold">
                         {mentee.profile_picture === null ?
                             <img className='pfp-image' src={process.env.PUBLIC_URL + "/blank-profile-picture.png"} alt=''></img>
                             : <img className='pfp-image' src={mentee.profile_picture} alt=''></img>
@@ -151,7 +145,7 @@ function Matchmaking() {
                         &
                     </div>
 
-                    <div className="flex flex-row items-center basis-1/3">
+                    <div className="flex flex-row items-center basis-1/3 font-bold">
                         {mentor &&
                             (mentor.profile_picture === null ?
                                 <img className='pfp-image' src={process.env.PUBLIC_URL + "/blank-profile-picture.png"} alt=''></img>
@@ -161,7 +155,7 @@ function Matchmaking() {
                     </div>
                 </div>
 
-                <div className='flex flex-row z-10 relative basis-1/3'>
+                <div className='flex flex-row z-10 relative basis-1/3 peer'>
                     <Dropdown
                         disabled={disabled}
                         options={options}
@@ -200,8 +194,8 @@ function Matchmaking() {
                     }
                 </div>
 
-                <div className='z-10 basis-1/6'>
-                    <button className="bg-green-400 p-2 w-full" onClick={async () => {
+                <div className='z-10 basis-1/6 peer'>
+                    <button className="bg-secondary p-2 w-full text-white" onClick={async () => {
                         if (disabled == false) {
 
                             if (mentors && (selMentor.value == -1 || candidates[selMentor.value].id == mentor.id)) {
@@ -325,6 +319,12 @@ function Matchmaking() {
                         {disabled ? "Edit" : "Confirm"}
                     </button>
                 </div>
+
+                <div className={"absolute w-full h-full hover:cursor-pointer border scale-[0.98] hover:scale-100 peer-hover:scale-100 duration-200 " + color}
+                    onClick={() => {
+                        setModalOpen(true)
+                        setModalProps({ mentee: mentee, mentor: mentor })
+                    }}></div>
             </div>
         )
     }
@@ -560,7 +560,7 @@ function Matchmaking() {
 
             <section className="flex-grow overflow-y-hidden flex flex-row">
 
-                <div className="overflow-y-scroll flex-1 z-0">
+                <div className="overflow-y-scroll flex-1 z-0 mt-4 flex flex-col items-center">
                     {
                         mentees[true] ? mentees[true].map((m, i) => (<MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={i} />)) : ""
                     }

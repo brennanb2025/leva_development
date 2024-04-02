@@ -46,7 +46,7 @@ function App() {
           </div>
           <button className="option-button" onClick={() => { setPage(ADMIN_ENUM.matchmaking) }}>Matchmaking</button>
           <button className="option-button" onClick={() => { setPage(ADMIN_ENUM.search) }}>User Search</button>
-          <button className="option-button" onClick={() => { setPage(ADMIN_ENUM.feedback) }}>Feedback</button>
+          {/* <button className="option-button" onClick={() => { setPage(ADMIN_ENUM.feedback) }}>Feedback</button> */}
         </div>
       </section>
       <div className="flex-grow">

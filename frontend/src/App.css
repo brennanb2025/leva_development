@@ -55,7 +55,7 @@
 }
 
 .entry-label {
-  @apply text-center text-gray-500
+  @apply text-center text-gray-500 text-lg
 }
 
 .pfp-image {
