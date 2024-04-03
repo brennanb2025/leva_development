@@ -475,13 +475,17 @@ def admin_get_business_excel():
 @app.route('/admin-delete-user', methods=['POST'])
 def admin_delete_user():   
     if not adminUserLoggedIn():
-        return False
+        return jsonify({
+            "result": False
+        })
 
     userId = request.args.get("userId")
-
+    print(userId)
     user = User.query.filter_by(id=userId).first()
     if not user:
-        return False
+        return jsonify({
+            "result": False
+        })
 
     session.pop('userID', None)
 
@@ -489,7 +493,9 @@ def admin_delete_user():
 
     admin.logData(userId,12,"")
 
-    return True
+    return jsonify({
+        "result" : True
+    })
 
 
 #no longer in use (mentors are selected by admin)

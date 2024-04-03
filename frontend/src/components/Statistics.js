@@ -8,39 +8,43 @@ import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 function Statistics() {
 
     const [userResults, setUserResults] = useState([])
-    const [eventResults, setEventResults] = useState([])
-    const [deleteResults, setDeleteResults] = useState()
+    const [selected, setSelected] = useState(0)
     const [modalOpen, setModalOpen] = useState(false)
     const [currentQuery, setCurrentQuery] = useState("")
 
     const deleteUser = () => {
         confirmAlert({
             title: "Confirm to delete",
-            message: "Are you sure you want to delete user " + userResults[0].first_name + "?",
+            message: "Are you sure you want to delete user " + userResults[selected].first_name + "?",
             buttons: [
                 {label: "Yes", onClick: () => {
-                    console.log("Deleting user id ", userResults[0].id)
                     setModalOpen(false)
+                    const filtered = userResults.filter((user) => {
+                        return user.id != userResults[selected].id
+                    })
+                    setUserResults(filtered)
+                    handleDelete(userResults[selected].id)
+
                 }},
                 {label: "No", onClick: () => {console.log("Abort delete")}}
             ]
         });
     }
 
-    const handleSubmitForm = (values) => {
+    const handleDelete = (userid) => {
+        console.log("deleting:", userid)
         axios.get("/csrf", { withCredentials: true }).then((response) => {
-            axios.post("/admin-delete-match", {
-                mentorId: values.mentorId,
-                menteeId: values.menteeId
-            }, {
+            axios.post("/admin-delete-user", {}, {
                 withCredentials: true,
                 headers: {
                     'X-CSRFToken': response.headers['x-csrftoken'],
                     'Content-Type': 'multipart/form-data'
+                },
+                params: {
+                    userId: userid,
                 }
             }).then((results) => {
                 console.log(results)
-                setDeleteResults(results)
             }).catch(err => {
                 console.log(err)
             })
@@ -48,7 +52,7 @@ function Statistics() {
     }
 
     function UserModal() {
-        let person = userResults[0]
+        let person = userResults[selected]
         return (
             <Modal
                 isOpen={modalOpen}
@@ -168,7 +172,7 @@ function Statistics() {
                             </div> */}
 
                             <div className='text-md text-gray-500 mt-4'>
-                                Lookup by...
+                                Lookup by any of the following...
                             </div>
                             <div className='flex flex-row'>
                                 <div className='input-container'>
@@ -200,33 +204,31 @@ function Statistics() {
 
                             <button type="submit" className='submit-button'>Search</button>
 
-                            {userResults.length > 0 && currentQuery === "lookup" ? (
-                                <div className='bg-slate-500 rounded-md p-4 text-white mt-4 w-fit flex flex-row items-center hover:cursor-pointer'
-                                    onClick={() => { setModalOpen(true) }}>
-                                    <img src={userResults[0].profile_picture} className='h-16 w-auto rounded-full' />
-                                    <div className='ml-4'>
-                                        <div>Name: {userResults[0].first_name} {userResults[0].last_name}</div>
-                                        <div>
-                                            Email: {userResults[0].email}
+                            {
+                                userResults.map((user, index) => {
+                                    return (
+                                        <div className='bg-slate-500 rounded-md p-4 text-white mt-4 w-fit flex flex-row items-center hover:cursor-pointer'
+                                        onClick={() => { 
+                                            setModalOpen(true) 
+                                            setSelected(index)
+                                        }}>
+                                            <img src={userResults[0].profile_picture} className='h-16 w-auto rounded-full' />
+                                            <div className='ml-4'>
+                                                <div>Name: {user.first_name} {user.last_name}</div>
+                                                <div>
+                                                    Email: {user.email}
+                                                </div>
+                                                <div>
+                                                    Occupation: {user.current_occupation}
+                                                </div>
+                                                <div>
+                                                    Division: {user.division}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            Occupation: {userResults[0].current_occupation}
-                                        </div>
-                                        <div>
-                                            Division: {userResults[0].division}
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : ""}
-
-                            {userResults.length > 0 && currentQuery != "lookup" ? (
-                                <div className='bg-slate-500 rounded-md p-4 text-white mt-4 w-fit flex flex-row items-center hover:cursor-pointer'
-                                >
-                                    {
-                                        JSON.stringify(userResults)
-                                    }
-                                </div>
-                            ) : ""}
+                                    )
+                                })
+                            }
 
                             {userResults.length > 0 ? <UserModal /> : ""}
                         </Form>
