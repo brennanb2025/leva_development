@@ -10,6 +10,7 @@ function Statistics() {
     const [userResults, setUserResults] = useState([])
     const [selected, setSelected] = useState(0)
     const [modalOpen, setModalOpen] = useState(false)
+    const [found, setFound] = useState(true)
     const [currentQuery, setCurrentQuery] = useState("")
 
     const deleteUser = () => {
@@ -148,6 +149,12 @@ function Statistics() {
                             console.log("results here");
                             console.log(results);
                             setUserResults(results.data)
+                            if(results.data.length == 0){
+                                setFound(false)
+                            }
+                            else{
+                                setFound(true)
+                            }
                         })
                         setCurrentQuery(values.picked)
                     }}>
@@ -229,7 +236,9 @@ function Statistics() {
                                     )
                                 })
                             }
-
+                            <div>
+                                {found ? "" : "No user found..."}
+                            </div>
                             {userResults.length > 0 ? <UserModal /> : ""}
                         </Form>
                     )}
