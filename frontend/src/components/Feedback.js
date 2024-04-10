@@ -51,15 +51,8 @@ function Feedback() {
   }
 
   return (
-    <div>
-      {feedback.map((value, index) => (
-        <div>
-          {JSON.stringify(value)}
-        </div>
-      ))}
-
-      Current frequency: {currentFrequency ? currentFrequency : "Not yet set"} <br/><br/>
-      Change frequency: 
+    <div className='px-8'>
+      <span className="font-bold">Current frequency</span>: {currentFrequency ? currentFrequency : "Not yet set"} <br/><br/>
       <Formik
         initialValues={{
             frequency: '',
@@ -68,14 +61,31 @@ function Feedback() {
         <Form>
             <div className='flex flex-row'>
                 <div className='input-container'>
-                    <label htmlFor="frequency">Frequency</label>
+                    <label htmlFor="frequency">Change frequency: </label>
                     <Field id="frequency" name="frequency" placeholder={currentFrequency} className="stats-input" />
                 </div>
             </div>
 
             <button type="submit" className='submit-button'>Set frequency</button>
         </Form>
-    </Formik>
+      </Formik>
+
+      <div className='flex flex-row flex-wrap'>
+        {feedback.map((value, index) => (
+          <div className='py-2 pr-2 last:pr-0 basis-1/5 text-white mt-4'>
+            <div className='bg-slate-400 rounded-md w-full h-full p-4'>
+              <div>
+                Feedback: "
+                {value.content}
+                "
+              </div>
+              <div>
+                Submitted at time: {value.timestamp}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
