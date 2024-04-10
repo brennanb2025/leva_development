@@ -246,16 +246,14 @@
 
                             <div class="single">
                                 <div class="label">
-                                    Number of matches able to make:
-                                </div>
-        
-                                <div class="answer">
+                                    Able to make 
                                     {% if user.num_pairings_can_make is none %}
-                                        1
+                                        1 match
                                     {% else %}
-                                        {{ user.num_pairings_can_make }}
+                                        {{ user.num_pairings_can_make }} matches
                                     {% endif %}
                                 </div>
+                                    
                             </div>
 
                             {#

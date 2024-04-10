@@ -297,7 +297,8 @@ def admin_lookup_user_feed_all():
         return
 
     userId = request.args.get("userid")
-    allMatches = admin.get_all_matches(userId)
+    #allMatches = admin.get_all_matches(userId)
+    allMatches = admin.get_all_matches_with_weights(userId) # use feed weights
     if allMatches is None:
         return jsonify("No matches found")
     jsonRtn = {

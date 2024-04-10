@@ -576,19 +576,7 @@
                                         <!--Gender identity-->
                                         <label>What is your gender identity?</label>
                                         <div class="input-container">
-                                            {% if mentorGenderIdentity is not defined or mentorGenderIdentity == none or mentorGenderIdentity == "male" %}
-                                                <label class="regtext">Male
-                                                    <input type="radio" id="choiceMale" name="radio_gender_identity" value="male" checked="checked">
-                                                    <span class="checkmark"></span>
-                                                </label>    
-                                            {% else %}
-                                                <label class="regtext">Male
-                                                    <input type="radio" id="choiceMale" name="radio_gender_identity" value="male">
-                                                    <span class="checkmark"></span>
-                                                </label>
-                                            {% endif %}
-                                
-                                            {% if mentorGenderIdentity is defined and mentorGenderIdentity == "female" %}
+                                            {% if mentorGenderIdentity is not defined or mentorGenderIdentity == none or mentorGenderIdentity == "female" %}
                                                 <label class="regtext">Female
                                                     <input type="radio" id="choiceFemale" name="radio_gender_identity" value="female" checked="checked">
                                                     <span class="checkmark"></span>
@@ -596,6 +584,18 @@
                                             {% else %}
                                                 <label class="regtext">Female
                                                     <input type="radio" id="choiceFemale" name="radio_gender_identity" value="female">
+                                                    <span class="checkmark"></span>
+                                                </label>
+                                            {% endif %}
+
+                                            {% if mentorGenderIdentity is defined and mentorGenderIdentity == "male" %}
+                                                <label class="regtext">Male
+                                                    <input type="radio" id="choiceMale" name="radio_gender_identity" value="male" checked="checked">
+                                                    <span class="checkmark"></span>
+                                                </label>    
+                                            {% else %}
+                                                <label class="regtext">Male
+                                                    <input type="radio" id="choiceMale" name="radio_gender_identity" value="male">
                                                     <span class="checkmark"></span>
                                                 </label>
                                             {% endif %}
@@ -645,19 +645,7 @@
                                     <div id="mentorPreference">
                                     <label>Do you prefer a male or a female mentor?</label>
                                     <div class="input-container">
-                                        {% if menteeGenderPreference is not defined or menteeGenderPreference == none or menteeGenderPreference == "male" %}
-                                            <label class="regtext">Male
-                                                <input type="radio" id="choiceMale" name="radio_gender_preference" value="male" checked="checked">
-                                                <span class="checkmark"></span>
-                                            </label>    
-                                        {% else %}
-                                            <label class="regtext">Male
-                                                <input type="radio" id="choiceMale" name="radio_gender_preference" value="male">
-                                                <span class="checkmark"></span>
-                                            </label>
-                                        {% endif %}
-                                        
-                                        {% if menteeGenderPreference is defined and menteeGenderPreference == "female" %}
+                                        {% if menteeGenderPreference is not defined or menteeGenderPreference == none or menteeGenderPreference == "female" %}
                                             <label class="regtext">Female
                                                 <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female" checked="checked">
                                                 <span class="checkmark"></span>
@@ -667,6 +655,18 @@
                                                 <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female">
                                                 <span class="checkmark"></span>
                                             </label> 
+                                        {% endif %}
+
+                                        {% if menteeGenderPreference is defined and menteeGenderPreference == "male" %}
+                                            <label class="regtext">Male
+                                                <input type="radio" id="choiceMale" name="radio_gender_preference" value="male" checked="checked">
+                                                <span class="checkmark"></span>
+                                            </label>    
+                                        {% else %}
+                                            <label class="regtext">Male
+                                                <input type="radio" id="choiceMale" name="radio_gender_preference" value="male">
+                                                <span class="checkmark"></span>
+                                            </label>
                                         {% endif %}
 
                                         {% if menteeGenderPreference is defined and menteeGenderPreference == "noPreference" %}

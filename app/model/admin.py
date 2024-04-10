@@ -23,13 +23,13 @@ from app.utils.create_excel import create_excel_sheet
 #    return str(app.config['ADMIN_PASSWORD']) == password and str(app.config['ADMIN_USERNAME']) == username
 
 def admin_lookup_user(userId, firstName, lastName, email):
-    if userId != None:  
+    if userId:  
         return User.query.filter_by(id=userId).all()
-    if firstName != None and lastName != None:
-        return User.query.filter(
-                first_name = firstName,
-                last_name = lastName).all()
-    if email != None:
+    if firstName and firstName != "":
+        return User.query.filter_by(first_name = firstName).all()
+    if lastName and lastName != "":
+        return User.query.filter_by(last_name = lastName).all()
+    if email and email != "":
         return User.query.filter_by(email=email).all()
 
 def admin_lookup_users_in_business(businessId):
@@ -115,6 +115,21 @@ def get_all_matches(userId):
 
     if user.is_student:
         return feed.get_all_matches(userId)
+    return None
+
+
+#gets all matches (even if user is already matched, including already matched people.)
+# use feed weights
+def get_all_matches_with_weights(userId):
+    #returns array of objects: match info (userid, matching stuff, score, etc)
+
+    user = User.query.filter_by(id=userId).first()
+
+    if user is None:
+        return None
+
+    if user.is_student:
+        return feed.get_all_matches_feedWeights(userId)
     return None
 
 

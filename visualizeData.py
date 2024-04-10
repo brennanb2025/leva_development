@@ -2,37 +2,57 @@ from requests import delete
 from app import db
 from app.input_sets.models import Event, Select, Business, User, ProgressMeetingCompletionInformation, AdminUser
 
+import app.model.admin as admin
+import app.model.editProfile as editProfileFuncs
+
 #from app.routes import delete_intro_video, delete_profile_picture, delete_resume, delete_user_attributes, logData
 
 
+
+# b = Business(
+#     name="brennanTest",
+#     number_employees_maximum=100,
+#     number_employees_currently_registered=0)
+# db.session.add(b)
+# db.session.commit()
+
+# for b in Business.query.all():
+#     print(b.id, b.name)
+
+
+
+dictWeights13 = {}
+dictWeights13['personality'] = 1 # rates personality None
+dictWeights13['mentor_gender_preference'] = 0 # rates mentor gender preference None
+dictWeights13['interests'] = 2 # rates interests important
+dictWeights13['career_interests'] = 2 # rates career interests important
+dictWeights13['education'] = 0 # rates education not important
+editProfileFuncs.setFeedWeight(13, dictWeights13)
+
+
+dictWeights14 = {}
+dictWeights14['personality'] = 1 # rates personality not important (alike, 1, 100%)
+dictWeights14['mentor_gender_preference'] = 0 # mentor gender preference None (is mentor) (alike, 0,0 low-low, 50%)
+dictWeights14['interests'] = 2 # rates interests important (alike, 2-2, high-high: 100%)
+dictWeights14['career_interests'] = 1 # rates career interests none (diff, 2-1, high-none: 100%)
+dictWeights14['education'] = 2 # rates education important (diff, 0-2, high-low: 75%)
+editProfileFuncs.setFeedWeight(14, dictWeights14)
+
 """
-b = Business(
-    name="test1",
-    number_employees_maximum=100,
-    number_employees_currently_registered=0)
-db.session.add(b)
-db.session.commit()
-"""
-
-for b in Business.query.all():
-    print(b.id, b.name)
-
-
-#print(User.query.filter_by(business_id=6).all())
-
-
 u = AdminUser(
-    email="katefawcett2024@u.northwestern.edu",
-    first_name="Kate",
-    last_name="Fawcett",
-    business_id=9
+    email="brennanbenson2025@u.northwestern.edu",
+    first_name="Brennan",
+    last_name="Benson",
+    business_id=3
 )
 
 db.session.add(u) #add to database
-u.set_password("brennanPassword1") #must set pwd w/ hashing method
+u.set_password("brennanbenson2025@u.northwestern.edu") #must set pwd w/ hashing method
 db.session.commit()
+"""
 
-print("All admin users:", AdminUser.query.all())
+#print("All admin users:", AdminUser.query.all())
+
 
 
 """

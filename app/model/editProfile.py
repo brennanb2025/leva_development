@@ -440,11 +440,7 @@ def setFeedWeight(id, dictWeights):
 
     resp = setFeedWeightResponse()
 
-    if value < 0 or value > 10:
-        resp.errorMsg = "Please enter a value from 0-10."
-        return resp
-
-    currentWeights = UserFeedWeights.query.filter_by(user_id).first()
+    currentWeights = UserFeedWeights.query.filter_by(user_id=id).first()
     if not currentWeights:
         currentWeights = UserFeedWeights(user_id=id)
         
