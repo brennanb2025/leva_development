@@ -13,7 +13,7 @@ function Matchmaking() {
     const [initialMatches, setInitialMatches] = useState({}) // All initial matches (when the screen loads), key: menteeid, value: mentorid
     const [matches, setMatches] = useState({}) // All "confirmed" matches, key: menteeid, value: mentorid
     const [allUsers, setAllUsers] = useState([]) // All users
-    const [mentees, setMentees] = useState([]) // All mentees
+    const [mentees, setMentees] = useState({true: [], false: []}) // All mentees
     const [feed, setFeed] = useState({})
     const [numMatches, setNumMatches] = useState({}) // Mapping from mentor to number of mentees pointing to mentor
 
