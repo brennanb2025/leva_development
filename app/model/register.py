@@ -1,5 +1,6 @@
 from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, CareerInterest, \
-        CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation
+        CareerInterestTag, Select, Business, Event, ProgressMeeting, ProgressMeetingCompletionInformation, \
+        UserFeedWeights
 
 from app import app, db
 
@@ -97,6 +98,7 @@ class register_post_response:
         self.imageError_bad_file_type_message = ""
 
 
+#TODO: add data from sliders
 def registerPost(form, resume, img):
 
     resp = register_post_response()
@@ -132,6 +134,12 @@ def registerPost(form, resume, img):
         success = False
 
     if isMentee == None:
+        success = False
+
+    # if the user submitted the request through the webpage, these sliders should have default values.
+    if (not form.get("personalitySlider") or not form.get("interestSlider")
+            or not form.get("careerSlider") or not form.get("educationSlider")
+            or not form.get("genderSlider")):
         success = False
 
     if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #if gender preference should be taken into account, check it.
@@ -420,12 +428,28 @@ def registerPost(form, resume, img):
             user.set_resume(output, filename) #set the user resume
             db.session.commit()
 
+
+        addFeedWeight(user.id, personality=form.get("personalitySlider"), 
+                mentor_gender_preference=form.get("genderSlider"),
+                interests=form.get("interestSlider"), career_interests=form.get("careerSlider"),
+                education=form.get("educationSlider"))
+
         db.session.commit()
 
 
     return success, errors, resp
     
 
+
+# weights are all on a 0-10 scale
+def addFeedWeight(id, personality, mentor_gender_preference, interests, career_interests, education):
+    newWeights = UserFeedWeights(user_id=id, personality=personality, 
+            mentor_gender_preference=mentor_gender_preference,
+            interests=interests, career_interests=career_interests, education=education)
+
+    db.session.add(newWeights)
+    db.session.commit()
+    
 
     #checks the basic registration information.
 def checkBasicInfo(form, resp):

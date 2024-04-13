@@ -1179,38 +1179,38 @@ def editProfilePost():
 
         db.session.commit()
 
-        dataChangedDict = {}
-        dataChangedDict["fn"] = changedFnSuccess
-        dataChangedDict["ln"] = changedLnSuccess
-        """dataChangedDict["city"] = changedCitySuccess
-        dataChangedDict["occupation"] = changedOccupationSuccess"""
-        dataChangedDict["bio"] = changedBioSuccess
-        dataChangedDict["mentorGender"] = changedMentorGenderSuccess
-        dataChangedDict["genderIdentity"] = changedGenderIdentitySuccess
-        dataChangedDict["attributes"] = changedInputsSuccess
-        dataChangedDict["personality"] = changedPersonalitySuccess
-        """dataChangedDict["division"] = changedDivisionSuccess
-        dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess"""
-        dataChangedDict["contact"] = changedContactMethodSuccess
+        # dataChangedDict = {}
+        # dataChangedDict["fn"] = changedFnSuccess
+        # dataChangedDict["ln"] = changedLnSuccess
+        # """dataChangedDict["city"] = changedCitySuccess
+        # dataChangedDict["occupation"] = changedOccupationSuccess"""
+        # dataChangedDict["bio"] = changedBioSuccess
+        # dataChangedDict["mentorGender"] = changedMentorGenderSuccess
+        # dataChangedDict["genderIdentity"] = changedGenderIdentitySuccess
+        # dataChangedDict["attributes"] = changedInputsSuccess
+        # dataChangedDict["personality"] = changedPersonalitySuccess
+        # """dataChangedDict["division"] = changedDivisionSuccess
+        # dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess"""
+        # dataChangedDict["contact"] = changedContactMethodSuccess
         
-        admin.logData(session.get('userID'),7,json.dumps(dataChangedDict)) #log data edit profile success
+        # admin.logData(session.get('userID'),7,json.dumps(dataChangedDict)) #log data edit profile success
 
         return redirect(url_for('view', id=session.get('userID')))
     else:
-        dataChangedDict = {}
-        dataChangedDict["fn"] = changedFnSuccess
-        dataChangedDict["ln"] = changedLnSuccess
-        """dataChangedDict["city"] = changedCitySuccess
-        dataChangedDict["occupation"] = changedOccupationSuccess"""
-        dataChangedDict["bio"] = changedBioSuccess
-        dataChangedDict["mentorGender"] = changedMentorGenderSuccess
-        dataChangedDict["genderIdentity"] = changedGenderIdentitySuccess
-        dataChangedDict["attributes"] = changedInputsSuccess
-        dataChangedDict["personality"] = changedPersonalitySuccess
-        """dataChangedDict["division"] = changedDivisionSuccess
-        dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess"""
-        dataChangedDict["contact"] = changedContactMethodSuccess
-        admin.logData(session.get('userID'),6,json.dumps(dataChangedDict)) #log data edit profile error
+        # dataChangedDict = {}
+        # dataChangedDict["fn"] = changedFnSuccess
+        # dataChangedDict["ln"] = changedLnSuccess
+        # """dataChangedDict["city"] = changedCitySuccess
+        # dataChangedDict["occupation"] = changedOccupationSuccess"""
+        # dataChangedDict["bio"] = changedBioSuccess
+        # dataChangedDict["mentorGender"] = changedMentorGenderSuccess
+        # dataChangedDict["genderIdentity"] = changedGenderIdentitySuccess
+        # dataChangedDict["attributes"] = changedInputsSuccess
+        # dataChangedDict["personality"] = changedPersonalitySuccess
+        # """dataChangedDict["division"] = changedDivisionSuccess
+        # dataChangedDict["divisionPref"] = changedDivisionPreferenceSuccess"""
+        # dataChangedDict["contact"] = changedContactMethodSuccess
+        # admin.logData(session.get('userID'),6,json.dumps(dataChangedDict)) #log data edit profile error
         return redirect(url_for('editProfile'))
 
 

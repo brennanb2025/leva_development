@@ -572,4 +572,9 @@ class UserFeedWeights(db.Model, Base):
 
     def __repr__(self):
         return '<UserFeedWeights {}>'.format(
-                str(self.id) + ", user: " + str(self.user_id))
+                str(self.id) + ", user: " + str(self.user_id) + 
+                "\npersonality: " + str(self.personality) + 
+                ", mentor_gender_preference: " + str(self.mentor_gender_preference) +
+                ", interests: " + str(self.interests) +
+                ", career_interests: " + str(self.career_interests) +
+                ", education: " + str(self.education))

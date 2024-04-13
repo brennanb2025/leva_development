@@ -327,6 +327,18 @@
                                         {% endif %}
                                     {% endwith %}
                                 </div>
+                                <div class="slider-caption">
+                                    How important is it that your personalities align?
+                                </div>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="2" value="1" class="slider" name="personalitySlider" id="personalitySlider">
+                                    <div class="slider-labels">
+                                        <span>Low</span>
+                                        <span>Medium</span>
+                                        <span>High</span>
+                                    </div>
+                                </div>
+                                
 
                                 <!--Short bio about the user-->
                                 <div class="bio">
@@ -384,6 +396,18 @@
                                         {% endif %}
                                     {% endwith %}
                                     <table class="center" class="createTable" id="tagTable"></table>
+
+                                    <div class="slider-caption">
+                                        How important is it that your interests align?
+                                    </div>
+                                    <div class="slider-container">
+                                        <input type="range" min="0" max="2" value="1" class="slider" name="interestSlider" id="interestSlider">
+                                        <div class="slider-labels">
+                                            <span>Low</span>
+                                            <span>Medium</span>
+                                            <span>High</span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!--User expertise-->
@@ -426,6 +450,18 @@
                                         {% endif %}
                                     {% endwith %}
                                     <table class="center" class="createTable" id="careerInterestTable"></table>
+
+                                    <div class="slider-caption">
+                                        How important is it that your career interests/expertise align?
+                                    </div>
+                                    <div class="slider-container">
+                                        <input type="range" min="0" max="2" value="1" class="slider" name="careerSlider" id="careerSlider">
+                                        <div class="slider-labels">
+                                            <span>Low</span>
+                                            <span>Medium</span>
+                                            <span>High</span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!--User education level-->
@@ -463,6 +499,18 @@
                                         {% endif %}
                                     {% endwith %}
                                     <table class="center" class="createTable" id="educationTable"></table>
+
+                                    <div class="slider-caption">
+                                        How important is it that your education history aligns?
+                                    </div>
+                                    <div class="slider-container">
+                                        <input type="range" min="0" max="2" value="1" class="slider" name="educationSlider" id="educationSlider">
+                                        <div class="slider-labels">
+                                            <span>Low</span>
+                                            <span>Medium</span>
+                                            <span>High</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                     
@@ -643,56 +691,67 @@
                                 <div class="Mentor">
                                     <!--Mentor gender preferences-->
                                     <div id="mentorPreference">
-                                    <label>Do you prefer a male or a female mentor?</label>
-                                    <div class="input-container">
-                                        {% if menteeGenderPreference is not defined or menteeGenderPreference == none or menteeGenderPreference == "female" %}
-                                            <label class="regtext">Female
-                                                <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female" checked="checked">
-                                                <span class="checkmark"></span>
-                                            </label>   
-                                        {% else %}
-                                            <label class="regtext">Female
-                                                <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female">
-                                                <span class="checkmark"></span>
-                                            </label> 
-                                        {% endif %}
-
-                                        {% if menteeGenderPreference is defined and menteeGenderPreference == "male" %}
-                                            <label class="regtext">Male
-                                                <input type="radio" id="choiceMale" name="radio_gender_preference" value="male" checked="checked">
-                                                <span class="checkmark"></span>
-                                            </label>    
-                                        {% else %}
-                                            <label class="regtext">Male
-                                                <input type="radio" id="choiceMale" name="radio_gender_preference" value="male">
-                                                <span class="checkmark"></span>
-                                            </label>
-                                        {% endif %}
-
-                                        {% if menteeGenderPreference is defined and menteeGenderPreference == "noPreference" %}
-                                            <label class="regtext">No preferece
-                                                <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference" checked="checked">
-                                                <span class="checkmark"></span>
-                                            </label> 
-                                        {% else %}
-                                        <label class="regtext">No preferece
-                                            <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference">
-                                            <span class="checkmark"></span>
-                                        </label> 
-                                        {% endif %}
-
-                                        {% with messages = get_flashed_messages(with_categories=true) %}
-                                            {% if messages %}
-                                                <ul class=flashes>
-                                                {% for category, message in messages %}
-                                                    {% if category == 'mentor_preference_error' %}
-                                                    <span style="color: red;">[{{ message }}]</span>
-                                                    {% endif %}
-                                                {% endfor %}
-                                                </ul>
+                                        <label>Do you prefer a male or a female mentor?</label>
+                                        <div class="input-container">
+                                            {% if menteeGenderPreference is not defined or menteeGenderPreference == none or menteeGenderPreference == "female" %}
+                                                <label class="regtext">Female
+                                                    <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female" checked="checked">
+                                                    <span class="checkmark"></span>
+                                                </label>   
+                                            {% else %}
+                                                <label class="regtext">Female
+                                                    <input type="radio" id="choiceFemale" name="radio_gender_preference" value="female">
+                                                    <span class="checkmark"></span>
+                                                </label> 
                                             {% endif %}
-                                        {% endwith %}
-                                    </div>
+
+                                            {% if menteeGenderPreference is defined and menteeGenderPreference == "male" %}
+                                                <label class="regtext">Male
+                                                    <input type="radio" id="choiceMale" name="radio_gender_preference" value="male" checked="checked">
+                                                    <span class="checkmark"></span>
+                                                </label>    
+                                            {% else %}
+                                                <label class="regtext">Male
+                                                    <input type="radio" id="choiceMale" name="radio_gender_preference" value="male">
+                                                    <span class="checkmark"></span>
+                                                </label>
+                                            {% endif %}
+
+                                            {% if menteeGenderPreference is defined and menteeGenderPreference == "noPreference" %}
+                                                <label class="regtext">No preferece
+                                                    <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference" checked="checked">
+                                                    <span class="checkmark"></span>
+                                                </label> 
+                                            {% else %}
+                                            <label class="regtext">No preferece
+                                                <input type="radio" id="choiceNoPref" name="radio_gender_preference" value="noPreference">
+                                                <span class="checkmark"></span>
+                                            </label> 
+                                            {% endif %}
+
+                                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                                {% if messages %}
+                                                    <ul class=flashes>
+                                                    {% for category, message in messages %}
+                                                        {% if category == 'mentor_preference_error' %}
+                                                        <span style="color: red;">[{{ message }}]</span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                        <div class="slider-caption">
+                                            How important is your mentor's gender? (Skip if you have no preference.)
+                                        </div>
+                                        <div class="slider-container">
+                                            <input type="range" min="0" max="2" value="1" class="slider" name="genderSlider" id="genderSlider">
+                                            <div class="slider-labels">
+                                                <span>Low</span>
+                                                <span>Medium</span>
+                                                <span>High</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 

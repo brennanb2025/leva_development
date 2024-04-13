@@ -443,6 +443,9 @@ def setFeedWeight(id, dictWeights):
     currentWeights = UserFeedWeights.query.filter_by(user_id=id).first()
     if not currentWeights:
         currentWeights = UserFeedWeights(user_id=id)
+        db.session.add(currentWeights)
+        db.session.commit()
+
         
     for k in dictWeights.keys():
         if k == "personality":

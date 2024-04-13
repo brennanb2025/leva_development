@@ -1,6 +1,6 @@
 from requests import delete
 from app import db
-from app.input_sets.models import Event, Select, Business, User, ProgressMeetingCompletionInformation, AdminUser
+from app.input_sets.models import Event, Select, Business, User, ProgressMeetingCompletionInformation, AdminUser, UserFeedWeights
 
 import app.model.admin as admin
 import app.model.editProfile as editProfileFuncs
@@ -20,23 +20,26 @@ import app.model.editProfile as editProfileFuncs
 #     print(b.id, b.name)
 
 
-
-dictWeights13 = {}
-dictWeights13['personality'] = 1 # rates personality None
-dictWeights13['mentor_gender_preference'] = 0 # rates mentor gender preference None
-dictWeights13['interests'] = 2 # rates interests important
-dictWeights13['career_interests'] = 2 # rates career interests important
-dictWeights13['education'] = 0 # rates education not important
-editProfileFuncs.setFeedWeight(13, dictWeights13)
+print(User.query.filter_by(email="e@e.com").first())
+print(UserFeedWeights.query.all())
 
 
-dictWeights14 = {}
-dictWeights14['personality'] = 1 # rates personality not important (alike, 1, 100%)
-dictWeights14['mentor_gender_preference'] = 0 # mentor gender preference None (is mentor) (alike, 0,0 low-low, 50%)
-dictWeights14['interests'] = 2 # rates interests important (alike, 2-2, high-high: 100%)
-dictWeights14['career_interests'] = 1 # rates career interests none (diff, 2-1, high-none: 100%)
-dictWeights14['education'] = 2 # rates education important (diff, 0-2, high-low: 75%)
-editProfileFuncs.setFeedWeight(14, dictWeights14)
+# dictWeights13 = {}
+# dictWeights13['personality'] = 1 # rates personality None
+# dictWeights13['mentor_gender_preference'] = 0 # rates mentor gender preference None
+# dictWeights13['interests'] = 2 # rates interests important
+# dictWeights13['career_interests'] = 2 # rates career interests important
+# dictWeights13['education'] = 0 # rates education not important
+# editProfileFuncs.setFeedWeight(13, dictWeights13)
+
+
+# dictWeights14 = {}
+# dictWeights14['personality'] = 1 # rates personality None (alike, 1, 100%)
+# dictWeights14['mentor_gender_preference'] = 0 # mentor gender preference None (is mentor) (alike, 0,0 low-low, 50%)
+# dictWeights14['interests'] = 2 # rates interests important (alike, 2-2, high-high: 100%)
+# dictWeights14['career_interests'] = 1 # rates career interests none (diff, 2-1, high-none: 100%)
+# dictWeights14['education'] = 2 # rates education important (diff, 0-2, high-low: 75%)
+# editProfileFuncs.setFeedWeight(14, dictWeights14)
 
 """
 u = AdminUser(

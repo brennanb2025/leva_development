@@ -313,3 +313,72 @@ input{
    }
 
 }
+
+
+
+.slider-container {
+    width: 300px;
+    margin: 20px;
+}
+  
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 15px;
+    border-radius: 5px;   
+    background: rgb(33, 48, 74);
+    outline: none; 
+    -webkit-transition: .2s; 
+    transition: opacity .2s;
+}
+  
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%; 
+    background: rgb(191, 126, 255);
+    cursor: pointer; 
+}
+  
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: rgb(191, 126, 255);
+    cursor: pointer;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+  
+.slider-labels span {
+    font-size: 12px;
+}
+
+.slider-caption {
+    margin-top: 20px;
+}
+
+.interests {
+    margin-top: 50px;
+    margin-bottom: 100px;
+}
+.expertise {
+    margin-bottom: 100px;
+}
+.education {
+    margin-bottom: 100px;
+}
+
+.personal2 {
+    margin-top: 50px;
+    margin-bottom: 100px;
+}
+.bio {
+    margin-top: 50px;
+}
