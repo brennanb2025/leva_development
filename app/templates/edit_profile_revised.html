@@ -351,6 +351,18 @@
                                                     {% endif %}
                                                 {% endwith %}
                                             </div>
+
+                                            <div class="slider-caption">
+                                                How important is it that your career interests/expertise align?
+                                            </div>
+                                            <div class="slider-container">
+                                                <input type="range" min="0" max="2" value="{{weights.career_interests}}" class="slider" name="careerSlider" id="careerSlider">
+                                                <div class="slider-labels">
+                                                    <span>Low</span>
+                                                    <span>Medium</span>
+                                                    <span>High</span>
+                                                </div>
+                                            </div>
                                         </div>
                 
                                         <div class="single">
@@ -381,6 +393,18 @@
                                                         </ul>
                                                     {% endif %}
                                                 {% endwith %}
+                                            
+                                            <div class="slider-caption">
+                                                How important is it that your interests align?
+                                            </div>
+                                            <div class="slider-container">
+                                                <input type="range" min="0" max="2" value="{{weights.interests}}" class="slider" name="interestSlider" id="interestSlider">
+                                                <div class="slider-labels">
+                                                    <span>Low</span>
+                                                    <span>Medium</span>
+                                                    <span>High</span>
+                                                </div>
+                                            </div>
                                         </div>
                 
                                         <div class="single">
@@ -412,6 +436,18 @@
                                                     {% endif %}
                                                 {% endwith %}
                                             </div>
+
+                                            <div class="slider-caption">
+                                                How important is it that your education history aligns?
+                                            </div>
+                                            <div class="slider-container">
+                                                <input type="range" min="0" max="2" value="{{weights.education}}" class="slider" name="educationSlider" id="educationSlider">
+                                                <div class="slider-labels">
+                                                    <span>Low</span>
+                                                    <span>Medium</span>
+                                                    <span>High</span>
+                                                </div>
+                                            </div>
                                         </div>
             
             
@@ -436,6 +472,18 @@
                                                     </ul>
                                                 {% endif %}
                                             {% endwith %}
+
+                                            <div class="slider-caption">
+                                                How important is it that your personalities align?
+                                            </div>
+                                            <div class="slider-container">
+                                                <input type="range" min="0" max="2" value="{{weights.personality}}" class="slider" name="personalitySlider" id="personalitySlider">
+                                                <div class="slider-labels">
+                                                    <span>Low</span>
+                                                    <span>Medium</span>
+                                                    <span>High</span>
+                                                </div>
+                                            </div>
                                         </div>
             
                                         <!--
@@ -501,6 +549,19 @@
                                                             </ul>
                                                         {% endif %}
                                                     {% endwith %}
+                                                </div>
+
+
+                                                <div class="slider-caption">
+                                                    How important is your mentor's gender? (Skip if you have no preference.)
+                                                </div>
+                                                <div class="slider-container">
+                                                    <input type="range" min="0" max="2" value="{{weights.mentor_gender_preference}}" class="slider" name="genderSlider" id="genderSlider">
+                                                    <div class="slider-labels">
+                                                        <span>Low</span>
+                                                        <span>Medium</span>
+                                                        <span>High</span>
+                                                    </div>
                                                 </div>
             
                                             {% endif %}

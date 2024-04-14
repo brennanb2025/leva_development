@@ -21,17 +21,9 @@ function Matchmaking() {
 
     // Populate matches, mentees state
     useEffect(() => {
-        const matchescall = axios.get("/admin-user-matches", {
-            params: {
-                "businessId": 1
-            },
-        })
+        const matchescall = axios.get("/admin-user-matches")
 
-        const userscall = axios.get("/admin-lookup-users-in-business", {
-            params: {
-                "businessId": 1
-            },
-        })
+        const userscall = axios.get("/admin-lookup-users-in-business")
 
         Promise.all([matchescall, userscall]).then((results) => {
             let dict = {}
@@ -90,12 +82,17 @@ function Matchmaking() {
             let temp = {}
             console.log(results)
             results.map((m) => {
-                temp[m.data.userId] = m.data.matches
+                const sortedMatches = m.data.matches.sort(sortMatches)
+                temp[m.data.userId] = sortedMatches
             })
             console.log(temp)
             setFeed(temp)
         })
     }, [allUsers])
+
+    function sortMatches(m1, m2) {
+        return m2.score - m1.score
+    }
 
     useEffect(() => {
         let filtered = allUsers.filter(m => m.is_mentee)
@@ -111,14 +108,14 @@ function Matchmaking() {
         let candidates = props.candidates.map(m => m.mentor)
         let index = props.index
 
+        const [disabled, setDisabled] = useState(mentors !== undefined) //mentee in matches --> mentee was already matched
+        const [selMentor, setSelMentor] = useState({ label: mentor ? mentor.first_name : "Select mentor...", value: mentors === undefined ? 0 : -1 })
+        const [updateStatus, setUpdateStatus] = useState(1)
+
         let mentor
         if (mentors !== undefined) {
             mentor = mentors[0]
         }
-
-        const [disabled, setDisabled] = useState(mentors !== undefined) //mentee in matches --> mentee was already matched
-        const [selMentor, setSelMentor] = useState({ label: mentor ? mentor.first_name : "Select mentor...", value: mentors === undefined ? 0 : -1 })
-        const [updateStatus, setUpdateStatus] = useState(1)
 
         const options = candidates.map((m, i) => ({ label: m.first_name, value: i }))
         let color = !disabled ? "bg-purple-200" : "bg-slate-100"

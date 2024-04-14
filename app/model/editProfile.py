@@ -19,11 +19,15 @@ class readyUserProfileResponse:
         self.divisionPreference = None
         self.mentorGenderPreference = None
         self.genderIdentity = None
+        self.weights = None
 
 def readyUserProfile(userId):
     resp = readyUserProfileResponse()
 
     user = User.query.filter_by(id=userId).first() #get the correct profile by inputting user id
+
+    resp.weights = UserFeedWeights.query.filter_by(user_id=user.id).first()
+
     interestList = []
     for interest in user.rtn_interests():
         #interestList.append(Tag.query.filter_by(tagID=interest.interestID).first().title)
@@ -46,7 +50,7 @@ def readyUserProfile(userId):
         edu = School.query.filter_by(id=school.educationID).first()
         if edu != None:
             educationList.append(edu.title)
-    resp.educationList = careerInterestList
+    resp.educationList = educationList
 
     mentorGenderPreference = user.mentor_gender_preference
     if mentorGenderPreference != None:
@@ -445,7 +449,6 @@ def setFeedWeight(id, dictWeights):
         currentWeights = UserFeedWeights(user_id=id)
         db.session.add(currentWeights)
         db.session.commit()
-
         
     for k in dictWeights.keys():
         if k == "personality":
@@ -458,6 +461,29 @@ def setFeedWeight(id, dictWeights):
             currentWeights.set_career_interests_weight(dictWeights[k])
         elif k == "education":
             currentWeights.set_education_weight(dictWeights[k])
+
+    db.session.commit()
+
+    resp.success = True
+    return resp
+
+
+def setFeedWeight(id, personality, mentor_gender_preference, interests, career_interests, education):
+
+    resp = setFeedWeightResponse()
+
+    currentWeights = UserFeedWeights.query.filter_by(user_id=id).first()
+    if not currentWeights:
+        currentWeights = UserFeedWeights(user_id=id)
+        db.session.add(currentWeights)
+        db.session.commit()
+        
+    currentWeights.set_personality_weight(personality)
+    if mentor_gender_preference:
+        currentWeights.set_mentor_gender_preference_weight(mentor_gender_preference)
+    currentWeights.set_interests_weight(interests)
+    currentWeights.set_career_interests_weight(career_interests)
+    currentWeights.set_education_weight(education)
 
     db.session.commit()
 

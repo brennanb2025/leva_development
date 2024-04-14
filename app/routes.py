@@ -194,7 +194,7 @@ def admin_user_matches():  # mentees true = search for mentees, false = mentors
     if not adminUserLoggedIn():
         return
 
-    businessId = request.args.get("businessId")
+    businessId = getAdminUser().business_id
 
     dictMenteeToMentor = admin.user_matches(businessId)
 
@@ -301,6 +301,7 @@ def admin_lookup_user_feed_all():
     allMatches = admin.get_all_matches_with_weights(userId) # use feed weights
     if allMatches is None:
         return jsonify("No matches found")
+    
     jsonRtn = {
         "userId":allMatches.userId,
         "matches":
@@ -523,9 +524,9 @@ def admin_get_feedback():
     if not adminUserLoggedIn():
         return
 
-    business = getAdminUser().business_id
+    businessId = getAdminUser().business_id
 
-    feedbackResponses = admin.getFeedback(business)
+    feedbackResponses = admin.getFeedback(businessId)
 
     return jsonify({
         "responses": [
@@ -921,7 +922,7 @@ def editProfile():
     title="Edit profile Page"
     #return render_template('edit_profile.html', intro_video=intro_video_link, 
     #return render_template('editProfileNew.html', intro_video=intro_video_link, 
-    return render_template('edit_profile_revised.html', intro_video=user.intro_video, 
+    return render_template('edit_profile_revised.html', #intro_video=user.intro_video, 
             contact_method=user.email_contact, phone_num=user.phone_number, profile_picture=user.profile_picture, 
             interestTags=interestTags, careerInterests=careerInterests, schools=schools, 
             title=title, bio=user.bio, 
@@ -931,6 +932,7 @@ def editProfile():
             personality_1=user.personality_1, personality_2=user.personality_2, personality_3=user.personality_3, 
             #division=user.division, 
             resumeUrl=resumeUrl,
+            weights=userUtils.format_weights_as_json(readyProfileResp.weights),
             #divisionPreference=readyProfileResp.divisionPreference,
             mentorGenderPreference=readyProfileResp.mentorGenderPreference, 
             genderIdentity=readyProfileResp.genderIdentity,
@@ -1178,6 +1180,10 @@ def editProfilePost():
                 u.set_phone(form.get('phoneNumber'))
 
         db.session.commit()
+
+        editProfileFuncs.setFeedWeight(id=u.id, personality=form.get('personalitySlider'), 
+                mentor_gender_preference=form.get('genderSlider'), interests=form.get('interestSlider'),
+                career_interests=form.get('careerSlider'), education=form.get('educationSlider'))
 
         # dataChangedDict = {}
         # dataChangedDict["fn"] = changedFnSuccess

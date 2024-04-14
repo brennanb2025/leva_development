@@ -439,7 +439,7 @@ def deleteMatch(menteeId, mentorId):
     return True
 
 def getFeedback(business_id):
-    return UserFeedback.query.filter_by(business_id=business).all()
+    return UserFeedback.query.filter_by(business_id=business_id).all()
 
 
 def setFeedbackSolicitationFrequency(business_id, frequency):
@@ -458,7 +458,8 @@ def createExcelSheet(businessId):
 
 
 def logData(num, msg, userId):
-    if str(app.config['LOG_DATA']) == "True" and num != None and msg != None and userId != None:
-        newEvent = Event(userID=userId, action=num, message=msg)
-        db.session.add(newEvent)
-        db.session.commit()
+    return # removed logging data
+    # if str(app.config['LOG_DATA']) == "True" and num != None and msg != None and userId != None:
+    #     newEvent = Event(userID=userId, action=num, message=msg)
+    #     db.session.add(newEvent)
+    #     db.session.commit()

@@ -13,7 +13,7 @@ heuristicVals["career"] = 45       #career interest
 heuristicVals["interest"] = 15      #personal interest
 heuristicVals["personality"] = 10
 #heuristicVals["division_pref"] = 0
-heuristicVals["gender_pref"] = 10
+heuristicVals["gender_pref"] = 10 
 
 
 class match_suggestion:
@@ -757,7 +757,7 @@ def get_all_matches_feedWeights(userId):
         for u in users: #initialize user dictionary
             if (user.mentor_gender_preference == "male" and u.gender_identity == "male") or (user.mentor_gender_preference == "female" and u.gender_identity == "female"):
                 #matching gender preference / gender
-                if thisUserWeights and thisUserWeights.mentor_gender_preference:
+                if thisUserWeights:
                     if thisUserWeights.mentor_gender_preference == 0: # low
                         userDict[u] = 0.5 * heuristicVals["gender_pref"]
                     elif thisUserWeights.mentor_gender_preference == 1: # indifferent
@@ -766,6 +766,7 @@ def get_all_matches_feedWeights(userId):
                         userDict[u] = heuristicVals["gender_pref"]
                 else:
                     userDict[u] = heuristicVals["gender_pref"]
+            
             #ignore case mentor gender preference == "noPreference".
 
 
@@ -809,7 +810,7 @@ def get_all_matches_feedWeights(userId):
                 matches["personality"] += 1
 
             weights = potentialUserWeights.get(userId, None)
-            if (thisUserWeights and weights) and thisUserWeights.personality and weights.personality:
+            if thisUserWeights and weights:
                 if weights.personality == thisUserWeights.personality == 0: # low-low: 0.5x points
                     userDict[u] += 0.5 * (sumPersonalityMatches / 6) * heuristicVals["personality"]
                 elif weights.personality != thisUserWeights.personality: # high-low: 0.75x points
@@ -844,7 +845,8 @@ def get_all_matches_feedWeights(userId):
 
         educationPercentMatches = numberOfEducationMatches / totalNumberOfEducation
         #now update match amount in user dict
-        if (thisUserWeights and weights) and thisUserWeights.education and weights.education:
+
+        if thisUserWeights and weights:
             if weights.education == thisUserWeights.education == 0: # low-low: 0.5x points
                 userDict[u] += 0.5 * educationPercentMatches * heuristicVals["education"]
             elif weights.education != thisUserWeights.education: # high-low: 0.75x points
@@ -876,7 +878,7 @@ def get_all_matches_feedWeights(userId):
                     numberOfInterestMatches += 1 
                     
         interestPercentMatches = numberOfInterestMatches / totalNumberOfInterests
-        if (thisUserWeights and weights) and thisUserWeights.interests and weights.interests:
+        if thisUserWeights and weights:
             if weights.interests == thisUserWeights.interests == 0: # low-low: 0.5x points
                 userDict[u] += 0.5 * interestPercentMatches * heuristicVals["interest"]
             elif weights.interests != thisUserWeights.interests: # high-low: 0.75x points
@@ -910,7 +912,7 @@ def get_all_matches_feedWeights(userId):
                     numberOfCareerInterestMatches += 1 
                     
         careerInterestPercentMatches = numberOfCareerInterestMatches / totalNumberOfCareerInterests
-        if (thisUserWeights and weights) and thisUserWeights.career_interests and weights.career_interests:
+        if thisUserWeights and weights:
             if weights.career_interests == thisUserWeights.career_interests == 0: # low-low: 0.5x points
                 userDict[u] += 0.5 * careerInterestPercentMatches * heuristicVals["career"]
             elif weights.career_interests != thisUserWeights.career_interests: # high-low: 0.75x points

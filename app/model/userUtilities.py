@@ -44,3 +44,20 @@ def format_user_as_json(user):
             "career_interests": [i.entered_name for i in user.rtn_career_interests()],
             "education": [i.entered_name for i in user.rtn_education()]
         }
+
+def format_weights_as_json(weights):
+    if not weights:
+        return {
+            "personality":1,
+            "mentor_gender_preference":1,
+            "interests":1,
+            "career_interests":1,
+            "education":1
+        }
+    return {
+            "personality":weights.personality,
+            "mentor_gender_preference":weights.mentor_gender_preference,
+            "interests":weights.interests,
+            "career_interests":weights.career_interests,
+            "education": weights.education
+        }

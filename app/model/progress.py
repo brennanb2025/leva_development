@@ -147,8 +147,6 @@ def shouldSolicitFeedback(user):
     # frequency = every 3 meetings. It prompted them after meeting 1, they submitted,
     # that was 3 meetings ago, prompt them again.
 
-    print("testing",lastFeedback, frequency)
-
     if not lastFeedback: # user has never submitted feedback
         # in this case, we should solicit feedback unless the frequency is 0.
         if not frequency or frequency == 0:

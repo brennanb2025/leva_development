@@ -14,11 +14,12 @@ function Feedback() {
 
   // suppose that the data is...
 
-  const [feedback, setFeedback] = useState(mockData);
+  const [feedback, setFeedback] = useState([]);
   const [currentFrequency, setCurrentFrequency] = useState("");
 
   useEffect(() => {
     getFeedbackFrequency()
+    getFeedback()
   }, [])
 
   const handleSubmitNewFeedbackFrequency = (values) => {
@@ -50,9 +51,19 @@ function Feedback() {
         })
   }
 
+  const getFeedback = () => {
+    axios.get("/feedback"
+        ).then((results) => {
+            console.log(results)
+            setFeedback(results.data.responses)
+        }).catch(err => {
+            console.log(err)
+        })
+  }
+
   return (
     <div className='px-8'>
-      <span className="font-bold">Current frequency</span>: {currentFrequency ? currentFrequency : "Not yet set"} <br/><br/>
+      <span className="font-bold">Current feedback frequency</span>: {currentFrequency ? currentFrequency : "Not yet set"} <br/><br/>
       <Formik
         initialValues={{
             frequency: '',
@@ -70,6 +81,8 @@ function Feedback() {
         </Form>
       </Formik>
 
+      Set feedback to 0 to never solicit feedback. 1 = after every meeting.
+
       <div className='flex flex-row flex-wrap'>
         {feedback.map((value, index) => (
           <div className='py-2 pr-2 last:pr-0 basis-1/5 text-white mt-4'>
@@ -80,7 +93,7 @@ function Feedback() {
                 "
               </div>
               <div>
-                Submitted at time: {value.timestamp}
+                Submitted by {value.user.first_name} {value.user.last_name} at {value.timestamp}
               </div>
             </div>
           </div>
