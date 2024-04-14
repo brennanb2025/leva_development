@@ -5,6 +5,7 @@ from app.input_sets.models import Event, Select, Business, User, ProgressMeeting
 import app.model.admin as admin
 import app.model.editProfile as editProfileFuncs
 import app.model.feed as feedFuncs
+import app.model.progress as progressFuncs
 
 #from app.routes import delete_intro_video, delete_profile_picture, delete_resume, delete_user_attributes, logData
 
@@ -24,13 +25,17 @@ import app.model.feed as feedFuncs
 # print(User.query.filter_by(email="a@a.com").first())
 # print(User.query.filter_by(email="c@c.com").first())
 
-print("a@a.com feed with weights:")
-m13M = feedFuncs.get_all_matches_feedWeights(13)
-print([(m13.mentor, m13.score) for m13 in m13M.matches])
+# print("a@a.com feed with weights:")
+# m13M = feedFuncs.get_all_matches_feedWeights(13)
+# print([(m13.mentor, m13.score) for m13 in m13M.matches])
 
-print("c@c.com feed with weights:")
-m15M = feedFuncs.get_all_matches_feedWeights(15)
-print([(m15.mentor, m15.score) for m15 in m15M.matches])
+# print("c@c.com feed with weights:")
+# m15M = feedFuncs.get_all_matches_feedWeights(15)
+# print([(m15.mentor, m15.score) for m15 in m15M.matches])
+
+
+print(progressFuncs.shouldSolicitFeedback(User.query.filter_by(id=5).first()))
+progressFuncs.submitFeedback(5, "this is some test feedback.")
 
 
 # dictWeights13 = {}

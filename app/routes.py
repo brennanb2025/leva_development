@@ -531,8 +531,9 @@ def admin_get_feedback():
     return jsonify({
         "responses": [
             {
-                "user": userUtils.format_user_as_json(User.query.filter_by(id=f.user_id)),
+                "user": userUtils.format_user_as_json(User.query.filter_by(id=f.user_id).first()),
                 "content": f.content,
+                "meetingNumber": f.meeting_number,
                 "timestamp": f.timestamp
             }
             for f in feedbackResponses
@@ -559,10 +560,8 @@ def admin_set_feedback_soliciation_frequency():
     if not adminUserLoggedIn():
         return
 
-    print("request:",request.args)
-
     business = getAdminUser().business_id
-    frequency = int(request.args.get("frequency"))
+    frequency = int(request.form.get("frequency"))
 
     resp = admin.setFeedbackSolicitationFrequency(business, frequency)
 

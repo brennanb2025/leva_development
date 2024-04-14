@@ -61,6 +61,21 @@ function Feedback() {
         })
   }
 
+  function ordinal_suffix_of(i) {
+    let j = i % 10,
+        k = i % 100;
+    if (j === 1 && k !== 11) {
+        return i + "st";
+    }
+    if (j === 2 && k !== 12) {
+        return i + "nd";
+    }
+    if (j === 3 && k !== 13) {
+        return i + "rd";
+    }
+    return i + "th";
+}
+
   return (
     <div className='px-8'>
       <span className="font-bold">Current feedback frequency</span>: {currentFrequency ? currentFrequency : "Not yet set"} <br/><br/>
@@ -93,7 +108,7 @@ function Feedback() {
                 "
               </div>
               <div>
-                Submitted by {value.user.first_name} {value.user.last_name} at {value.timestamp}
+                Submitted by {value.user.first_name} {value.user.last_name} after their {ordinal_suffix_of(value.meetingNumber)} meeting.
               </div>
             </div>
           </div>
