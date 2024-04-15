@@ -68,8 +68,7 @@ u.set_password("brennanbenson2025@u.northwestern.edu") #must set pwd w/ hashing 
 db.session.commit()
 """
 
-#print("All admin users:", AdminUser.query.all())
-
+print("All admin users:", AdminUser.query.all())
 
 
 """
