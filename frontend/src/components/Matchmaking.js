@@ -97,6 +97,9 @@ function Matchmaking() {
     useEffect(() => {
         let filtered = allUsers.filter(m => m.is_mentee)
         let grouped = Object.groupBy(filtered, (m) => matches[m.id] === undefined)
+        if(grouped[false] === undefined){
+            grouped[false] = []
+        }
         setMentees(grouped)
     }, [feed])
 
