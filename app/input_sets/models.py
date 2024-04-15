@@ -530,7 +530,7 @@ class UserFeedback(db.Model, Base):
     __tablename__ = "UserFeedback"
     
     id = db.Column(db.Integer, primary_key=True) #id = primary key
-    user_id = db.Column(db.Integer, index=True, unique=True)
+    user_id = db.Column(db.Integer, index=True)
     content = db.Column(db.String(512))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     meeting_number = db.Column(db.Integer)

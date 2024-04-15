@@ -13,52 +13,86 @@ from app.input_sets.models import User, Tag, InterestTag, EducationTag, School, 
         ProgressMeetingCompletionInformation, UserFeedback
 
 
+
+class ProgressInfo:
+    def __init__(self, selectEntry=None, matchedUser=None, currentMeetingNumber=None,
+                progressDone=None, currMeetingInfo=None, prevMeetingInfo=None,
+                futureMeetingInfo=None):
+        self.selectEntry = selectEntry
+        self.matchedUser = matchedUser
+        self.currentMeetingNumber = currentMeetingNumber
+        self.progressDone = progressDone
+        self.currMeetingInfo = currMeetingInfo
+        self.prevMeetingInfo = prevMeetingInfo
+        self.futureMeetingInfo = futureMeetingInfo
+
 #TODO MAKE OBJECT
 def get_progress_info(user):
     isMentee = user.is_student #user.is_mentee
-    currentMeetingNumber = -1 #current meeting number
+
+    progressInfos = []
 
     select_mentor_mentee = None #the mentor or mentee that the user logged in has selected, or None
     if isMentee: 
-        selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
-        if selectEntry != None:
-            select_mentor_mentee = User.query.filter_by(id=selectEntry.mentor_id).first()
-            currentMeetingNumber = selectEntry.current_meeting_number_mentee
+        selectEntries = Select.query.filter_by(mentee_id=user.id).all()
+        for entry in selectEntries:
+            select_mentor_mentee = User.query.filter_by(id=entry.mentor_id).first()
+            currentMeetingNumber = entry.current_meeting_number_mentee
+            progressInfos.append(
+                ProgressInfo(
+                    selectEntry=entry,
+                    matchedUser=select_mentor_mentee,
+                    currentMeetingNumber=currentMeetingNumber
+                )
+            )
     else:
-        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
-        if selectEntry != None:
-            select_mentor_mentee = User.query.filter_by(id=selectEntry.mentor_id).first()
-            currentMeetingNumber = selectEntry.current_meeting_number_mentor
+        selectEntries = Select.query.filter_by(mentor_id=user.id).all()
+        for entry in selectEntries:
+            select_mentor_mentee = User.query.filter_by(id=entry.mentee_id).first()
+            currentMeetingNumber = entry.current_meeting_number_mentor
+            progressInfos.append(
+                ProgressInfo(
+                    selectEntry=entry,
+                    matchedUser=select_mentor_mentee,
+                    currentMeetingNumber=currentMeetingNumber
+                )
+            )
 
-    if not selectEntry:
-        return None, None, None, None, None, None
-
-    #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
-
-    progressDone = False
-
-    futureMeetingInfo = [] #future meeting list of info dicts
-    prevMeetingInfo = [] #previous meeting list of info dicts
-    currMeetingInfo = {} #current meeting info dict
-    if selectEntry != None and currentMeetingNumber != -1:
-        currMeeting = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                ProgressMeeting.num_meeting==currentMeetingNumber).first()
-        if currMeeting != None:
-            currMeetingInfo = getMeetingInfo(currMeeting)
-        else:
-            progressDone = True
-
-        previousMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                ProgressMeeting.num_meeting < currentMeetingNumber).all()
-        futureMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
-                ProgressMeeting.num_meeting > currentMeetingNumber).all()
+    for i in range(len(progressInfos)):
+        #selectEntry is the database entry for this user's select. It will be None if this user hasn't been selected/hasn't yet selected.
         
-        for m in previousMeetings: #build the dicts of the info about each meeting
-            prevMeetingInfo.append(getCompletedMeetingInfo(m, isMentee, selectEntry.id, m.num_meeting))
-        for m in futureMeetings:
-            futureMeetingInfo.append(getMeetingInfo(m))
+        info = progressInfos[i]
 
-    return selectEntry, select_mentor_mentee, progressDone, currMeetingInfo, prevMeetingInfo, futureMeetingInfo
+        progressDone = False
+
+        futureMeetingInfo = [] #future meeting list of info dicts
+        prevMeetingInfo = [] #previous meeting list of info dicts
+        currMeetingInfo = {} #current meeting info dict
+        if info.selectEntry != None and info.currentMeetingNumber != None:
+            currMeeting = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                    ProgressMeeting.num_meeting==info.currentMeetingNumber).first()
+            if currMeeting != None:
+                progressInfos[i].currMeetingInfo = getMeetingInfo(currMeeting)
+            else:
+                progressDone = True
+
+            previousMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                    ProgressMeeting.num_meeting < info.currentMeetingNumber).all()
+            futureMeetings = ProgressMeeting.query.filter(ProgressMeeting.business_ID==user.business_id, \
+                    ProgressMeeting.num_meeting > info.currentMeetingNumber).all()
+            
+            for m in previousMeetings: #build the dicts of the info about each meeting
+                prevMeetingInfo.append(getCompletedMeetingInfo(m, isMentee, info.selectEntry.id, m.num_meeting))
+            for m in futureMeetings:
+                futureMeetingInfo.append(getMeetingInfo(m))
+
+            progressInfos[i].prevMeetingInfo = prevMeetingInfo
+
+            progressInfos[i].futureMeetingInfo = futureMeetingInfo
+
+            progressInfos[i].progressDone = progressDone
+
+    return progressInfos
 
 
 
@@ -156,12 +190,12 @@ def shouldSolicitFeedback(user):
     return (lastMeetingNumber - lastFeedback.meeting_number) >= frequency
 
 
-def set_current_meeting_info_done(user, meetingNotes):
+def set_current_meeting_info_done(user, matchUser, meetingNotes):
 
     isMentee = user.is_student
 
     if isMentee: 
-        selectEntry = Select.query.filter_by(mentee_id=user.id).first() #the entry of the mentor-mentee selection, or None
+        selectEntry = Select.query.filter_by(mentee_id=user.id, mentor_id=matchUser.id).first() #the entry of the mentor-mentee selection, or None
         if selectEntry != None:
             completionInfoMentee = ProgressMeetingCompletionInformation.query.filter(
                 ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentee,
@@ -186,7 +220,7 @@ def set_current_meeting_info_done(user, meetingNotes):
             db.session.commit()
 
     else:
-        selectEntry = Select.query.filter_by(mentor_id=user.id).first()
+        selectEntry = Select.query.filter_by(mentor_id=user.id, mentee_id=matchUser.id).first()
         if selectEntry != None:
             completionInfoMentor = ProgressMeetingCompletionInformation.query.filter(
                 ProgressMeetingCompletionInformation.num_progress_meeting == selectEntry.current_meeting_number_mentor,

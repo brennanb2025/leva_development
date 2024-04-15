@@ -219,17 +219,16 @@ function Statistics() {
                                             setModalOpen(true) 
                                             setSelected(index)
                                         }}>
-                                            <img src={userResults[0].profile_picture} className='h-16 w-auto rounded-full' />
+                                            <img src={user.profile_picture === null ? 
+                                                    process.env.PUBLIC_URL + "/blank-profile-picture.png" :
+                                                    user.profile_picture} alt='' className='h-16 w-auto rounded-full' />
                                             <div className='ml-4'>
                                                 <div>Name: {user.first_name} {user.last_name}</div>
                                                 <div>
                                                     Email: {user.email}
                                                 </div>
                                                 <div>
-                                                    Occupation: {user.current_occupation}
-                                                </div>
-                                                <div>
-                                                    Division: {user.division}
+                                                    {user.is_mentee ? "Mentee" : "Mentor"}
                                                 </div>
                                             </div>
                                         </div>

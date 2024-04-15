@@ -173,6 +173,7 @@ html, body{
     width: 205px;
     height: 205px;
     border-radius: 50%;
+    margin-top:40px;
     object-fit: cover;
 }
 
@@ -180,6 +181,15 @@ html, body{
 .purple-line{
     height: 2px;
     width: 40px;
+    background-color: rgb(158,63,253);
+    margin-top: 10%;
+    margin-bottom: 10%;
+}
+
+/* Purely decorative */
+.purple-line-long {
+    height: 2px;
+    width: 90%;
     background-color: rgb(158,63,253);
     margin-top: 10%;
     margin-bottom: 10%;

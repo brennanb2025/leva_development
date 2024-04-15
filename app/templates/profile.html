@@ -84,7 +84,7 @@
                     {% if logged_in is defined and logged_in %}
                         My Leva Profile
                     {% else %}
-                        Leva Profile: {{ user.first_name }} {{ user.last_name }}
+                        {{ user.first_name }} {{ user.last_name }}
                     {% endif %}
                 </div>
 
@@ -247,7 +247,7 @@
                             <div class="single">
                                 <div class="label">
                                     Able to make 
-                                    {% if user.num_pairings_can_make is none %}
+                                    {% if user.num_pairings_can_make is none or user.num_pairings_can_make == 1 %}
                                         1 match
                                     {% else %}
                                         {{ user.num_pairings_can_make }} matches

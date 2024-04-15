@@ -549,10 +549,12 @@ def submit_feedback():
         flash(u'You must log in.', 'loginRedirectError')
         return redirect(url_for('sign_in'))
 
-    userId = request.args.get("userId")
-    content = request.args.get("content")
+    userId = User.query.filter_by(id=session.get('userID')).first().id
+    content = request.form.get("content")
 
-    admin.submitFeedback(userId, content)
+    progressFuncs.submitFeedback(userId, content)
+
+    return progress(False)
 
 @app.route('/feedback-soliciation-frequency', methods=['POST'])
 def admin_set_feedback_soliciation_frequency():
@@ -581,7 +583,7 @@ def admin_get_feedback_soliciation_frequency():
 
 
 @app.route('/progress', methods=['GET'])
-def progress():
+def progress(solicitFeedback = False, meetingFinishedWithUsername = None):
 
     if not(userLoggedIn()):
         flash(u'You must log in.', 'loginRedirectError')
@@ -589,27 +591,32 @@ def progress():
 
     user = User.query.filter_by(id=session.get('userID')).first()
     
-    selectEntry, select_mentor_mentee, progressDone, currMeetingInfo, prevMeetingInfo, futureMeetingInfo = \
-            progressFuncs.get_progress_info(user)
+    #selectEntry, select_mentor_mentee, progressDone, currMeetingInfo, prevMeetingInfo, futureMeetingInfo = \
+            
+    progresses = progressFuncs.get_progress_info(user)
 
     #admin.logData(session.get('userId'),15,"")
 
-    matchToMeetingInfo = {
-        select_mentor_mentee.id: 
-            {
-                "prev_meeting_info":prevMeetingInfo, 
-                "curr_meeting_info":currMeetingInfo, 
-                "progress_done":progressDone
-            }
-        } if select_mentor_mentee is not None else None
+    progressPerUser = {}
+    matchedUsers = []
 
-    matchedUsers = [select_mentor_mentee] if select_mentor_mentee else []
+    for p in progresses:
+        matchedUsers.append(p.matchedUser)
+
+        progressPerUser[p.matchedUser.id] = {
+                "prev_meeting_info":p.prevMeetingInfo, 
+                "curr_meeting_info":p.currMeetingInfo, 
+                "progress_done":p.progressDone
+            }
     
     #TODO redo this
-    return render_template('progress.html', selectEntry=selectEntry, isMentee=user.is_student, \
+    return render_template('progress.html', isMentee=user.is_student, \
+            #selectEntry=selectEntry,
             #selectMentorMentee=select_mentor_mentee,
-            matchedUsers = matchedUsers, userID=user.id, progressDone=progressDone, \
-            matchToMeetingInfo=matchToMeetingInfo)
+            matchedUsers = matchedUsers, userID=user.id, #progressDone=progressDone, \
+            #matchToMeetingInfo=matchToMeetingInfo,
+            matchToMeetingInfo=progressPerUser,
+            solicitFeedback=solicitFeedback, meetingFinishedWithUsername=meetingFinishedWithUsername)
             #currMeetingInfo=currMeetingInfo, prevMeetingInfo=prevMeetingInfo, futureMeetingInfo=futureMeetingInfo)
 
 
@@ -622,10 +629,12 @@ def currentMeetingSetDone():
     form = request.form
     user = User.query.filter_by(id=session.get('userID')).first()
     meetingNotes = form.get("meetingNotes")
+    matchedUser = User.query.filter_by(id=form.get("matchedUserId")).first()
 
-    progressFuncs.set_current_meeting_info_done(user, meetingNotes)
+    progressFuncs.set_current_meeting_info_done(user, matchedUser, meetingNotes)
 
-    return progress()  # send to progress page
+    return progress(progressFuncs.shouldSolicitFeedback(user), 
+            (matchedUser.first_name + " " + matchedUser.last_name))  # send to progress page
 
 
 @app.route('/should-solicit-feedback', methods=['GET'])

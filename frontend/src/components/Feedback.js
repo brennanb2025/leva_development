@@ -87,7 +87,7 @@ function Feedback() {
         <Form>
             <div className='flex flex-row'>
                 <div className='input-container'>
-                    <label htmlFor="frequency">Change frequency: </label>
+                    <label htmlFor="frequency">Change frequency (set to 0 to never solicit feedback, or to 1 to solicit feedback after every meeting.) </label>
                     <Field id="frequency" name="frequency" placeholder={currentFrequency} className="stats-input" />
                 </div>
             </div>
@@ -96,19 +96,15 @@ function Feedback() {
         </Form>
       </Formik>
 
-      Set feedback to 0 to never solicit feedback. 1 = after every meeting.
-
       <div className='flex flex-row flex-wrap'>
         {feedback.map((value, index) => (
           <div className='py-2 pr-2 last:pr-0 basis-1/5 text-white mt-4'>
             <div className='bg-slate-400 rounded-md w-full h-full p-4'>
               <div>
-                Feedback: "
-                {value.content}
-                "
+                "{value.content}"
               </div>
-              <div>
-                Submitted by {value.user.first_name} {value.user.last_name} after their {ordinal_suffix_of(value.meetingNumber)} meeting.
+              <div className='mt-2'>
+                Submitted by {value.user.first_name} {value.user.last_name} after their {ordinal_suffix_of(value.meetingNumber-1)} meeting.
               </div>
             </div>
           </div>
