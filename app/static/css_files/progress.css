@@ -55,6 +55,7 @@
     justify-content: center;
     align-items: center;
     border-right: 1px solid white;
+    z-index: 0;
 }
 
 .progress-navigation:last-child{
@@ -69,6 +70,7 @@
     border: none;
     outline: none;
     transition-duration: 0.3s;
+    z-index: 0;
 }
 
 .progress-navigation button:hover{
@@ -211,6 +213,14 @@
     display: block;
     margin-left: auto;
     margin-right: auto;
+}
+
+.feedback-background{
+    width: 100%;
+    min-height: 100vh;
+    position:absolute;
+    background-color: #00000050;
+    z-index: 500;
 }
 
 /*
