@@ -85,7 +85,7 @@ function Matchmaking() {
                 const sortedMatches = m.data.matches.sort(sortMatches)
                 temp[m.data.userId] = sortedMatches
             })
-            console.log(temp)
+            console.log("matches:",temp)
             setFeed(temp)
         })
     }, [allUsers])
@@ -127,7 +127,8 @@ function Matchmaking() {
                 <div className='z-10 basis-1/3 flex flex-row justify-between items-center peer'
                     onClick={() => {
                         setModalOpen(true)
-                        setModalProps({ mentee: mentee, mentor: mentor })
+                        setModalProps({ mentee: mentee, mentor: mentor ? mentor : selMentor.label === "Select mentor..." ? undefined : candidates[selMentor.value] })
+                        // show selected mentor if the user has selected one
                     }}>
                     <div className="flex flex-row items-center basis-1/3 font-bold">
                         {mentee.profile_picture === null ?
