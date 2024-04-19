@@ -251,8 +251,6 @@ def admin_get_events_exceptions():
         request.args.get("endTime"))
     action = request.args.get("action")
 
-    print(startTime, endTime)
-
     return jsonify([
             {
                 "id":e.id, 
@@ -301,16 +299,18 @@ def admin_lookup_user_feed_all():
     allMatches = admin.get_all_matches_with_weights(userId) # use feed weights
     if allMatches is None:
         return jsonify("No matches found")
-    
+
     jsonRtn = {
         "userId":allMatches.userId,
         "matches":
         [
             {
                 "mentor": userUtils.format_user_as_json(m.mentor),
-                "mentorInterestMatches": m.mentorInterestMatches,
-                "mentorCareerMatches": m.mentorCareerMatches,
-                "mentorEducationMatches": m.mentorEducationMatches,
+                "mentorInterestMatches": [i.lower() for i in m.mentorInterestMatches],
+                "mentorCareerMatches": [i.lower() for i in m.mentorCareerMatches],
+                "mentorEducationMatches": [i.lower() for i in m.mentorEducationMatches],
+                "mentorPersonalityMatches": [i.lower() for i in m.personalityMatches],
+                "mentorGenderPreferenceMatch": m.mentorGenderPreferenceMatching,
                 "score": m.score
             }
             for m in allMatches.matches
@@ -367,11 +367,12 @@ def admin_validate_match():
     menteeId = request.args.get("menteeId")
     mentorId = request.args.get("mentorId")
     numMatching = json.loads(request.args.get("numMatching"))
+    print("adminnn",menteeId,mentorId,numMatching)
     if menteeId is None or mentorId is None:
         return jsonify({"success":False})
 
     success = admin.validate_match(menteeId, mentorId, numMatching)
-    print(success)
+    print("admin",success)
 
     return jsonify(
         {
@@ -1444,7 +1445,6 @@ def view():
         return not_found("404")
 
     resumeUrl = AWS.create_resume_link(user)
-    print("got resume url:",resumeUrl)
 
     this_user_is_logged_in = (user.id == session.get('userID'))
     #^if the user looking at this person's profile page is the one who is currently logged in, 

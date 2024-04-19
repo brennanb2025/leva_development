@@ -2,14 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { Formik, Field, Form } from 'formik'
 import axios from 'axios'
 
-const mockData = [
-  {id: 1, content: "asdlkfjhalkjhaslkdjfh", timestamp: "lkjasdflkjh"},
-  {id: 1, content: "asdlkfjhalkjhaslkdjfh", timestamp: "lkjasdflkjh"},
-  {id: 1, content: "asdlkfjhalkjhaslkdjfh", timestamp: "lkjasdflkjh"},
-  {id: 1, content: "asdlkfjhalkjhaslkdjfh", timestamp: "lkjasdflkjh"},
-  {id: 1, content: "asdlkfjhalkjhaslkdjfh", timestamp: "lkjasdflkjh"},
-]
-
 function Feedback() {
 
   // suppose that the data is...

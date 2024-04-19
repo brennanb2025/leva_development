@@ -4,8 +4,9 @@ import Modal from 'react-modal'
 import axios from 'axios'
 import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
+import MatchmakingScreen from './MatchmakingScreenAnimation';
 
-function Matchmaking() {
+function Matchmaking({ toggleMatchmakingScreenVisibility }) {
 
     const [modalProps, setModalProps] = useState({})
     const [modalOpen, setModalOpen] = useState(false)
@@ -335,8 +336,11 @@ function Matchmaking() {
         let mentee = props.user
 
         let displayinfo = [mentee]
+        let feedObj = null
         if (mentor !== undefined) {
             displayinfo.push(mentor)
+            feedObj = feed[displayinfo[0].id].find((elem) => elem.mentor.id === mentor.id)
+            console.log("obj:",feedObj)
         }
 
         return (
@@ -364,6 +368,7 @@ function Matchmaking() {
                                 // do something
                                 backgroundClass += "bg-primary"
                             }
+                            
                             return (
                                 <div className={backgroundClass}>
                                     <ul className='flex flex-col items-start list-disc'>
@@ -399,19 +404,23 @@ function Matchmaking() {
                                         </div> */}
                                         <li>
                                             <span className='font-bold'>Personality traits: </span> 
-                                            <span>{person.personality_1}, {person.personality_2}, {person.personality_3}</span>
+                                            <span>
+                                                <span className={`${feedObj === null ? '' : feedObj.mentorPersonalityMatches.includes(person.personality_1 === null ? null : person.personality_1.toLowerCase()) ? 'text-green-500' : ''}`}>{person.personality_1}, </span>
+                                                <span className={`${feedObj === null ? '' : feedObj.mentorPersonalityMatches.includes(person.personality_2 === null ? null : person.personality_2.toLowerCase()) ? 'text-green-500' : ''}`}>{person.personality_2}, </span>
+                                                <span className={`${feedObj === null ? '' : feedObj.mentorPersonalityMatches.includes(person.personality_3 === null ? null : person.personality_3.toLowerCase()) ? 'text-green-500' : ''}`}>{person.personality_3}</span>
+                                            </span>
                                         </li>
 
                                         {
                                             person.is_mentee ?
                                                 <li>
                                                     <span className='font-bold'>Mentor gender preference: </span> 
-                                                    <span>{person.mentor_gender_preference}</span>
+                                                    <span className={`${feedObj === null ? '' : feedObj.mentorGenderPreferenceMatch ? 'text-green-500' : ''}`}>{person.mentor_gender_preference}</span>
                                                 </li>
                                                 :
                                                 <li>
                                                     <span className='font-bold'>Gender identity: </span> 
-                                                    <span>{person.gender_identity}</span>
+                                                    <span className={`${feedObj === null ? '' : feedObj.mentorGenderPreferenceMatch ? 'text-green-500' : ''}`}>{person.gender_identity}</span>
                                                 </li>
                                         }
 
@@ -420,9 +429,11 @@ function Matchmaking() {
                                             <span>{
                                                 person.career_interests.map((field, i) => {
                                                     if (i == person.career_interests.length - 1) {
-                                                        return field
+                                                        return (<span className={`${feedObj === null ? '' : feedObj.mentorCareerMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>)
                                                     }
-                                                    return field + ", "
+                                                    return (<span>
+                                                        <span className={`${feedObj === null ? '' : feedObj.mentorCareerMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>,&nbsp;
+                                                    </span>)
                                                 })
                                             }</span>
                                         </li>
@@ -431,9 +442,11 @@ function Matchmaking() {
                                             <span>{
                                                 person.interests.map((field, i) => {
                                                     if (i == person.interests.length - 1) {
-                                                        return field
+                                                        return (<span className={`${feedObj === null ? '' : feedObj.mentorInterestMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>)
                                                     }
-                                                    return field + ", "
+                                                    return (<span>
+                                                        <span className={`${feedObj === null ? '' : feedObj.mentorInterestMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>,&nbsp;
+                                                    </span>)
                                                 })
                                             }</span>
                                         </li>
@@ -442,9 +455,11 @@ function Matchmaking() {
                                             <span>{
                                                 person.education.map((field, i) => {
                                                     if (i == person.education.length - 1) {
-                                                        return field
+                                                        return (<span className={`${feedObj === null ? '' : feedObj.mentorEducationMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>)
                                                     }
-                                                    return field + ", "
+                                                    return (<span>
+                                                        <span className={`${feedObj === null ? '' : feedObj.mentorEducationMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>,&nbsp;
+                                                    </span>)
                                                 })
                                             }</span>
                                         </li>
@@ -456,7 +471,12 @@ function Matchmaking() {
                                             </span> 
                                         }
 
-                                        <a href={person.resume} target="_blank" className='text-white underline cursor-pointer'>Resume</a>
+                                        {
+                                            person.resume === null ? 
+                                                <div className='text-white'>No resume</div> : 
+                                                <a href={person.resume} target="_blank" className='text-white underline cursor-pointer'>Resume</a>
+                                        }
+                                        
 
                                         
                                         {/* <div className="text-start">
@@ -511,6 +531,8 @@ function Matchmaking() {
     }
 
     function submitMatches() {
+
+        toggleMatchmakingScreenVisibility(true);
 
         let l = structuredClone(matches)
 

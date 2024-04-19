@@ -1,6 +1,7 @@
 import './App.css';
 import { useState, useEffect, memo } from 'react'
 import Matchmaking from './components/Matchmaking'
+import MatchmakingScreen from './components/MatchmakingScreenAnimation';
 import Statistics from './components/Statistics';
 import Feedback from './components/Feedback';
 
@@ -14,10 +15,18 @@ function App() {
 
   const [page, setPage] = useState(ADMIN_ENUM.matchmaking)
 
+  const [matchesMadeScreenVisible, setMatchesMadeScreenVisible] = useState(false);
+
+  function toggleMatchmakingScreenVisibility() {
+    setMatchesMadeScreenVisible(true);
+    const animationTimeout = setTimeout(() => setMatchesMadeScreenVisible(false), 2499);
+    return () => clearTimeout(animationTimeout);
+  }
+
   const content = () => {
     switch(page){
       case ADMIN_ENUM.matchmaking:
-        return <Matchmaking />
+        return <Matchmaking toggleMatchmakingScreenVisibility={toggleMatchmakingScreenVisibility} />
       case ADMIN_ENUM.search:
         return <Statistics />
       case ADMIN_ENUM.feedback:
@@ -38,6 +47,7 @@ function App() {
 
   return (
     <div className='flex flex-col w-full h-screen'>
+      <MatchmakingScreen animationVisible={matchesMadeScreenVisible} />
       <meta name="csrf-token" content="{{ csrf_token() }}" />
       <section className="w-full p-8">
         <div className="flex flex-row items-center border-b pb-2">

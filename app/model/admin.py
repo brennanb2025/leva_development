@@ -359,7 +359,6 @@ def apply_matches_if_unmatched(matches): #takes {menteeId : mentorId} -> bool de
         #assume each mentee can only have 1 mentor.
         selectThisMentee = Select.query.filter_by(mentee_id=m).first()
         if not selectThisMentee: #select doesn't exist. We can create it.
-            print("nothing to delete, posting",m,matches[m])
             success = feed.feedPost(m, matches[m])
             if not success:
                 resp.match_overall_success = False
@@ -368,7 +367,7 @@ def apply_matches_if_unmatched(matches): #takes {menteeId : mentorId} -> bool de
             
         #if the match we want to make does already exist:
         if selectThisMentee.id not in maintainSelects:
-            print("deleting mentee=",selectThisMentee.mentee_id,"mentor=",selectThisMentee.mentor_id)
+            # print("deleting mentee=",selectThisMentee.mentee_id,"mentor=",selectThisMentee.mentor_id)
             Select.query.filter_by(id=selectThisMentee.id).delete() #delete all other matches
 
             #delete any progress meetings associated with this user
@@ -377,7 +376,7 @@ def apply_matches_if_unmatched(matches): #takes {menteeId : mentorId} -> bool de
                     ProgressMeetingCompletionInformation.select_id == selectThisMentee.id
                 ).delete()
 
-            print("posting",m,matches[m])
+            # print("posting",m,matches[m])
             success = feed.feedPost(m, matches[m])
             if not success:
                 resp.match_overall_success = False

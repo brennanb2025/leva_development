@@ -22,6 +22,8 @@ class match_suggestion:
         self.mentorInterestMatches = []
         self.mentorCareerMatches = []
         self.mentorEducationMatches = []
+        self.mentorGenderPreferenceMatching = False
+        self.personalityMatches = []
         self.score = None
 
 class match_suggested_response:
@@ -736,12 +738,12 @@ def get_all_matches_feedWeights(userId):
     potentialUserWeights = {}
 
     userDict = {} #user : number match.
-    matches = {} #for data logging
+    #matches = {} #for data logging (removed)
     #matches["division_pref"] = 0
-    matches["personality"] = 0
-    matches["education"] = 0
-    matches["career"] = 0
-    matches["interest"] = 0
+    #matches["personality"] = 0
+    #matches["education"] = 0
+    #matches["career"] = 0
+    #matches["interest"] = 0
 
     #get all mentors in the same business as the user. is_student should remove the user themself from the query.
     users = User.query.filter_by(business_id=user.business_id).filter_by(is_student=False).all()
@@ -752,11 +754,14 @@ def get_all_matches_feedWeights(userId):
         if uWeights:
             potentialUserWeights[u.id] = uWeights
 
+    hasDesiredGenders = {}
+
     #check gender preference/identity
     if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #only check if flag for gender/identity is "True"
         for u in users: #initialize user dictionary
-            if (user.mentor_gender_preference == "male" and u.gender_identity == "male") or (user.mentor_gender_preference == "female" and u.gender_identity == "female"):
-                #matching gender preference / gender
+            if user.mentor_gender_preference == "noPreference" or (user.mentor_gender_preference == "male" and u.gender_identity == "male") or (user.mentor_gender_preference == "female" and u.gender_identity == "female"):
+                #matching gender preference / gender (or mentee has no preferece)
+                hasDesiredGenders[u] = True
                 if thisUserWeights:
                     if thisUserWeights.mentor_gender_preference == 0: # low
                         userDict[u] = 0.5 * heuristicVals["gender_pref"]
@@ -786,28 +791,43 @@ def get_all_matches_feedWeights(userId):
 
     #TODO Added u.personality_n and before all to test if None before asking if in. Update the above to do the same.
     #personality
+
+    personalityDict = dict((u.id, set()) for u in users) # set - no duplicates
+
     if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":
         for u in users:
             sumPersonalityMatches = 0
             #match in any personality trait - separate to add to the value per each match.
             if (u.personality_1 and user.personality_1) and (u.personality_1 in user.personality_1 or user.personality_1 in u.personality_1):
                 sumPersonalityMatches += 1
-                matches["personality"] += 1
+                personalityDict[u.id].add(u.personality_1)
+                personalityDict[u.id].add(user.personality_1)
+                #matches["personality"] += 1
             if (u.personality_1 and user.personality_2) and (u.personality_1 in user.personality_2 or user.personality_2 in u.personality_1):
                 sumPersonalityMatches += 1
-                matches["personality"] += 1
+                personalityDict[u.id].add(u.personality_1)
+                personalityDict[u.id].add(user.personality_2)
+                #matches["personality"] += 1
             if (u.personality_1 and user.personality_3) and (u.personality_1 in user.personality_3 or user.personality_3 in u.personality_1):
                 sumPersonalityMatches += 1
-                matches["personality"] += 1
+                personalityDict[u.id].add(u.personality_1)
+                personalityDict[u.id].add(user.personality_3)
+                #matches["personality"] += 1
             if (u.personality_2 and user.personality_2) and (u.personality_2 in user.personality_2 or user.personality_2 in u.personality_2):
                 sumPersonalityMatches += 1
-                matches["personality"] += 1
+                personalityDict[u.id].add(u.personality_2)
+                personalityDict[u.id].add(user.personality_2)
+                #matches["personality"] += 1
             if (u.personality_2 and user.personality_3) and (u.personality_2 in user.personality_3 or user.personality_3 in u.personality_2):
                 sumPersonalityMatches += 1
-                matches["personality"] += 1
+                personalityDict[u.id].add(u.personality_2)
+                personalityDict[u.id].add(user.personality_3)
+                #matches["personality"] += 1
             if (u.personality_3 and user.personality_3) and (u.personality_3 in user.personality_3 or user.personality_3 in u.personality_3):
                 sumPersonalityMatches += 1
-                matches["personality"] += 1
+                personalityDict[u.id].add(u.personality_3)
+                personalityDict[u.id].add(user.personality_3)
+                #matches["personality"] += 1
 
             weights = potentialUserWeights.get(userId, None)
             if thisUserWeights and weights:
@@ -853,8 +873,7 @@ def get_all_matches_feedWeights(userId):
                 userDict[u] += 0.75 * educationPercentMatches * heuristicVals["education"]
         else:
             userDict[u] += educationPercentMatches * heuristicVals["education"]
-        matches["education"] += numberOfEducationMatches
-
+        #matches["education"] += numberOfEducationMatches
 
     interestTitleDict = {} #contains all the matching tags for each user (user : [interest tag titles])
     thisUserInterestTagIDs = user.rtn_interests()
@@ -886,7 +905,7 @@ def get_all_matches_feedWeights(userId):
         else:
             userDict[u] += interestPercentMatches * heuristicVals["interest"]
         
-        matches["interest"] += numberOfInterestMatches
+        #matches["interest"] += numberOfInterestMatches
 
 
     careerDict = {} #contains all the matching career tags for each user (user : [career experience/interest title])
@@ -920,7 +939,7 @@ def get_all_matches_feedWeights(userId):
         else:
             userDict[u] += careerInterestPercentMatches * heuristicVals["career"]
 
-        matches["career"] += numberOfCareerInterestMatches
+        #matches["career"] += numberOfCareerInterestMatches
 
 
     resp = match_suggested_response()
@@ -931,8 +950,10 @@ def get_all_matches_feedWeights(userId):
         matchSuggestion.mentor = u
         matchSuggestion.mentorInterestMatches = interestTitleDict[u] if u in interestTitleDict else []
         matchSuggestion.mentorCareerMatches = careerDict[u] if u in careerDict else []
-        matchSuggestion.mentorEducationMatchesMatches = schoolDict[u] if u in schoolDict else []
+        matchSuggestion.mentorEducationMatches = schoolDict[u] if u in schoolDict else []
         matchSuggestion.score = userDict[u]
+        matchSuggestion.mentorGenderPreferenceMatching = True if u in hasDesiredGenders else False
+        matchSuggestion.personalityMatches = list(personalityDict[u.id])
 
         matchSuggestions.append(matchSuggestion)
 

@@ -1,0 +1,34 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
+
+.intro-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  background: #e8ccfc;
+  overflow: hidden;
+  animation: slideUp 2.5s;
+}
+
+.text-container {
+  font-size: 3.5rem;
+  font-weight: bold; /* Make the font bold */
+  color: navy;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 700px;
+}
+
+@keyframes slideUp {
+  0% { transform: translateY(-100%); opacity:1; }
+  40% { transform: translateY(0); opacity:1; }
+  66.6% { transform: translateY(0); opacity:1; }
+  100% { transform: translateY(0); opacity:0; }
+}
