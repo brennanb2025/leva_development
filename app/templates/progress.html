@@ -33,7 +33,7 @@
 
         <!-- <div class="modal-overlay" id="modal-overlay"> -->
 
-        <div class="header navbar navbar-expand-lg navbar-light bg-white justify-content-between p-3 sticky-top">
+        <div class="header navbar navbar-expand-lg navbar-light bg-white justify-content-between p-3 sticky top-0">
             <div class="navbar-brand">
                 <img src="https://static.wixstatic.com/media/12ecaa_e292ca41155b4bee9ea276dc89fef0f3~mv2.png/v1/fill/w_165,h_87,al_c,q_85,usm_0.66_1.00_0.01/IMG_0256_PNG.webp" 
                 alt="IMG_0256.PNG" style="width:10vw;height:5vw;object-fit:contain;object-position:50% 50%">
@@ -87,6 +87,8 @@
             meetings, and the history of completed meetings in three separate fragments. The progressNavbar()
             function takes a string input and changes the contents of the screen according to the string input-->
 
+        <div class="feedback-background" id="feedback-background"></div>
+
         <div class="feedback-modal" id="feedback-modal">
             <span class="feedback-modal-close" onclick="closeModal()">&times;</span>
 
@@ -103,7 +105,7 @@
             
             {% if matchedUsers|length > 0 %}
 
-            <div class="navbar-bottom navbar navbar-expand-lg navbar-light bg-white justify-content-between sticky-top">
+            <div class="navbar-bottom navbar navbar-expand-lg navbar-light bg-white justify-content-between sticky top-0">
                 
                 <div class="progress-navigation" id="progressNav1">
                     <button onclick="progressNavbar('mentor')">
@@ -446,12 +448,12 @@
         function openModal(){
             // ask if we should request feedback from the user
             document.getElementById('feedback-modal').style.display = "block"
-            document.getElementById('modal-overlay').style.display = 'block';
+            document.getElementById("feedback-background").style.display = "block"
         }
 
         function closeModal(){
             document.getElementById('feedback-modal').style.display = "none"
-            document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('feedback-background').style.display = "none"
         }
     </script>
 
