@@ -221,6 +221,7 @@
     position:absolute;
     background-color: #00000050;
     z-index: 500;
+    display: none;
 }
 
 /*
