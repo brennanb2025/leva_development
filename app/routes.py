@@ -77,6 +77,15 @@ def admin_login():
 
     return render_template("admin_login.html", form=form)
 
+@app.route('/admin-logout', methods=['GET'])
+def admin_logout():
+    # sessionID1 = request.cookies.get('user') #get the session token
+    # means they hit logout btn
+    if session.get('adminId'):  # valid session token -- user already logged in
+        session.pop('adminId', None)
+
+    return redirect(url_for('index'))
+
 @app.route('/admin-data/<path:path>')
 def admin_data_static(path):
     return send_from_directory("../frontend/build", path)

@@ -4,6 +4,7 @@ import Matchmaking from './components/Matchmaking'
 import MatchmakingScreen from './components/MatchmakingScreenAnimation';
 import Statistics from './components/Statistics';
 import Feedback from './components/Feedback';
+import axios from 'axios';
 
 const ADMIN_ENUM = {
   matchmaking: 1,
@@ -45,6 +46,11 @@ function App() {
     }
   }
 
+  const logout = async () => {
+    const query = await axios.get("/admin-logout")
+    window.location.replace("/admin-login", "_self")
+}
+
   return (
     <div className='flex flex-col w-full h-screen'>
       <MatchmakingScreen animationVisible={matchesMadeScreenVisible} />
@@ -57,6 +63,7 @@ function App() {
           <button className="option-button" onClick={() => { setPage(ADMIN_ENUM.matchmaking) }}>Matchmaking</button>
           <button className="option-button" onClick={() => { setPage(ADMIN_ENUM.search) }}>User Search</button>
           <button className="option-button" onClick={() => { setPage(ADMIN_ENUM.feedback) }}>Feedback</button>
+          <button className="ml-auto text-red-500" onClick={logout}>Logout</button>
         </div>
       </section>
       <div className="flex-grow">
