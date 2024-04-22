@@ -41,7 +41,7 @@ def upload_resume_file_to_s3(file_upload, user):
         ContentType = file_upload.content_type
     )
     output = 'https://s3-{}.amazonaws.com/{}/{}'.format(app.config['S3_REGION'], app.config['BUCKET_NAME_RESUME'], filename)
-    print(filename, output, file_upload.content_type)
+    #print(filename, output, file_upload.content_type)
     db.session.commit() #just in case
 
     dictFile = {}

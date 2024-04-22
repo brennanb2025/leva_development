@@ -10,6 +10,11 @@ import app.model.progress as progressFuncs
 #from app.routes import delete_intro_video, delete_profile_picture, delete_resume, delete_user_attributes, logData
 
 
+# print(Business.query.all())
+# admin = AdminUser.query.filter_by(id=3).first()
+# admin.set_password("brennanTestAdmin") #must set pwd w/ hashing method
+# db.session.commit()
+
 
 # b = Business(
 #     name="brennanTest",
@@ -34,8 +39,8 @@ import app.model.progress as progressFuncs
 # print([(m15.mentor, m15.score) for m15 in m15M.matches])
 
 
-print(progressFuncs.shouldSolicitFeedback(User.query.filter_by(id=5).first()))
-progressFuncs.submitFeedback(5, "this is some test feedback.")
+# print(progressFuncs.shouldSolicitFeedback(User.query.filter_by(id=5).first()))
+# progressFuncs.submitFeedback(5, "this is some test feedback.")
 
 
 # dictWeights13 = {}

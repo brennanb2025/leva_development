@@ -1692,7 +1692,7 @@ def not_found(e):
     return send_from_directory("../frontend/build", 'index.html')
 
 
-"""
+
 @app.errorhandler(Exception)
 # inbuilt function which takes error as parameter
 def error_handler(e):
@@ -1710,4 +1710,3 @@ def error_handler(e):
         admin.logData(session.get('userId'),16,json.dumps(dictLog))
     
     return render_template("general_error.html", code=code)
-"""

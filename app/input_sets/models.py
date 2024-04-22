@@ -390,7 +390,7 @@ class Business(db.Model, Base):
     number_employees_maximum = db.Column(db.Integer)
     number_employees_currently_registered = db.Column(db.Integer)
 
-    feedback_solicitation_frequency = db.Column(db.Integer)
+    feedback_solicitation_frequency = db.Column(db.Integer, default=0)
 
     def inc_number_employees_currently_registered(self):
         self.number_employees_currently_registered = self.number_employees_currently_registered+1
