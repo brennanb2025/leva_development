@@ -76,12 +76,10 @@ db.session.commit()
 print("All admin users:", AdminUser.query.all())
 
 
-"""
-for b in Business.query.all():
-    print(b)
-"""
+# for b in Business.query.all():
+#     print(b)
 
-#print(User.query.filter_by(last_name="lisa").all())
+#print(User.query.filter_by(business_id=9).all())
 
 #for u in User.query.all():
 #    print(u)

@@ -842,8 +842,7 @@ def get_all_matches_feedWeights(userId):
 
     
     schoolDict = {} #contains all the matching schools for each user (user : [school])
-    thisUserEducationTagIDs = user.rtn_education()
-    thisUserEducationTagIDs = [edu.id for edu in thisUserEducationTagIDs] #get the ids
+    thisUserEducationTagIDs = set(edu.id for edu in user.rtn_education()) #get the ids
 
     for u in users:
         weights = potentialUserWeights.get(u.id, None)

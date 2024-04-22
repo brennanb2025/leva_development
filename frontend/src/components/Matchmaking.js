@@ -55,45 +55,10 @@ function Matchmaking({ toggleMatchmakingScreenVisibility }) {
             }
             tempNum[m] = mentors.length
         })
-        console.log(tempNum)
+        // console.log(tempNum)
         setNumMatches(tempNum)
-    }, [matches])
 
-    // ...and update the mentees.
-    // TODO: Make this call faster, because it seems to be getting blocked pretty hard here
-    useEffect(() => {
-        // Perform filter here...
-        if (allUsers.length == 0) {
-            return
-        }
-        let filtered = allUsers.filter(m => m.is_mentee)
-        let promises = []
-        filtered.map((m) => {
-            const feedcall = axios.get("/admin-lookup-user-feed-all", {
-                params: {
-                    "userid": m.id
-                },
-            })
-            promises.push(feedcall)
-        })
 
-        Promise.all(promises).then((results) => {
-            let temp = {}
-            console.log(results)
-            results.map((m) => {
-                const sortedMatches = m.data.matches.sort(sortMatches)
-                temp[m.data.userId] = sortedMatches
-            })
-            console.log("matches:",temp)
-            setFeed(temp)
-        })
-    }, [allUsers])
-
-    function sortMatches(m1, m2) {
-        return m2.score - m1.score
-    }
-
-    useEffect(() => {
         let filtered = allUsers.filter(m => m.is_mentee)
         let grouped = Object.groupBy(filtered, (m) => matches[m.id] === undefined)
         if(grouped[false] === undefined){
@@ -103,7 +68,41 @@ function Matchmaking({ toggleMatchmakingScreenVisibility }) {
             grouped[true] = []
         }
         setMentees(grouped)
-    }, [feed])
+    }, [matches])
+
+    // ...and update the mentees.
+    // TODO: Make this call faster, because it seems to be getting blocked pretty hard here
+    // useEffect(() => {
+    //     // Perform filter here...
+    //     if (allUsers.length == 0) {
+    //         return
+    //     }
+    //     let filtered = allUsers.filter(m => m.is_mentee)
+    //     let promises = []
+    //     filtered.map((m) => {
+    //         const feedcall = axios.get("/admin-lookup-user-feed-all", {
+    //             params: {
+    //                 "userid": m.id
+    //             },
+    //         })
+    //         promises.push(feedcall)
+    //     })
+
+    //     Promise.all(promises).then((results) => {
+    //         let temp = {}
+    //         console.log(results)
+    //         results.map((m) => {
+    //             const sortedMatches = m.data.matches.sort(sortMatches)
+    //             temp[m.data.userId] = sortedMatches
+    //         })
+    //         console.log("matches:",temp)
+    //         setFeed(temp)
+    //     })
+    // }, [allUsers])
+
+    // function sortMatches(m1, m2) {
+    //     return m2.score - m1.score
+    // }
 
     // ...or update matches here.
     function submitMatches() {
