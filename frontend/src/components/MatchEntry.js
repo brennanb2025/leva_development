@@ -40,25 +40,30 @@ function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setN
     }
 
     const resolveConflict = (mentee, currMentor, candidate, tempNum) => {
+        let conflicts = []
+        // Find the conflicts...
+        for (const [key, value] of Object.entries(matches)) {
+            if (value[0].id == candidates[selMentor.value].id) {
+                conflicts.push(parseInt(key))
+            }
+        }
+        console.log(conflicts)
         confirmAlert({
             title: "Resolve conflict",
-            message: "There is a conflict between the current mentor and the candidate. Do you want to resolve it?",
-            buttons: [
-                {
-                    label: "Yes",
+            message: "This mentor is current matched with these other mentees. Select one to mentee to replace...",
+            buttons: conflicts.map((menteeid) => {
+                const conflictMentee = allUsers.find(obj => {
+                    return obj.id === menteeid
+                })
+                return ({
+                    label: conflictMentee.first_name,
                     onClick: () => {
                         // API call to resolve conflict
-                        console.log("Resolving conflict", mentee, currMentor, candidate)
-                        updateState(mentee, currMentor, candidate, tempNum)
+                        console.log("Resolving conflict", mentee, currMentor, candidate, conflictMentee)
+                        updateState(mentee, currMentor, candidate, tempNum, conflictMentee)
                     }
-                },
-                {
-                    label: "No",
-                    onClick: () => {
-                        // Do nothing
-                    }
-                }
-            ]
+                })
+            }).concat([{ label: "Cancel", onClick: () => { "" } }])
         })
     }
 
@@ -80,20 +85,46 @@ function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setN
         }
     }
 
-  const updateState = (mentee, currMentor, candidate, numMatches, displacedMentee = undefined) => {
-    let temp = { ...numMatches }
-    if (currMentor) {
-        temp[currMentor.id] -= 1
+    const updateState = (mentee, currMentor, candidate, numMatches, displacedMentee = undefined) => {
+        // temp is a copy of numMatches
+        let temp = { ...numMatches }
+
+        // If mentor is being replaced, decrement the number of mentees pointing to the mentor
+        if (currMentor) {
+            temp[currMentor.id] -= 1
+        }
+        // Increment the number of mentees pointing to the new mentor
+        temp[candidate.id] += 1
+        temp[mentee.id] = 1
+        // Displacement happening, remove both displaced mentee and candidate from the count
+        if (displacedMentee) {
+            temp[displacedMentee.id] -= 1
+            temp[candidate.id] -= 1
+        }
+        setNumMatches(temp)
+
+        setMentees(prev => {
+            if (!currMentor) {
+                prev[false].push(mentee)
+                prev[true].splice(prev[true].indexOf(mentee), 1)
+            }
+            if(displacedMentee){
+                prev[true].push(displacedMentee)
+                prev[false].splice(prev[false].indexOf(displacedMentee), 1)
+            }
+            return prev
+        })
+
+        setMatches(prev => {
+            prev[mentee.id] = [candidate]
+            if(displacedMentee){
+                delete prev[displacedMentee.id]
+            }
+            return prev
+        })
+
+        setDisabled(true)
     }
-    temp[candidate.id] += 1
-    temp[mentee.id] = 1
-    if (displacedMentee) {
-        temp[displacedMentee.id] -= 1
-    }
-    console.log("new numMatches", temp)
-    setNumMatches(temp)
-    setDisabled(true)
-  }
 
   const checkMatch = async () => {
     if(disabled) {
@@ -134,7 +165,7 @@ function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setN
         
         // If the match is viable, update the state
         if(res.success){
-            updateState(mentee, mentor, tempNum, candidate)
+            updateState(mentee, mentor, candidate, tempNum)
         }
         // else, alert the user that the match is not viable
         else{
@@ -142,7 +173,6 @@ function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setN
         }
     })
   }
-
   return (
       <div
           className={`w-full relative p-3 mt-4 first:mt-0 flex flex-row justify-around items-center`}
