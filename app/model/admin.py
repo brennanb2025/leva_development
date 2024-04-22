@@ -206,10 +206,12 @@ def validate_match(menteeId, mentorId, numMatching):
 
     print("validating match. Mentee:",mentee,"mentor:",mentor,"numMatching:", numMatching)
 
-    print(numMatching[menteeId]-1+len(selectsMentee))
-    print(num_pairings_mentee)
-    print(numMatching[mentorId]-1+len(selectsMentor))
-    print(num_pairings_mentor)
+    print("print1", numMatching[menteeId]-1+len(selectsMentee))
+    print("print2", num_pairings_mentee)
+    print("print3", numMatching[mentorId]-1+len(selectsMentor))
+    print("print4", num_pairings_mentor)
+
+    print("here")
     
     if numMatching[menteeId]-1+len(selectsMentee) >= num_pairings_mentee or \
             numMatching[mentorId]-1+len(selectsMentor) >= num_pairings_mentor:

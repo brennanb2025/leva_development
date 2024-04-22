@@ -3,7 +3,6 @@ import Dropdown from 'react-dropdown'
 import { confirmAlert } from "react-confirm-alert"; // Import
 import axios from 'axios'
 
-// "Helper functions"
 function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setNumMatches, setModalOpen, setModalProps, ...props}) {
 
   let mentee = props.mentee
@@ -18,126 +17,108 @@ function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setN
   let mentor
   if (mentors !== undefined) {
       mentor = mentors[0]
+      candidates = candidates.filter(m => m.id !== mentor.id)
   }
 
   const options = candidates.map((m, i) => ({ label: m.first_name, value: i }))
   let color = !disabled ? "bg-purple-200" : "bg-slate-100"
 
-  // Potentially update match here?
+    // "Helper functions"
+    const validateMatch = async (mentee, mentor, numMatchings) => {
+        console.log(mentee.id, mentor.id, numMatchings)
+        const query = await axios.get("/admin-validate-match", {
+            params: {
+                menteeId: mentee.id,
+                mentorId: mentor.id,
+                numMatching: JSON.stringify(numMatchings)
+            }
+        })
+        return query.data
+    }
+
+    const resolveConflict = (mentee, currMentor, candidate, tempNum) => {
+        confirmAlert({
+            title: "Resolve conflict",
+            message: "There is a conflict between the current mentor and the candidate. Do you want to resolve it?",
+            buttons: [
+                {
+                    label: "Yes",
+                    onClick: () => {
+                        // API call to resolve conflict
+                        console.log("Resolving conflict", mentee, currMentor, candidate)
+                        updateState(mentee, currMentor, candidate, tempNum)
+                    }
+                },
+                {
+                    label: "No",
+                    onClick: () => {
+                        // Do nothing
+                    }
+                }
+            ]
+        })
+    }
+
+  const updateState = (mentee, currMentor, candidate, numMatches, displacedMentee = undefined) => {
+    let temp = { ...numMatches }
+    if (currMentor) {
+        temp[currMentor.id] -= 1
+    }
+    temp[candidate.id] += 1
+    temp[mentee.id] = 1
+    if (displacedMentee) {
+        temp[displacedMentee.id] -= 1
+    }
+    console.log("new numMatches", temp)
+    setNumMatches(temp)
+    setDisabled(true)
+  }
+
   const checkMatch = async () => {
-      if (disabled == false) {
+    if(disabled) {
+        setDisabled(false)
+        return
+    }
 
-          if (mentors && (selMentor.value == -1 || candidates[selMentor.value].id == mentor.id)) {
-              setDisabled(!disabled)
-              return
-          }
+    // Need to check if selection is viable
+    if(selMentor.value === -1) {
+        return;
+    }
 
-          let m_id = candidates[selMentor.value].id
-          let numCopy = structuredClone(numMatches)
-          // Changes start here
-          if (numCopy[m_id] === undefined) {
-              numCopy[m_id] = 1
-          }
-          else {
-              numCopy[m_id] += 1
-          }
+    // Current candidate:
+    const candidate = candidates[selMentor.value]
 
-          if (mentor) {
-              numCopy[mentor.id] -= 1
-          }
+    // Take copy of numMatches ane edit to represent the selection
+    let tempNum = numMatches
+    // current mentee (always 0 probably, to represent vacancy)
+    tempNum[mentee.id] = 0
+    // Mentor to be added, show that matching wants to happen
+    if(!tempNum[candidate.id]){
+        tempNum[candidate.id] = 0
+    }
+    // If there was a mentor before, remove
+    if(mentor){
+        if(tempNum[mentor.id] === 1){
+            delete tempNum[mentor.id]
+        }
+        else{
+            tempNum[mentor.id] -= 1
+        }
+    }
 
-          if (numCopy[mentee.id] === undefined) {
-              numCopy[mentee.id] = 1
-          }
-          console.log(numCopy)
-          const query = await axios.get("/admin-validate-match", {
-              params: {
-                  mentorId: m_id,
-                  menteeId: mentee.id,
-                  numMatching: JSON.stringify(numCopy)
-              }
-          })
-          if (query.data.success) {
-              // change matching...
-              // Frontend changes...
-              setDisabled(!disabled)
-              setUpdateStatus(2)
-              setTimeout(() => setUpdateStatus(1), "3000")
-              setMatches(prev => {
-                  console.log("prev:", prev)
-                  prev[mentee.id] = [candidates[selMentor.value]]
-                  console.log("new:", prev)
-                  return prev
-              })
-              setNumMatches(numCopy)
-              if (!mentors) {
-                  setMentees(prev => {
-                      prev[false].push(mentee)
-                      prev[true].splice(prev[true].indexOf(mentee), 1)
-                      return prev
-                  })
-              }
-          }
-          else {
-              console.log("invalid")
-              setUpdateStatus(0)
-              setTimeout(() => setUpdateStatus(1), "3000")
-
-              let conflicts = []
-              console.log(conflicts)
-              // Find the conflicts...
-              for (const [key, value] of Object.entries(matches)) {
-                  if (value[0].id == candidates[selMentor.value].id) {
-                      console.log(parseInt(key))
-                      conflicts.push(parseInt(key))
-                  }
-              }
-              console.log(matches)
-              // modal here...
-              confirmAlert({
-                  title: "Confirm to reorder",
-                  message: "This mentor is current matched with these other mentees. Select one to mentee to replace...",
-                  buttons: conflicts.map((menteeid) => {
-                      const conflictMentee = allUsers.find(obj => {
-                          return obj.id === menteeid
-                      })
-                      return ({
-                          label: conflictMentee.first_name,
-                          onClick: () => {
-                              setMentees(prev => {
-                                  if (!mentors) {
-                                      prev[false].push(mentee)
-                                      prev[true].splice(prev[true].indexOf(mentee), 1)
-                                  }
-                                  prev[true].push(conflictMentee)
-                                  prev[false].splice(prev[false].indexOf(conflictMentee), 1)
-                                  return prev
-                              })
-                              let numCopy = structuredClone(numMatches)
-
-                              if (numCopy[mentee.id] === undefined) {
-                                  numCopy[mentee.id] = 1
-                              }
-                              else {
-                                  numCopy[mentee.id] += 1
-                              }
-                              numCopy[conflictMentee.id] -= 1
-
-                              setNumMatches(numCopy)
-                              setMatches(prev => {
-                                  prev[mentee.id] = [candidates[selMentor.value]]
-                                  delete prev[conflictMentee.id]
-                                  return prev
-                              })
-                          }
-                      })
-                  }).concat([{ label: "Cancel", onClick: () => { "" } }])
-              });
-          }
-      }
-      else {
-          setDisabled(!disabled)
-      }
+    // Run the API call to check the matches (probably a helper)
+    validateMatch(mentee, candidate, tempNum).then((res) => {
+        console.log(res)
+        
+        // If the match is viable, update the state
+        if(res.success){
+            updateState(mentee, mentor, tempNum, candidate)
+        }
+        // else, alert the user that the match is not viable
+        else{
+            resolveConflict(mentee, mentor, candidate, tempNum)
+        }
+    })
   }
 
   return (

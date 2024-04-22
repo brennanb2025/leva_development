@@ -60,6 +60,7 @@ function Matchmaking({ toggleMatchmakingScreenVisibility }) {
     }, [matches])
 
     // ...and update the mentees.
+    // TODO: Make this call faster, because it seems to be getting blocked pretty hard here
     useEffect(() => {
         // Perform filter here...
         if (allUsers.length == 0) {
@@ -97,6 +98,9 @@ function Matchmaking({ toggleMatchmakingScreenVisibility }) {
         let grouped = Object.groupBy(filtered, (m) => matches[m.id] === undefined)
         if(grouped[false] === undefined){
             grouped[false] = []
+        }
+        if(grouped[true] === undefined){
+            grouped[true] = []
         }
         setMentees(grouped)
     }, [feed])
