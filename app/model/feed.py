@@ -16,15 +16,19 @@ heuristicVals["personality"] = 10
 heuristicVals["gender_pref"] = 10 
 
 
-class match_suggestion:
+class match_similarities:
     def __init__(self):
-        self.mentor = None
         self.mentorInterestMatches = []
         self.mentorCareerMatches = []
         self.mentorEducationMatches = []
         self.mentorGenderPreferenceMatching = False
         self.personalityMatches = []
+
+class match_suggestion:
+    def __init__(self):
+        self.mentor = None
         self.score = None
+        self.match_similarities = None
 
 class match_suggested_response:
     def __init__(self):
@@ -839,10 +843,9 @@ def get_all_matches_feedWeights(userId):
                 userDict[u] += (sumPersonalityMatches / 6) * heuristicVals["personality"]
 
                 # divided by 6 because 6 personality traits total.
-
     
     schoolDict = {} #contains all the matching schools for each user (user : [school])
-    thisUserEducationTagIDs = set(edu.id for edu in user.rtn_education()) #get the ids
+    thisUserEducationTagIDs = set(edu.educationID for edu in user.rtn_education()) #get the ids
 
     for u in users:
         weights = potentialUserWeights.get(u.id, None)
@@ -851,16 +854,12 @@ def get_all_matches_feedWeights(userId):
         numberOfEducationMatches = 0
         
         for educ in potentialUserEducation: #cycle thru each user education
-            educationTags = EducationTag.query.filter_by(educationID=educ.educationID).all()
-            for edTag in educationTags: #go thru all the educationTags (the ones related to each user ans unique to each input)
-                if edTag.id in thisUserEducationTagIDs:
-                    if u in schoolDict: #add user to the dict
-                        schoolDict[u].append(edTag.entered_name)
-                    else:
-                        sArr = [edTag.entered_name] #not already in the dict --> add a new array
-                        schoolDict[u] = sArr
-
-                    numberOfEducationMatches += 1
+            if educ.educationID in thisUserEducationTagIDs:
+                if u in schoolDict:
+                    schoolDict[u] = schoolDict[u].append(educ.entered_name)
+                else:
+                    schoolDict[u] = schoolDict[u] = [educ.entered_name]
+                numberOfEducationMatches += 1
 
         educationPercentMatches = numberOfEducationMatches / totalNumberOfEducation
         #now update match amount in user dict
@@ -874,26 +873,23 @@ def get_all_matches_feedWeights(userId):
             userDict[u] += educationPercentMatches * heuristicVals["education"]
         #matches["education"] += numberOfEducationMatches
 
+
     interestTitleDict = {} #contains all the matching tags for each user (user : [interest tag titles])
-    thisUserInterestTagIDs = user.rtn_interests()
-    thisUserInterestTagIDs = [intrst.id for intrst in thisUserInterestTagIDs] #get the ids
+    thisUserInterestTagIDs = set(intrst.interestID for intrst in user.rtn_interests()) #get the ids
 
     for u in users:
         weights = potentialUserWeights.get(u.id, None)
         potentialUserInterests = u.rtn_interests()
         totalNumberOfInterests = len(thisUserInterestTagIDs) + len(potentialUserInterests)
         numberOfInterestMatches = 0
-        for intrst in potentialUserInterests: #cycle thru each user interest
-            interestTags = InterestTag.query.filter_by(interestID=intrst.interestID).all()
-            for intT in interestTags: #go thru all the interestTags (the ones related to each user ans unique to each input)
-                if intT.id in thisUserInterestTagIDs:
-                    if u in interestTitleDict: #add user to the dict
-                        interestTitleDict[u].append(intT.entered_name)
-                    else:
-                        iArr = [intT.entered_name] #not already in the dict --> add a new array
-                        interestTitleDict[u] = iArr
 
-                    numberOfInterestMatches += 1 
+        for intrst in potentialUserInterests: #cycle thru each user interest
+            if intrst.interestID in thisUserInterestTagIDs:
+                if u in interestTitleDict:
+                    interestTitleDict[u].append(intrst.entered_name)
+                else:
+                    interestTitleDict[u] = [intrst.entered_name]
+                numberOfInterestMatches += 1 
                     
         interestPercentMatches = numberOfInterestMatches / totalNumberOfInterests
         if thisUserWeights and weights:
@@ -906,10 +902,8 @@ def get_all_matches_feedWeights(userId):
         
         #matches["interest"] += numberOfInterestMatches
 
-
     careerDict = {} #contains all the matching career tags for each user (user : [career experience/interest title])
-    thisUserCareerInterestIDs = user.rtn_career_interests()
-    thisUserCareerInterestIDs = [cInt.id for cInt in thisUserCareerInterestIDs] #get the ids
+    thisUserCareerInterestIDs = set(cInt.careerInterestID for cInt in user.rtn_career_interests()) #get the ids
 
     for u in users:
         weights = potentialUserWeights.get(u.id, None)
@@ -918,16 +912,12 @@ def get_all_matches_feedWeights(userId):
         numberOfCareerInterestMatches = 0
 
         for cInt in potentialUserCareerInterests: #cycle thru each
-            careerInterestTags = CareerInterestTag.query.filter_by(careerInterestID=cInt.careerInterestID).all()
-            for cInt in careerInterestTags: #go thru all the educationTags (the ones related to each user ans unique to each input)
-                if cInt.id in thisUserCareerInterestIDs:
-                    if u in careerDict: #add user to the dict
-                        careerDict[u].append(cInt.entered_name)
-                    else:
-                        cArr = [cInt.entered_name] #not already in the dict --> add a new array
-                        careerDict[u] = cArr
-
-                    numberOfCareerInterestMatches += 1 
+            if cInt.careerInterestID in thisUserCareerInterestIDs:
+                if u in careerDict:
+                    careerDict[u].append(cInt.entered_name)
+                else:
+                    careerDict[u] = [cInt.entered_name]
+                numberOfCareerInterestMatches += 1 
                     
         careerInterestPercentMatches = numberOfCareerInterestMatches / totalNumberOfCareerInterests
         if thisUserWeights and weights:
@@ -940,22 +930,101 @@ def get_all_matches_feedWeights(userId):
 
         #matches["career"] += numberOfCareerInterestMatches
 
-
     resp = match_suggested_response()
     matchSuggestions = []
     for u in userDict.keys():
 
         matchSuggestion = match_suggestion()
+        matchSimilarities = match_similarities()
         matchSuggestion.mentor = u
-        matchSuggestion.mentorInterestMatches = interestTitleDict[u] if u in interestTitleDict else []
-        matchSuggestion.mentorCareerMatches = careerDict[u] if u in careerDict else []
-        matchSuggestion.mentorEducationMatches = schoolDict[u] if u in schoolDict else []
+        matchSimilarities.mentorInterestMatches = interestTitleDict[u] if u in interestTitleDict else []
+        matchSimilarities.mentorCareerMatches = careerDict[u] if u in careerDict else []
+        matchSimilarities.mentorEducationMatches = schoolDict[u] if u in schoolDict else []
         matchSuggestion.score = userDict[u]
-        matchSuggestion.mentorGenderPreferenceMatching = True if u in hasDesiredGenders else False
-        matchSuggestion.personalityMatches = list(personalityDict[u.id])
+        matchSimilarities.mentorGenderPreferenceMatching = True if u in hasDesiredGenders else False
+        matchSimilarities.personalityMatches = list(personalityDict[u.id])
+
+        matchSuggestion.match_similarities = matchSimilarities
 
         matchSuggestions.append(matchSuggestion)
 
     resp.userId = user.id
     resp.matches = matchSuggestions
     return resp
+
+
+
+
+def getSimilarities(menteeId, mentorId):
+    
+    mentee = User.query.filter_by(id=menteeId).first()
+    if mentee == None:
+        return
+
+    mentor = User.query.filter_by(id=mentorId).first()
+    if mentor == None:
+        return
+
+    hasDesiredGenders = False
+
+    #check gender preference/identity
+    if str(app.config['MATCHING_FLAG_MENTOR_GENDER_PREFERENCE']) == "True": #only check if flag for gender/identity is "True"
+        if mentee.mentor_gender_preference == "noPreference" or (mentee.mentor_gender_preference == "male" and mentor.gender_identity == "male") or (mentee.mentor_gender_preference == "female" and mentor.gender_identity == "female"):
+            #matching gender preference / gender (or mentee has no preferece)
+            hasDesiredGenders = True
+
+    personalities = []
+
+    if str(app.config['MATCHING_FLAG_PERSONALITY']) == "True":
+        if (mentee.personality_1 and mentor.personality_1) and (mentee.personality_1 in mentor.personality_1 or mentor.personality_1 in mentee.personality_1):
+            personalities.append(mentee.personality_1)
+            personalities.append(mentor.personality_1)
+        if (mentee.personality_1 and mentor.personality_2) and (mentee.personality_1 in mentor.personality_2 or mentor.personality_2 in mentee.personality_1):
+            personalities.append(mentee.personality_1)
+            personalities.append(mentor.personality_2)
+        if (mentee.personality_1 and mentor.personality_3) and (mentee.personality_1 in mentor.personality_3 or mentor.personality_3 in mentee.personality_1):
+            personalities.append(mentee.personality_1)
+            personalities.append(mentor.personality_3)
+        if (mentee.personality_2 and mentor.personality_2) and (mentee.personality_2 in mentor.personality_2 or mentor.personality_2 in mentee.personality_2):
+            personalities.append(mentee.personality_2)
+            personalities.append(mentor.personality_2)
+        if (mentee.personality_2 and mentor.personality_3) and (mentee.personality_2 in mentor.personality_3 or mentor.personality_3 in mentee.personality_2):
+            personalities.append(mentee.personality_2)
+            personalities.append(mentor.personality_3)
+        if (mentee.personality_3 and mentor.personality_3) and (mentee.personality_3 in mentor.personality_3 or mentor.personality_3 in mentee.personality_3):
+            personalities.append(mentee.personality_3)
+            personalities.append(mentor.personality_3)
+    
+    schools = []
+    thisUserEducationTagIDs = set(edu.educationID for edu in mentee.rtn_education()) #get the ids
+    potentialUserEducation = mentor.rtn_education()
+        
+    for educ in potentialUserEducation: #cycle thru each user education
+        if educ.educationID in thisUserEducationTagIDs:
+            schools.append(educ.entered_name)
+
+    interests = []
+    thisUserInterestTagIDs = set(intrst.interestID for intrst in mentee.rtn_interests()) #get the ids
+
+    potentialUserInterests = mentor.rtn_interests()
+
+    for intrst in potentialUserInterests: #cycle thru each user interest
+        if intrst.interestID in thisUserInterestTagIDs:
+            interests.append(intrst.entered_name)
+
+    careers = []
+    thisUserCareerInterestIDs = set(cInt.careerInterestID for cInt in mentee.rtn_career_interests()) #get the ids
+
+    potentialUserCareerInterests = mentor.rtn_career_interests()
+
+    for cInt in potentialUserCareerInterests: #cycle thru each
+        if cInt.careerInterestID in thisUserCareerInterestIDs:
+            careers.append(cInt.entered_name)
+
+    matchSimilarities = match_similarities()
+    matchSimilarities.mentorInterestMatches = interests
+    matchSimilarities.mentorCareerMatches = careers
+    matchSimilarities.mentorEducationMatches = schools
+    matchSimilarities.mentorGenderPreferenceMatching = hasDesiredGenders
+    matchSimilarities.personalityMatches = personalities
+    return matchSimilarities

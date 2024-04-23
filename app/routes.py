@@ -315,15 +315,39 @@ def admin_lookup_user_feed_all():
         [
             {
                 "mentor": userUtils.format_user_as_json(m.mentor),
-                "mentorInterestMatches": [i.lower() for i in m.mentorInterestMatches],
-                "mentorCareerMatches": [i.lower() for i in m.mentorCareerMatches],
-                "mentorEducationMatches": [i.lower() for i in m.mentorEducationMatches],
-                "mentorPersonalityMatches": [i.lower() for i in m.personalityMatches],
-                "mentorGenderPreferenceMatch": m.mentorGenderPreferenceMatching,
+                "matchSimilarities": {
+                    "mentorInterestMatches": [i.lower() for i in m.match_similarities.mentorInterestMatches],
+                    "mentorCareerMatches": [i.lower() for i in m.match_similarities.mentorCareerMatches],
+                    "mentorEducationMatches": [i.lower() for i in m.match_similarities.mentorEducationMatches],
+                    "mentorPersonalityMatches": [i.lower() for i in m.match_similarities.personalityMatches],
+                    "mentorGenderPreferenceMatch": m.match_similarities.mentorGenderPreferenceMatching,
+                },
                 "score": m.score
             }
             for m in allMatches.matches
         ]
+    }
+
+    return jsonify(jsonRtn)
+
+
+@app.route("/admin-lookup-similarities", methods = ['GET'])
+def admin_lookup_similarities():
+    if not adminUserLoggedIn():
+        return
+
+    menteeId = request.args.get("menteeid")
+    mentorId = request.args.get("mentorid")
+    similarities = feed.getSimilarities(menteeId, mentorId)
+
+    jsonRtn = {
+        "matchSimilarities": {
+            "mentorInterestMatches": [i.lower() for i in similarities.mentorInterestMatches],
+            "mentorCareerMatches": [i.lower() for i in similarities.mentorCareerMatches],
+            "mentorEducationMatches": [i.lower() for i in similarities.mentorEducationMatches],
+            "mentorPersonalityMatches": [i.lower() for i in similarities.personalityMatches],
+            "mentorGenderPreferenceMatch": similarities.mentorGenderPreferenceMatching
+        }
     }
 
     return jsonify(jsonRtn)

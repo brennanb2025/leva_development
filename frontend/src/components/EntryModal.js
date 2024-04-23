@@ -1,5 +1,6 @@
-import {React} from 'react'
+import {React, useState} from 'react'
 import Modal from 'react-modal'
+import axios from 'axios'
 
 
 function EntryModal({setModalOpen, modalOpen, feed, ...props}) {
@@ -7,11 +8,29 @@ function EntryModal({setModalOpen, modalOpen, feed, ...props}) {
   let mentee = props.user
 
   let displayinfo = [mentee]
-  let feedObj = null
+  const [similarities, setSimilarities] = useState(null)
+
+
+  const getSimilaritiesBetweenMatch = (mentee, mentor) => {
+    console.log("getting similarities", mentee.id, mentor.id)
+    axios.get("/admin-lookup-similarities", {
+        params: {
+            "menteeid": mentee.id,
+            "mentorid": mentor.id
+        },
+    }).then((results) => {
+        setSimilarities(results.data)
+    })
+  }
+
+
   if (mentor !== undefined) {
-      displayinfo.push(mentor)
-      feedObj = feed[displayinfo[0].id].find((elem) => elem.mentor.id === mentor.id)
-      console.log("obj:",feedObj)
+        displayinfo.push(mentor)
+        if(feed[displayinfo[0].id] === undefined) {
+            getSimilaritiesBetweenMatch(mentee, mentor)
+        } else {
+            setSimilarities(feed[displayinfo[0].id].find((elem) => elem.mentor.id === mentor.id))
+        }
   }
 
   return (
@@ -64,9 +83,9 @@ function EntryModal({setModalOpen, modalOpen, feed, ...props}) {
                                   <li>
                                       <span className='font-bold'>Personality traits: </span> 
                                       <span>
-                                          <span className={`${feedObj === null ? '' : feedObj.mentorPersonalityMatches.includes(person.personality_1 === null ? null : person.personality_1.toLowerCase()) ? 'text-green-500' : ''}`}>{person.personality_1}, </span>
-                                          <span className={`${feedObj === null ? '' : feedObj.mentorPersonalityMatches.includes(person.personality_2 === null ? null : person.personality_2.toLowerCase()) ? 'text-green-500' : ''}`}>{person.personality_2}, </span>
-                                          <span className={`${feedObj === null ? '' : feedObj.mentorPersonalityMatches.includes(person.personality_3 === null ? null : person.personality_3.toLowerCase()) ? 'text-green-500' : ''}`}>{person.personality_3}</span>
+                                          <span className={`${similarities === null || similarities === undefined ? '' : similarities.matchSimilarities.mentorPersonalityMatches.includes(person.personality_1 === null ? null : person.personality_1.toLowerCase()) ? 'text-green-500' : ''}`}>{person.personality_1}, </span>
+                                          <span className={`${similarities === null || similarities === undefined ? '' : similarities.matchSimilarities.mentorPersonalityMatches.includes(person.personality_2 === null ? null : person.personality_2.toLowerCase()) ? 'text-green-500' : ''}`}>{person.personality_2}, </span>
+                                          <span className={`${similarities === null || similarities === undefined ? '' : similarities.matchSimilarities.mentorPersonalityMatches.includes(person.personality_3 === null ? null : person.personality_3.toLowerCase()) ? 'text-green-500' : ''}`}>{person.personality_3}</span>
                                       </span>
                                   </li>
 
@@ -74,12 +93,12 @@ function EntryModal({setModalOpen, modalOpen, feed, ...props}) {
                                       person.is_mentee ?
                                           <li>
                                               <span className='font-bold'>Mentor gender preference: </span> 
-                                              <span className={`${feedObj === null ? '' : feedObj.mentorGenderPreferenceMatch ? 'text-green-500' : ''}`}>{person.mentor_gender_preference}</span>
+                                              <span className={`${similarities === undefined || similarities === null ? '' : similarities.matchSimilarities.mentorGenderPreferenceMatch ? 'text-green-500' : ''}`}>{person.mentor_gender_preference}</span>
                                           </li>
                                           :
                                           <li>
                                               <span className='font-bold'>Gender identity: </span> 
-                                              <span className={`${feedObj === null ? '' : feedObj.mentorGenderPreferenceMatch ? 'text-green-500' : ''}`}>{person.gender_identity}</span>
+                                              <span className={`${similarities === null || similarities === undefined ? '' : similarities.matchSimilarities.mentorGenderPreferenceMatch ? 'text-green-500' : ''}`}>{person.gender_identity}</span>
                                           </li>
                                   }
 
@@ -88,10 +107,10 @@ function EntryModal({setModalOpen, modalOpen, feed, ...props}) {
                                       <span>{
                                           person.career_interests.map((field, i) => {
                                               if (i == person.career_interests.length - 1) {
-                                                  return (<span className={`${feedObj === null ? '' : feedObj.mentorCareerMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>)
+                                                  return (<span className={`${similarities === null || similarities === undefined ? '' : similarities.matchSimilarities.mentorCareerMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>)
                                               }
                                               return (<span>
-                                                  <span className={`${feedObj === null ? '' : feedObj.mentorCareerMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>,&nbsp;
+                                                  <span className={`${similarities === null || similarities === undefined ? '' : similarities.matchSimilarities.mentorCareerMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>,&nbsp;
                                               </span>)
                                           })
                                       }</span>
@@ -101,10 +120,10 @@ function EntryModal({setModalOpen, modalOpen, feed, ...props}) {
                                       <span>{
                                           person.interests.map((field, i) => {
                                               if (i == person.interests.length - 1) {
-                                                  return (<span className={`${feedObj === null ? '' : feedObj.mentorInterestMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>)
+                                                  return (<span className={`${similarities === null || similarities === undefined ? '' : similarities.matchSimilarities.mentorInterestMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>)
                                               }
                                               return (<span>
-                                                  <span className={`${feedObj === null ? '' : feedObj.mentorInterestMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>,&nbsp;
+                                                  <span className={`${similarities === null || similarities === undefined ? '' : similarities.matchSimilarities.mentorInterestMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>,&nbsp;
                                               </span>)
                                           })
                                       }</span>
@@ -114,10 +133,10 @@ function EntryModal({setModalOpen, modalOpen, feed, ...props}) {
                                       <span>{
                                           person.education.map((field, i) => {
                                               if (i == person.education.length - 1) {
-                                                  return (<span className={`${feedObj === null ? '' : feedObj.mentorEducationMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>)
+                                                  return (<span className={`${similarities === null || similarities === undefined ? '' : similarities.matchSimilarities.mentorEducationMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>)
                                               }
                                               return (<span>
-                                                  <span className={`${feedObj === null ? '' : feedObj.mentorEducationMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>,&nbsp;
+                                                  <span className={`${similarities === null || similarities === undefined ? '' : similarities.matchSimilarities.mentorEducationMatches.includes(field.toLowerCase()) ? 'text-green-500' : ''}`}>{field.toLowerCase()}</span>,&nbsp;
                                               </span>)
                                           })
                                       }</span>
@@ -130,7 +149,7 @@ function EntryModal({setModalOpen, modalOpen, feed, ...props}) {
                                       </span> 
                                   }
 
-                                  {
+                                  { 
                                       person.resume === null ? 
                                           <div className='text-white'>No resume</div> : 
                                           <a href={person.resume} target="_blank" className='text-white underline cursor-pointer'>Resume</a>

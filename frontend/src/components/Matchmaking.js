@@ -17,6 +17,8 @@ function Matchmaking({ toggleMatchmakingScreenVisibility }) {
     const [feed, setFeed] = useState({})
     const [numMatches, setNumMatches] = useState({}) // Mapping from mentor to number of mentees pointing to mentor
 
+    console.log("feed:",feed)
+
     // Populate matches, mentees state
     useEffect(() => {
         const matchescall = axios.get("/admin-user-matches")
@@ -34,6 +36,25 @@ function Matchmaking({ toggleMatchmakingScreenVisibility }) {
             setAllUsers(results[1].data)
         })
     }, [])
+
+
+    function sortMatches(m1, m2) {
+        return m2.score - m1.score
+    }
+
+    const parentOnDropdownClicked = (id) => {
+        if(feed[id] === undefined) {
+            axios.get("/admin-lookup-user-feed-all", {
+                params: {
+                    "userid": id
+                },
+            }).then((results) => {
+                console.log("Got results", results)
+                setFeed({...feed, [id] : results.data.matches.sort(sortMatches)})
+            })
+        }
+    }
+
 
     // As a consequence of the API call, the function should...
     // Update the matches state
@@ -164,7 +185,7 @@ function Matchmaking({ toggleMatchmakingScreenVisibility }) {
                             <MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={i} 
                                 setModalProps={setModalProps} setModalOpen={setModalOpen}
                                 matches={matches} setMatches={setMatches} numMatches={numMatches} setNumMatches={setNumMatches}
-                                allUsers={allUsers} setMentees={setMentees}
+                                allUsers={allUsers} setMentees={setMentees} parentOnDropdownClicked={parentOnDropdownClicked}
                             />
                         )) : ""
                     }
@@ -173,7 +194,7 @@ function Matchmaking({ toggleMatchmakingScreenVisibility }) {
                             <MatchEntry mentee={m} mentors={matches[m.id]} candidates={feed[m.id]} index={mentees[true].length + i} 
                                 setModalProps={setModalProps} setModalOpen={setModalOpen}
                                 matches={matches} setMatches={setMatches} numMatches={numMatches} setNumMatches={setNumMatches}
-                                allUsers={allUsers} setMentees={setMentees}
+                                allUsers={allUsers} setMentees={setMentees} parentOnDropdownClicked={parentOnDropdownClicked}
                             />
                         )) : ""
                     }

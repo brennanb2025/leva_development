@@ -3,27 +3,27 @@ import Dropdown from 'react-dropdown'
 import { confirmAlert } from "react-confirm-alert"; // Import
 import axios from 'axios'
 
-function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setNumMatches, setModalOpen, setModalProps, ...props}) {
+function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setNumMatches, setModalOpen, setModalProps, parentOnDropdownClicked, ...props}) {
 
   let mentee = props.mentee
   let mentors = props.mentors
-//   let candidates = props.candidates.map(m => m.mentor)
+  let candidates = []
+  if(props.candidates !== undefined) {
+    candidates = props.candidates.map(m => m.mentor)
+  }
   let index = props.index
 
   const [disabled, setDisabled] = useState(mentors !== undefined) //mentee in matches --> mentee was already matched
   const [selMentor, setSelMentor] = useState({ label: mentor ? mentor.first_name : "Select mentor...", value: mentors === undefined ? 0 : -1 })
   const [updateStatus, setUpdateStatus] = useState(1)
-  const [feed, setFeed] = useState([])
-
-  const options = feed.map((m, i) => ({ label: m.mentor.first_name, value: i }));
 
   let mentor
   if (mentors !== undefined) {
       mentor = mentors[0]
-    //   candidates = candidates.filter(m => m.id !== mentor.id)
+      candidates = candidates.filter(m => m.id !== mentor.id)
   }
 
-//   const options = candidates.map((m, i) => ({ label: m.first_name, value: i }))
+  const options = candidates.map((m, i) => ({ label: m.first_name, value: i }))
   let color = !disabled ? "bg-purple-200" : "bg-slate-100"
 
     // "Helper functions"
@@ -67,22 +67,8 @@ function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setN
         })
     }
 
-
-    function sortMatches(m1, m2) {
-        return m2.score - m1.score
-    }
-
     const onDropdownClicked = () => {
-        console.log("Getting feed for", mentee.id);
-        if(feed.length === 0) {
-            axios.get("/admin-lookup-user-feed-all", {
-                params: {
-                    "userid": mentee.id
-                },
-            }).then((results) => {
-                setFeed(results.data.matches.sort(sortMatches))
-            })
-        }
+        parentOnDropdownClicked(mentee.id)
     }
 
     const updateState = (mentee, currMentor, candidate, numMatches, displacedMentee = undefined) => {
@@ -138,8 +124,7 @@ function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setN
     }
 
     // Current candidate:
-    //const candidate = candidates[selMentor.value]
-    const candidate = feed[selMentor.value]
+    const candidate = candidates[selMentor.value]
 
     // Take copy of numMatches ane edit to represent the selection
     let tempNum = numMatches
@@ -181,8 +166,7 @@ function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setN
           <div className='z-10 basis-1/3 flex flex-row justify-between items-center peer'
               onClick={() => {
                   setModalOpen(true)
-                //   setModalProps({ mentee: mentee, mentor: mentor ? mentor : selMentor.label === "Select mentor..." ? undefined : candidates[selMentor.value] })
-                setModalProps({ mentee: mentee, mentor: mentor ? mentor : selMentor.label === "Select mentor..." ? undefined : feed[selMentor.value] })
+                  setModalProps({ mentee: mentee, mentor: mentor ? mentor : selMentor.label === "Select mentor..." ? undefined : candidates[selMentor.value] })
                   // show selected mentor if the user has selected one
               }}>
               <div className="flex flex-row items-center basis-1/3 font-bold">
