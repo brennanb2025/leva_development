@@ -1,4 +1,4 @@
-import {React, useState} from 'react'
+import {React, useEffect, useState} from 'react'
 import Modal from 'react-modal'
 import axios from 'axios'
 
@@ -23,15 +23,19 @@ function EntryModal({setModalOpen, modalOpen, feed, ...props}) {
     })
   }
 
-
-  if (mentor !== undefined) {
+  // Run following only when modalOpen changes
+  // If you want it to run only when the modal is rendered, put [] instead of [modalOpen]
+  useEffect(() => {
+    console.log("here")
+    if (mentor !== undefined) {
         displayinfo.push(mentor)
         if(feed[displayinfo[0].id] === undefined) {
             getSimilaritiesBetweenMatch(mentee, mentor)
         } else {
             setSimilarities(feed[displayinfo[0].id].find((elem) => elem.mentor.id === mentor.id))
         }
-  }
+    }
+  }, [modalOpen])
 
   return (
       <Modal
