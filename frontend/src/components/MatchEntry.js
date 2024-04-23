@@ -112,52 +112,52 @@ function MatchEntry({matches, setMatches, allUsers, setMentees, numMatches, setN
         setDisabled(true)
     }
 
-  const checkMatch = async () => {
-    if(disabled) {
-        setDisabled(false)
-        return
-    }
-
-    // Need to check if selection is viable
-    if(selMentor.value === -1) {
-        return;
-    }
-
-    // Current candidate:
-    const candidate = candidates[selMentor.value]
-
-    // Take copy of numMatches ane edit to represent the selection
-    let tempNum = numMatches
-    // current mentee (always 0 probably, to represent vacancy)
-    tempNum[mentee.id] = 0
-    // Mentor to be added, show that matching wants to happen
-    if(!tempNum[candidate.id]){
-        tempNum[candidate.id] = 0
-    }
-    // If there was a mentor before, remove
-    if(mentor){
-        if(tempNum[mentor.id] === 1){
-            delete tempNum[mentor.id]
+    const checkMatch = async () => {
+        if(disabled) {
+            setDisabled(false)
+            return
         }
-        else{
-            tempNum[mentor.id] -= 1
-        }
-    }
 
-    // Run the API call to check the matches (probably a helper)
-    validateMatch(mentee, candidate, tempNum).then((res) => {
-        console.log(res)
-        
-        // If the match is viable, update the state
-        if(res.success){
-            updateState(mentee, mentor, candidate, tempNum)
+        // Need to check if selection is viable
+        if(selMentor.value === -1) {
+            return;
         }
-        // else, alert the user that the match is not viable
-        else{
-            resolveConflict(mentee, mentor, candidate, tempNum)
+
+        // Current candidate:
+        const candidate = candidates[selMentor.value]
+
+        // Take copy of numMatches ane edit to represent the selection
+        let tempNum = numMatches
+        // current mentee (always 0 probably, to represent vacancy)
+        tempNum[mentee.id] = 0
+        // Mentor to be added, show that matching wants to happen
+        if(!tempNum[candidate.id]){
+            tempNum[candidate.id] = 0
         }
-    })
-  }
+        // If there was a mentor before, remove
+        if(mentor){
+            if(tempNum[mentor.id] === 1){
+                delete tempNum[mentor.id]
+            }
+            else{
+                tempNum[mentor.id] -= 1
+            }
+        }
+
+        // Run the API call to check the matches (probably a helper)
+        validateMatch(mentee, candidate, tempNum).then((res) => {
+            console.log(res)
+            
+            // If the match is viable, update the state
+            if(res.success){
+                updateState(mentee, mentor, candidate, tempNum)
+            }
+            // else, alert the user that the match is not viable
+            else{
+                resolveConflict(mentee, mentor, candidate, tempNum)
+            }
+        })
+    }
   return (
       <div
           className={`w-full relative p-3 mt-4 first:mt-0 flex flex-row justify-around items-center`}
