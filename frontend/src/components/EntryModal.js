@@ -7,7 +7,7 @@ function EntryModal({setModalOpen, modalOpen, feed, ...props}) {
   let mentor = props.mentor
   let mentee = props.user
 
-  let displayinfo = [mentee]
+  const [displayinfo, setDisplayinfo] = useState([mentee])
   const [similarities, setSimilarities] = useState(null)
 
 
@@ -28,7 +28,7 @@ function EntryModal({setModalOpen, modalOpen, feed, ...props}) {
   useEffect(() => {
     console.log("here")
     if (mentor !== undefined) {
-        displayinfo.push(mentor)
+        setDisplayinfo([mentee, mentor])
         if(feed[displayinfo[0].id] === undefined) {
             getSimilaritiesBetweenMatch(mentee, mentor)
         } else {
