@@ -23,8 +23,8 @@ import app.model.progress as progressFuncs
 # db.session.add(b)
 # db.session.commit()
 
-# for b in Business.query.all():
-#     print(b.id, b.name)
+for b in Business.query.all():
+    print(b.id, b.name)
 
 
 # print(User.query.filter_by(email="a@a.com").first())

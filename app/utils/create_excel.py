@@ -14,17 +14,18 @@ MATCH_NAME = 4
 LAST_MEETING_TITLE = 5
 LAST_MEETING_NUMBER = 6
 PROGRESS_MEETING_NOTES = 7
-DIVISION = 8
-DIVISION_PREFERENCE = 9
-BIO = 10
-CITY = 11
-CURRENT_OCCUPATION = 12
-MENTOR_GENDER_PREFERENCE = 13
-GENDER_IDENTITY = 14
-PERSONALITY_TRAITS = 15
-PERSONAL_INTERESTS = 16
-CAREER_INTERESTS_EXPERIENCE = 17
-EDUCATION = 18
+# DIVISION = 8
+# DIVISION_PREFERENCE = 9
+BIO = 8
+# CITY = 11
+# CURRENT_OCCUPATION = 12
+MENTOR_GENDER_PREFERENCE = 9
+GENDER_IDENTITY = 10
+PERSONALITY_TRAITS = 11
+PERSONAL_INTERESTS = 12
+CAREER_INTERESTS_EXPERIENCE = 13
+EDUCATION = 14
+NUM_MATCHES = 15
 
 
 
@@ -52,18 +53,19 @@ def write_col_guide(sheet):
     sheet.write(0, MATCH_NAME, "Match name") # Write mentor/mentee first name + last name
     sheet.write(0, LAST_MEETING_TITLE, "Last meeting title") # Write most recent meeting title
     sheet.write(0, LAST_MEETING_NUMBER, "Last meeting number") # Write most recent meeting number
-    sheet.write(0, DIVISION, "Division") # Write division
-    sheet.write(0, DIVISION_PREFERENCE, "Division preference")
+    # sheet.write(0, DIVISION, "Division") # Write division
+    # sheet.write(0, DIVISION_PREFERENCE, "Division preference")
     sheet.write(0, PROGRESS_MEETING_NOTES,"Last meeting notes")
     sheet.write(0, BIO, "Bio")
-    sheet.write(0, CITY, "City")
-    sheet.write(0, CURRENT_OCCUPATION, "Current Occupation")
+    # sheet.write(0, CITY, "City")
+    # sheet.write(0, CURRENT_OCCUPATION, "Current Occupation")
     sheet.write(0, MENTOR_GENDER_PREFERENCE, "Mentor gender preference")
     sheet.write(0, GENDER_IDENTITY, "Gender identity")
     sheet.write(0, PERSONALITY_TRAITS, "Personality traits")
     sheet.write(0, PERSONAL_INTERESTS, "Personal interests")
     sheet.write(0, CAREER_INTERESTS_EXPERIENCE, "Career interests/experience")
     sheet.write(0, EDUCATION, "Education")
+    sheet.write(0, NUM_MATCHES, "Willing to have X mentors/mentees")
 
 def print_to_sheet(business):
 
@@ -74,13 +76,13 @@ def print_to_sheet(business):
     sheet1 = wb.add_sheet('Sheet 1')
     write_col_guide(sheet1)
 
-    users = User.query.filter_by(business_id=business.id)
+    users = User.query.filter_by(business_id=business.id).all()
     cnt = 1
     for u in users:
         sheet1.write(cnt, EMAIL, u.email) # Write email into 0th position
         sheet1.write(cnt, NAME, u.first_name + " " + u.last_name) # Write first name + last name into 1st position
 
-        #write the mentor/mentee match
+        #write the mentor/mentee matches
         if u.is_student: #user is a mentee
             sheet1.write(cnt, ROLE, "Mentee")
             select = Select.query.filter_by(mentee_id=u.id).first()
@@ -104,8 +106,8 @@ def print_to_sheet(business):
             if select != None:
                 mentee = User.query.filter_by(id=select.mentee_id).first()
                 sheet1.write(cnt, MATCH_EMAIL, mentee.email) # Write mentee email into 4th position
-                sheet1.write(cnt, MATCH_NAME, mentee.first_name + " " + mentor.last_name) # Write mentee first name + last name into 5th position
-           
+                sheet1.write(cnt, MATCH_NAME, mentee.first_name + " " + mentee.last_name) # Write mentee first name + last name into 5th position
+
                 #write the amount of meetings completed
                 write_meeting_info(sheet1, business.id, "mentor", select, cnt)
                 #subtract 1 from current meeting id to get last meeting (not upcoming one)
@@ -119,22 +121,22 @@ def print_to_sheet(business):
         
         #Write meeting responses
 
-        sheet1.write(cnt, DIVISION, u.division) # Write division 7th position
+        # sheet1.write(cnt, DIVISION, u.division) # Write division 7th position
 
-        divisionPreference = u.division_preference
-        if divisionPreference != None:
-            if divisionPreference == "same":
-                sheet1.write(cnt, DIVISION_PREFERENCE, "Same division") # Write user division preference
-            elif divisionPreference == "different":
-                sheet1.write(cnt, DIVISION_PREFERENCE, "Different division") 
-            else:
-                sheet1.write(cnt, DIVISION_PREFERENCE, "No preference") 
-        else:
-            sheet1.write(cnt, DIVISION_PREFERENCE, "N/A")
+        # divisionPreference = u.division_preference
+        # if divisionPreference != None:
+        #     if divisionPreference == "same":
+        #         sheet1.write(cnt, DIVISION_PREFERENCE, "Same division") # Write user division preference
+        #     elif divisionPreference == "different":
+        #         sheet1.write(cnt, DIVISION_PREFERENCE, "Different division") 
+        #     else:
+        #         sheet1.write(cnt, DIVISION_PREFERENCE, "No preference") 
+        # else:
+        #     sheet1.write(cnt, DIVISION_PREFERENCE, "N/A")
 
         sheet1.write(cnt, BIO, u.bio) # Write bio
-        sheet1.write(cnt, CITY, u.city_name) # Write city name
-        sheet1.write(cnt, CURRENT_OCCUPATION, u.current_occupation) # Write current occupation
+        # sheet1.write(cnt, CITY, u.city_name) # Write city name
+        # sheet1.write(cnt, CURRENT_OCCUPATION, u.current_occupation) # Write current occupation
 
         mentorGenderPreference = u.mentor_gender_preference
         if mentorGenderPreference != None:
@@ -158,15 +160,19 @@ def print_to_sheet(business):
             else:
                 sheet1.write(cnt, GENDER_IDENTITY, "Prefer not to respond")
         
-
-        sheet1.write(cnt, PERSONALITY_TRAITS, u.personality_1 + "; " + u.personality_2 + "; " + u.personality_3)
+        personalities = ""
+        if u.personality_1:
+            personalities += u.personality_1 + "; "
+        if u.personality_2:
+            personalities += u.personality_2 + "; "
+        if u.personality_3:
+            personalities += u.personality_3
+        sheet1.write(cnt, PERSONALITY_TRAITS, personalities)
 
 
         interestList = ""
         for interest in u.rtn_interests():
-            interest = Tag.query.filter_by(id=interest.interestID).first()
-            if interest != None:
-                interestList += (interest.title + "; ")
+            interestList += (interest.entered_name + "; ")
         if len(interestList) > 2:
             interestList = interestList[:-2] #cut the semicolon
         sheet1.write(cnt, PERSONAL_INTERESTS, interestList)
@@ -174,9 +180,7 @@ def print_to_sheet(business):
         
         careerInterestList = ""
         for cint in u.rtn_career_interests():
-            cint = CareerInterest.query.filter_by(id=cint.careerInterestID).first()
-            if cint != None:
-                careerInterestList += (cint.title + "; ")
+            careerInterestList += (cint.entered_name + "; ")
         if len(careerInterestList) > 2:
             careerInterestList = careerInterestList[:-2] #cut the semicolon
         sheet1.write(cnt, CAREER_INTERESTS_EXPERIENCE, careerInterestList)
@@ -184,12 +188,15 @@ def print_to_sheet(business):
 
         educationList = ""
         for school in u.rtn_education():
-            edu = School.query.filter_by(id=school.educationID).first()
-            if edu != None:
-                educationList += (edu.title + "; ")
+            educationList += (school.entered_name + "; ")
         if len(educationList) > 2:
             educationList = educationList[:-2] #cut the semicolon
         sheet1.write(cnt, EDUCATION, educationList)
+
+        if u.num_pairings_can_make:
+            sheet1.write(cnt, NUM_MATCHES, u.num_pairings_can_make)
+        else:
+            sheet1.write(cnt, NUM_MATCHES, 1)
 
         cnt+=1
     

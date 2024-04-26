@@ -400,12 +400,10 @@ def admin_validate_match():
     menteeId = request.args.get("menteeId")
     mentorId = request.args.get("mentorId")
     numMatching = json.loads(request.args.get("numMatching"))
-    print("adminnn",menteeId,mentorId,numMatching)
     if menteeId is None or mentorId is None:
         return jsonify({"success":False})
 
     success = admin.validate_match(menteeId, mentorId, numMatching)
-    print("admin",success)
 
     return jsonify(
         {
@@ -485,15 +483,14 @@ def admin_replace_match():
             "success": success
         })
 
-@app.route("/business-excel")
+@app.route("/business-excel", methods=['GET'])
 def admin_get_business_excel():
     if not adminUserLoggedIn():
         return
 
-    businessId = request.args.get("businessId")
-    filename = admin.createExcelSheet(businessId)
+    businessId = getAdminUser().business_id
 
-    print("filename:",filename)
+    filename = admin.createExcelSheet(businessId)
 
     return_data = io.BytesIO()
     with open(filename, 'rb') as fo:

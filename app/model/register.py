@@ -353,7 +353,7 @@ def registerPost(form, resume, img):
                     is_student=isMentee, bio=form.get('bio'), email_contact=True, phone_number=None,
                     #city_name=form.get('city_name'), current_occupation=form.get('current_occupation'),
                     business_id=businessRegisteredUnder.id, 
-                    num_pairings_can_make=int(form.get('num_pairings')),
+                    num_pairings_can_make=int(form.get('num_pairings')) if not isMentee else 1, # hard set to 1 if mentee
                     mentor_gender_preference=mentor_gender_preferenceForm,
                     gender_identity=gender_identityForm,
                     #division_preference=division_preference_set, division=division_set,

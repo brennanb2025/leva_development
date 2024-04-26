@@ -24,6 +24,23 @@ function App() {
     return () => clearTimeout(animationTimeout);
   }
 
+  const getExcelSheet = () => {
+    console.log("Getting excel")
+    axios.get("/business-excel", { responseType: 'blob' }) // Set responseType to 'blob' to receive binary data
+      .then(response => {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'user_info.xls');
+          document.body.appendChild(link);
+          link.click();
+      })
+      .catch(error => {
+          // Handle error
+          console.error('Error downloading Excel sheet:', error);
+      });
+  }
+
   const content = () => {
     switch(page){
       case ADMIN_ENUM.matchmaking:
@@ -63,6 +80,7 @@ function App() {
           <button className="option-button" onClick={() => { setPage(ADMIN_ENUM.matchmaking) }}>Matchmaking</button>
           <button className="option-button" onClick={() => { setPage(ADMIN_ENUM.search) }}>User Search</button>
           <button className="option-button" onClick={() => { setPage(ADMIN_ENUM.feedback) }}>Feedback</button>
+          <button className="option-button" onClick={getExcelSheet}>Spreadsheet</button>
           <button className="ml-auto text-red-500" onClick={logout}>Logout</button>
         </div>
       </section>

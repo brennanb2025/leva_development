@@ -611,6 +611,7 @@ function radio_mentor() { //function for if user selected that they are a mentor
     document.getElementById("mentorPreference").style.display = "none"; //hide mentor preference
     document.getElementById("careerInt").style.display = "none"; //hide
     document.getElementById("addCareerInterest").value = "Add experience"; //button change
+    document.getElementById("numPairings").style.display = "block"; //show input for num pairings
     //document.getElementById("occupationInput").style.display = "block"; //show occupation entry
     radio_mentee_selected = false
 }
@@ -625,6 +626,7 @@ function radio_mentee() { //function for if user selected that they are a mentee
     document.getElementById("addCareerInterest").value = "Add interest"; //button change
     //document.getElementById("occupationInput").style.display = "none"; //hide occupation entry
     radio_mentee_selected = true
+    document.getElementById("numPairings").style.display = "none"; //hide input for num pairings
 }
 
 
