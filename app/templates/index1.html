@@ -27,7 +27,7 @@
         <!--This portion determines the structure of the navbar using bootstrap-->
 
         <!--Make the navbar have a light theme with a white background, put space between each element, make the header sticky on top-->
-        <div class="header navbar navbar-expand-lg navbar-light bg-white justify-content-between p-3 sticky-top">
+        <div class="header navbar navbar-expand-lg navbar-light bg-white justify-content-between p-3 sticky-top relative">
             <!--Leva logo-->
             <div class="navbar-brand">
                 <img src="https://static.wixstatic.com/media/12ecaa_e292ca41155b4bee9ea276dc89fef0f3~mv2.png/v1/fill/w_165,h_87,al_c,q_85,usm_0.66_1.00_0.01/IMG_0256_PNG.webp" 
@@ -40,7 +40,7 @@
             </button>
 
             <!--Actual list of buttons for users to navigate through the webpage using bootstrap-->
-            <div class="nav-box navbar-collapse collapse" id="navbarToggler">
+            <div class="nav-box navbar-collapse collapse absolute" id="navbarToggler">
                 <ul class="navbar-nav">
                     <!--Each item in the navbar should consist of a li class of nav-item, followed by
                         a link to home, and then the button, shown below-->
@@ -68,22 +68,6 @@
                         </a>
                     </li>
     
-                    <!-- <li class="nav-item">
-                        <a href="#testimonials">
-                            <button class="nav-button">
-                                Testimonials
-                            </button>
-                        </a>
-                    </li>
-    
-                    <li class="nav-item">
-                        <a href="#contact">
-                            <button class="nav-button">
-                                Contact
-                            </button>
-                        </a>
-                    </li> -->
-    
                 </ul>
             </div>
 
@@ -91,12 +75,12 @@
             <div class="register-box">
                 <button class="register me-3">
                     <a href="{{ url_for('admin_login') }}">
-                        Admin log in
+                        Admin Login
                     </a>
                 </button>
                 <button class="register">
                     <a href="{{ url_for('sign_in') }}">
-                        Log In
+                        User Login
                     </a>
                 </button>
             </div>
