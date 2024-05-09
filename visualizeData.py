@@ -15,16 +15,19 @@ import app.model.progress as progressFuncs
 # admin.set_password("brennanTestAdmin") #must set pwd w/ hashing method
 # db.session.commit()
 
+# Business.query.filter_by(id=4).delete()
+# db.session.commit()
 
 # b = Business(
-#     name="brennanTest",
+#     name="Demo Business",
 #     number_employees_maximum=100,
-#     number_employees_currently_registered=0)
+#     number_employees_currently_registered=0,
+#     feedback_solicitation_frequency=0)
 # db.session.add(b)
 # db.session.commit()
 
 for b in Business.query.all():
-    print(b.id, b.name)
+    print(b)
 
 
 # print(User.query.filter_by(email="a@a.com").first())
@@ -60,21 +63,25 @@ for b in Business.query.all():
 # dictWeights14['education'] = 2 # rates education important (diff, 0-2, high-low: 75%)
 # editProfileFuncs.setFeedWeight(14, dictWeights14)
 
-"""
+
 u = AdminUser(
-    email="brennanbenson2025@u.northwestern.edu",
-    first_name="Brennan",
-    last_name="Benson",
-    business_id=3
+    email="Katefawcett2024@u.northwestern.edu",
+    first_name="Kate",
+    last_name="Fawcett",
+    business_id=10
 )
 
 db.session.add(u) #add to database
-u.set_password("brennanbenson2025@u.northwestern.edu") #must set pwd w/ hashing method
+u.set_password("Katefawcett2024@u.northwestern.edu") #must set pwd w/ hashing method
 db.session.commit()
-"""
 
 print("All admin users:", AdminUser.query.all())
 
+# AdminUser.query.filter_by(email="Katefawcett2024@u.northwestern.edu").delete()
+# db.session.commit()
+
+
+# print(AdminUser.query.filter_by(email="Katefawcett2024@u.northwestern.edu").all())
 
 # for b in Business.query.all():
 #     print(b)

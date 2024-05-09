@@ -404,7 +404,8 @@ class Business(db.Model, Base):
     def __repr__(self):
         return '<Business {}>'.format(str(self.id) + " " + str(self.name) + ", Employees max: " + 
                 str(self.number_employees_maximum) + ", number currently registered: " + 
-                str(self.number_employees_currently_registered)) #how to print database
+                str(self.number_employees_currently_registered) + ", feedback_solicitation_frequency: " +
+                str(self.feedback_solicitation_frequency)) #how to print database
 
 
 

@@ -28,12 +28,16 @@ function App() {
     console.log("Getting excel")
     axios.get("/business-excel", { responseType: 'blob' }) // Set responseType to 'blob' to receive binary data
       .then(response => {
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', 'user_info.xls');
-          document.body.appendChild(link);
-          link.click();
+          if (response.status === 200) {
+              const url = window.URL.createObjectURL(new Blob([response.data]));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', 'User_data.xls');
+              document.body.appendChild(link);
+              link.click();
+          } else {
+              console.log("Error getting excel spreadsheet.")
+          }
       })
       .catch(error => {
           // Handle error
